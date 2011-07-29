@@ -1,12 +1,14 @@
 """
-    Very simple plugin to only let admins run functions. Need to update
-    this to be more secure.
+    Provide a way for users to authenticate themselves with the bot.
 """
 
-admins = ['Reisen']
+from plugins.commands import command
 
-def authorized(user):
-    if user in admins:
-        return True
-
-    return False
+@command
+def authenticate(irc, nick, prefix, command, args):
+    """
+    Authenticate with the bot.
+    .authenticate <password>
+    .authenticate status
+    """
+    return 'Hello'

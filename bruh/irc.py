@@ -1,4 +1,10 @@
+"""
+    This file implements functions and objects that actual deal with an IRC
+    connection itself. This abstracts it away from the bot.
+"""
+
 import socket
+
 def parse(msg):
     """Parses an IRC message into prefix, command, and arguments as per RFC"""
     if not msg:
@@ -13,6 +19,7 @@ def parse(msg):
     # Find prefix, command and arguments
     if msg[0] == ':':
         prefix, msg = msg[1:].split(' ', 1)
+
     if msg.find(' :') != -1:
         msg, trailing = msg.split(' :', 1)
         args = msg.split()
@@ -26,52 +33,68 @@ def parse(msg):
 
 
 class IRC(object):
-    """This class deals with IRC protocol messages."""
+    """
+    This class deals with IRC protocol messages coming from a connection
+    object.
+    """
 
     def __init__(self, nickname, connection, server):
         """Sets up the object so it can communicate with the server"""
 
         # IRC Specific information that relates to this particular connection.
+        # Plugins have access to this data.
         self.nickname = nickname
         self.channel = []
         self.conn = connection
-        self.messages = ""
+        self.message = ""
         self.server = server
 
-        # Pass the IRC details the server needs
-        self.raw('PASS %s\r\n' % '*')
+        # Set us up as a valid IRC user. Should move this to a plugin as well
+        # in the future.
         self.raw('NICK %s\r\n' % nickname)
         self.raw('USER %s %s bruh :%s\r\n' %
             ('Br', 'Uh', 'Bruh'))
 
-
     def raw(self, message):
         """Send a properly encoded message to the server"""
         message = message.encode('UTF-8')
+        print(message)
         self.conn.send(message)
 
+    def send(self, message):
+        """Deal with \r\n automatically."""
+        self.raw(message + '\r\n')
+
+    def recv(self):
+        """
+        More explicit way of receiving messages, returning the generator
+        returned from __call__ to the caller.
+        """
+        return self()
 
     def __call__(self):
-        """Parses incoming messages from the connection and yields them as a generator"""
-        self.messages += self.conn.recv(1024).decode('UTF-8')
+        """Parses incoming messages and yields them as a generator"""
+        # Assume IRC messages are being sent as UTF-8. If they aren't, It's
+        # likely to be decodable as a subset anyway.
+        self.message += self.conn.recv(1024).decode('UTF-8')
 
-        # Get the parsable messages, and store what isn't fully received
-        # back into self.messages for later
-        parsable = self.messages.split('\n')
-        self.messages = parsable.pop()
+        # Get all the information in the buffer so far. And split it into
+        # individual line-broken messages. The last message may not have been
+        # fully received yet, so the last message is popped off the stack, and
+        # pushed back onto the message buffer to be parsed later when it is
+        # ready.
+        parsable = self.message.split('\n')
+        self.message = parsable.pop()
 
-        # Parse the available messages
+        # Parse the available messages into prefix, command, args form.
         for message in parsable:
-            message = parse(message)
-            yield message
+            yield parse(message)
 
 
 def connectIRC(server, port, nick):
-    """Create a new IRC connection"""
-
-    # Create a connection to the server
+    """Helper for creating new IRC connections"""
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connection.connect((server, port))
 
-    # Create an IRC object to handle the protocol
+    # Pack the connection into an IRC object to handle the connection.
     return IRC(nick, connection, server)

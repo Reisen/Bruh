@@ -1,26 +1,26 @@
 """
-    Creates two decorators that are used by other plugins to create
-    commands. The first creates a command based on the function name:
+    Creates two decorators that are used by other plugins to create commands,
+    and a single 'help' command for providing help about particular commands by
+    sending docstrings to the user. Multiline docstring support works by only
+    sending the first line, unless the user requests 'all'.
+
+    The first decorator creates a command based on the function name:
 
     @command
-    def f(...):
+    def example(irc, prefix, command, args):
         pass
 
-    Will create a usable command: .f <arguments> in chat.
+    Will create a usable command: .example <arguments> in chat. The bot
+    automatically matches shortened commands, so .exam will also call this
+    function, unless more than one command matches.
 
 
-    The second decorator will allow a regex pattern to be matched:
+    The second decorator will allow a regex pattern to be matched, these
+    functions receive regular expression match objects.
 
     @regex('\?(\w+)')
-    def f(...)
+    def f(irc, prefix, command, args, match)
         pass
-
-    This creates a function that will receive regex match objects for
-    It's 'args' instead of a standard IRC <trailing> message.
-
-
-    Finally the function defines a single @command, help, that provides
-    information about other commands that are created
 """
 
 from plugins.bruh import event
@@ -28,75 +28,85 @@ import re
 import time
 
 commandlist = {}
-patternlist = []
+patternlist = {}
 
 def command(f):
-    """Create new command entry"""
+    """This decorator creates new command entry."""
     commandlist[f.__name__] = f
+    return f
 
 
 def regex(pattern):
-    """Create new regex pattern matching command"""
-    def target(f):
-        patternlist.append((pattern, f))
+    """This decorator creates a new pattern matching entry."""
+    def wrapper(f):
+        patternlist[pattern] = f
+        return f
 
-    return target
+    return wrapper
 
 
 @event('PRIVMSG')
 def commands(irc, prefix, command, args):
-    """Provide other commands with .command style hooks"""
+    """
+    This command hooks message events, and acts as a second layer of plugin
+    dispatching depending on the command. This wrapper also provides the
+    ability to pipe commands to each other, and match regular expressions.
+    """
+
+    # Find the users nick, useful enough in plugins that this can be passed as
+    # an extra argument.
+    nick = irc.parsed_message[0].split('!')[0]
+
+    # If messages don't start with a command character, attempt regex parsing
+    # instead.
     if args[1][0] != '!':
-        return None
+        for pattern in patternlist.keys():
+            if re.search(pattern, args[1]) is not None:
+                return patternlist[pattern](irc, nick, prefix, command, args)
+        else:
+            return None
 
-    # Split arguments into pipeable pieces
-    position = 0
-    pieces = []
-    for item in re.finditer(r'\|\s*!', args[1]):
-        pieces.append(args[1][position:item.start()].strip())
-        position = item.start() + 1
-
-    # Append command in case of only one command, if more than one command,
-    # this also makes sure the last command is appended properly.
-    pieces.append(args[1][position:].strip())
+    # Split arguments into pipeable pieces, using '|' characters found directly
+    # before another command as the splitting point.
+    pieces = re.findall(r'!(.*?)(?:\|\s*(?=!)|$)', args[1])
 
     output = ""
     for item in pieces:
-        # Get command information, starting with command name
-        info = item.split(' ', 1)
-        name = info[0][1:]
+        cmd, *input = item.strip().split(' ', 1)
 
-        # Create a fake args environment for the command based on current args
-        environment = args[:]
+        # Create a fake args environment for the command based on current args,
+        # this stops plugins from trashing the default args, and also allows
+        # modifying of the args submitted to the plugin.
+        sandbox_args = args[:]
 
-        # Add the users nick to arguments (nonstandard, but will be useful)
-        environment.append(prefix.split('!')[0])
-
-        # If more than just the command was invoked, then the command should
-        # receive the extra information as if it were the message itself, also
-        # appending any output from the last command to the message. For example:
-        # assuming '.test' outputs 'hello', then:
+        # If a command includes arguments, these arguments should be prepended
+        # before the output of the last command. I.E, if .one outputs 'World',
+        # and .two accepts a string to print:
         #
-        # .test | .reverse
+        # .one | .two Hello
         #
-        # Should create: message = '' + 'hello', we do this by buffering each
-        # commands output in 'output', and appending it on each loop.
-        if len(info) > 1:   environment[1] = info[1] + " " + output
-        else:               environment[1] = output
+        # The output of one should be concatenated with Hello so that .two
+        # receives '.two Hello World'. This is populated in the sandbox_args to
+        # be sent to the next command.
+        if len(input) > 0: sandbox_args[1] = (input[0] + " " + output).strip()
+        else:              sandbox_args[1] = output
 
-        # Find plugin to call, this allows partially named commands to work
-        # such as .wik to .wikipedia
-        if name in commandlist:
-            output = commandlist[name](irc, prefix, command, environment)
+        # Find the plugin to call. If it isn't in the list, then we search the
+        # entire list for partial matches. As long as there's only one partial
+        # match, the command can still be called. As an example, .wik should
+        # still call .wikipedia as a partial match.
+        if cmd in commandlist:
+            output = commandlist[cmd](irc, nick, prefix, command, sandbox_args)
+
         else:
             # Search for possible commands
             possibilities = []
-            for possible in commandlist:
-                if possible.startswith(name): possibilities.append(possible)
+            for candidate in commandlist:
+                if candidate.startswith(cmd): possibilities.append(candidate)
 
             # When no commands are found...
             if len(possibilities) == 0:
-                irc.reply("Didn't find any commands like '%s'" % name)
+                irc.reply("Didn't find any commands like '%s'" % cmd)
                 return None
 
             # When more than one potential command is found...
@@ -104,19 +114,18 @@ def commands(irc, prefix, command, args):
                 irc.reply("Which did you want?  %s" % str(possibilities)[1:-1])
                 return None
 
-            output = commandlist[possibilities[0]](irc, prefix, command, environment)
+            # Collect the output of the command into a buffer. If there is
+            # another command to pipe to, this is the input to the next
+            # command. Otherwise it is returned to the user.
+            output = commandlist[possibilities[0]](irc, nick, prefix, command, sandbox_args)
 
 
-        # Invoke plugin
-        if output is None:
-            output = ''
-
-    if output != '':
+    if output is not None:
         irc.reply(output)
 
 
 @command
-def help(irc, prefix, command, args):
+def help(irc, nick, prefix, command, args):
     """
     Get help about a command.
     .help <command>
@@ -127,12 +136,13 @@ def help(irc, prefix, command, args):
         return "Which command do you want help with?"
 
 
-    # Try and get the help information from the command
-    # dictionary
+    # Try and get the help information by looking up the commands docstring
+    # from the command dictionary.
     try:
         cmd = args[1].split(' ')
 
-        # Print out currently installed commands if 'list' is the command
+
+        # Print out currently installed commands if 'list' is the command.
         if cmd[0] == 'list':
             output = "Commands: "
             for item in commandlist.keys():
@@ -140,27 +150,30 @@ def help(irc, prefix, command, args):
 
             return output[:-2]
 
-        # Otherwise load the command from the pluginlist
+        # Fetch the commands docstring.
         info = commandlist[cmd[0]].__doc__.strip().split('\n')
+
+        # If the user supplied 'full' to their help, we should notice them
+        # instead as the help could be long. This avoids spam. If the plugin
+        # that the user asked for help about is 'help', we should return all
+        # information anyway as the user has no other way of finding out about
+        # things such as 'full'.
+        if len(cmd) > 1 and cmd[1] == 'full' or cmd[0] == 'help':
+            for line in info:
+                irc.notice(nick, line.strip())
+                time.sleep(0.1)
+
+            return None
+
     except KeyError:
-        return "Command not found"
+        return "Command not found."
 
-    # Notice the user if they want the full information
-    if len(cmd) > 1 and cmd[1] == 'full' or cmd[0] == 'help':
-        for line in info:
-            irc.notice(args[2], line.strip())
-            time.sleep(0.1)
-
-        return None
+    except AttributeError:
+        return "This command has no help information."
 
     return info[0].strip()
 
-
-@command
-def test(irc, prefix, command, args):
-    return "Received: " + args[1]
-
-
-@command
-def another(irc, prefix, command, args):
-    return "Another Received: " + args[1]
+@regex(r'bruh!')
+def respond(irc, nick, prefix, command, args):
+    irc.reply('%s!' % nick)
+    return None
