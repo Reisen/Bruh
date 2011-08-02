@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     # Test server connection, need some proper dynamic configuration, but that
     # can come later.
-    servers += [connectIRC('', 6667, 'bruv')]
+    servers += [connectIRC('irc.rizon.net', 6667, 'bruv')]
     servers[0].raw('JOIN #bruh\r\n')
 
     # Plugins work by hooking IRC events. Bruh provides one non-IRC related

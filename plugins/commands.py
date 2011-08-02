@@ -1,16 +1,18 @@
 """
-    Creates two decorators that are used by other plugins to create commands,
+    Creates three decorators that are used by other plugins to create commands,
     and a single 'help' command for providing help about particular commands by
     sending docstrings to the user. Multiline docstring support works by only
     sending the first line, unless the user requests 'all'.
 
-    The first decorator creates a command based on the function name:
+    The first decorator creates a command based on the function name, commands
+    are passed 4 arguments, the irc server that called it, the nick, channel,
+    the users input and the parsed IRC message.
 
     @command
-    def example(irc, prefix, command, args):
+    def example(irc, nick, channel, msg, args):
         pass
 
-    Will create a usable command: .example <arguments> in chat. The bot
+    This will create a usable command: .example <arguments> in chat. The bot
     automatically matches shortened commands, so .exam will also call this
     function, unless more than one command matches.
 
@@ -19,8 +21,13 @@
     functions receive regular expression match objects.
 
     @regex('\?(\w+)')
-    def f(irc, prefix, command, args, match)
+    def f(irc, nick, channel, match, args):
         pass
+
+    The final decorator will allow a plugin to receive ALL messages that are
+    being parsed. This is similar to just hooking @event('PRIVMSG'), except the
+    command plugin will parse nick/channel/msg parts so that the function
+    prototype is consistent.
 """
 
 from plugins.bruh import event
@@ -55,14 +62,23 @@ def commands(irc, prefix, command, args):
 
     # Find the users nick, useful enough in plugins that this can be passed as
     # an extra argument.
-    nick = irc.parsed_message[0].split('!')[0]
+    nick = prefix.split('!')[0]
+
+    # Find the channel the message was received from, also useful in commands.
+    chan = args[0] if args[0].startswith('#') else prefix.split('!')[0]
 
     # If messages don't start with a command character, attempt regex parsing
     # instead.
     if args[1][0] != '!':
         for pattern in patternlist.keys():
-            if re.search(pattern, args[1]) is not None:
-                return patternlist[pattern](irc, nick, prefix, command, args)
+            match = re.search(pattern, args[1])
+            if match is not None:
+                output = patternlist[pattern](irc, nick, chan, match, args)
+
+                if output is not None:
+                    irc.reply(output)
+
+                return None
         else:
             return None
 
@@ -96,7 +112,7 @@ def commands(irc, prefix, command, args):
         # match, the command can still be called. As an example, .wik should
         # still call .wikipedia as a partial match.
         if cmd in commandlist:
-            output = commandlist[cmd](irc, nick, prefix, command, sandbox_args)
+            output = commandlist[cmd](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
 
         else:
             # Search for possible commands
@@ -117,29 +133,28 @@ def commands(irc, prefix, command, args):
             # Collect the output of the command into a buffer. If there is
             # another command to pipe to, this is the input to the next
             # command. Otherwise it is returned to the user.
-            output = commandlist[possibilities[0]](irc, nick, prefix, command, sandbox_args)
-
+            output = commandlist[possibilities[0]](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
 
     if output is not None:
         irc.reply(output)
 
 
 @command
-def help(irc, nick, prefix, command, args):
+def help(irc, nick, chan, msg, args):
     """
     Get help about a command.
     .help <command>
     .help <command> full
     .help list
     """
-    if args[1] == '':
+    if msg == '':
         return "Which command do you want help with?"
 
 
     # Try and get the help information by looking up the commands docstring
     # from the command dictionary.
     try:
-        cmd = args[1].split(' ')
+        cmd = msg.split(' ')
 
 
         # Print out currently installed commands if 'list' is the command.
@@ -174,6 +189,13 @@ def help(irc, nick, prefix, command, args):
     return info[0].strip()
 
 @regex(r'bruh!')
-def respond(irc, nick, prefix, command, args):
-    irc.reply('%s!' % nick)
-    return None
+def respond(irc, nick, chan, match, args):
+    return nick + '!'
+
+@command
+def first(irc, nick, chan, msg, args):
+    return "Output First"
+
+@command
+def echo(irc, nick, chan, msg, args):
+    return msg
