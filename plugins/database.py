@@ -338,6 +338,7 @@ class Connection(object):
             return
 
         insert_query = 'INSERT INTO %s (' % o.table
+        extra_subs = []
         for attribute in o.__class__.__dict__:
             if isinstance(getattr(o.__class__, attribute), Column):
                 insert_query += getattr(o.__class__, attribute).name + ', '
@@ -347,14 +348,12 @@ class Connection(object):
             if attribute == 'id':
                 insert_query += 'NULL, '
 
-            elif isinstance(getattr(o.__class__, attribute), Integer):
-                insert_query += str(getattr(o, attribute)) + ', '
-
-            elif isinstance(getattr(o.__class__, attribute), String):
-                insert_query += '\'' + str(getattr(o, attribute)) + '\', '
+            elif isinstance(getattr(o.__class__, attribute), Column):
+                insert_query += '?, '
+                extra_subs.append(getattr(o, attribute))
 
         insert_query = insert_query[:-2] + ');'
-        self.connection.execute(insert_query)
+        self.connection.execute(insert_query, tuple(extra_subs))
         self.connection.commit()
 
         # We need to re-query the database to get the newly assigned ID for the

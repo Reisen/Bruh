@@ -14,16 +14,18 @@ class Factoid(object):
     Object representing a Factoid. Mapped by the database plugin to a sqlite
     table.
     """
-    id  = Integer(primary_key = True)
-    key = String()
-    val = String()
+    id        = Integer(primary_key = True)
+    key       = String()
+    value     = String()
+    connector = String()
 
-    def __init__(self, key = None, val = None):
+    def __init__(self, key = None, value = None, connector = 'is'):
         self.key = key
-        self.val = val
+        self.value = value
+        self.connector = connector
 
 
-@regex(r'^\?(.*?)\s+(?:is|are|was|will\sbe)\s+(.*)$')
+@regex(r'^\?(.*?)\s+(is|can|has|are|was|will\sbe|also\sis)\s+(.*)$')
 def add_fact(irc, nick, chan, match, args):
     """
     Parses ?A is B messages into factoids.
@@ -32,7 +34,7 @@ def add_fact(irc, nick, chan, match, args):
     # one doesn't exist.
     irc.db.map(Factoid)
 
-    key, val = match.groups()
+    key, connector, value = match.groups()
 
     # Preprocess the key, if the is keyword was escaped, we should store it
     # without the backslash.
@@ -43,10 +45,21 @@ def add_fact(irc, nick, chan, match, args):
     fact = irc.db.query(Factoid).where(Factoid.key == key).one()
 
     if fact is not None:
-        return "Already exists as: <Factoid ({} -> {})>".format(fact.key, fact.val)
+        # If the connector is 'is also', append the definition with a pipe
+        # instead.
+        if connector == 'also is':
+            fact.value += '|' + value
+            fact.save()
+            return "Got that as well."
+
+        if fact.value == value:
+            return "I already knew that. Tell me something I don't know."
+
+        return "No, it isn't."
 
     # Add the new key to the database.
-    irc.db.add(Factoid(key, val))
+    irc.db.add(Factoid(key, value, connector))
+    return key + " -> " + value
 
     return "Ok then {}".format(nick)
 
@@ -59,12 +72,43 @@ def get_fact(irc, nick, chan, match, args):
     irc.db.map(Factoid)
 
     try:
-        query = irc.db.query(Factoid).where(Factoid.key == match.groups()[0].lower())
-        query = query.one().val
+        # Transitive lookups will search the database again for a description
+        # if the found value also has a definition.
+        key = match.groups()[0]
+        transitive = False
+        if key[0] == '!':
+            transitive = True
+            key = key[1:]
+
+        query = irc.db.query(Factoid).where(Factoid.key == key.lower()).one()
+
+        if transitive:
+            # Keep looking up values until we find one that doesn't have
+            # a definition, or if random returns 0.
+            while transitive:
+                if random.randint(0,1) == 0:
+                    transitive = False
+
+                # Check if the value is piped, if so there's multiple ways we
+                # could branch our search here.
+                value = query.value
+                if '|' in value:
+                    value = value.split('|')
+                    value = value[random.randint(0, len(value) - 1)]
+
+                next_query = irc.db.query(Factoid).where(Factoid.key == value.lower()).one()
+
+                if next_query is not None:
+                    query = next_query
+                else:
+                    transitive = False
+
+        query, connector = query.value, query.connector
 
         # Preprocess returned response. These are all stolen from infobot.
         query = query.replace('$who', nick)
         query = query.replace('$chan', chan)
+        query = query.replace('$nick', irc.userlist[chan][random.randint(0, len(irc.userlist[chan]) -1)])
 
         # Pick a random response if multiple responses are available
         if '|' in query:
@@ -74,8 +118,13 @@ def get_fact(irc, nick, chan, match, args):
         # Action messages and shit.
         if query.startswith('@a'):
             query = "\01ACTION " + query[2:].strip() + "\01"
+            return query
 
-        return query
+        # Send messages back raw without the connector, and shit.
+        if query.startswith('@r'):
+            return query[2:].strip()
+
+        return key + ' {} '.format(connector) + query
 
     except Exception as e:
         print(e)

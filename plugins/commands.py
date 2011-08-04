@@ -35,7 +35,7 @@ import re
 import time
 
 commandlist = {}
-patternlist = {}
+patternlist = []
 
 def command(f):
     """This decorator creates new command entry."""
@@ -46,7 +46,7 @@ def command(f):
 def regex(pattern):
     """This decorator creates a new pattern matching entry."""
     def wrapper(f):
-        patternlist[pattern] = f
+        patternlist.append((pattern, f))
         return f
 
     return wrapper
@@ -70,10 +70,10 @@ def commands(irc, prefix, command, args):
     # If messages don't start with a command character, attempt regex parsing
     # instead.
     if args[1][0] != '!':
-        for pattern in patternlist.keys():
+        for pattern, callback in patternlist:
             match = re.search(pattern, args[1])
             if match is not None:
-                output = patternlist[pattern](irc, nick, chan, match, args)
+                output = callback(irc, nick, chan, match, args)
 
                 if output is not None:
                     irc.reply(output)
