@@ -15,7 +15,7 @@ def reply(self, message):
     self.raw('PRIVMSG %s :%s\r\n' % (target, message))
 
 
-def say(self, message, channel):
+def say(self, channel, message):
     """Sends a message to the channel the event was received from."""
     self.raw('PRIVMSG %s :%s\r\n' % (channel, message))
 

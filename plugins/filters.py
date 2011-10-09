@@ -1,5 +1,6 @@
 """
-    Provides a collection of text filters to filter output through.
+    Provides a collection of text filters to filter output through, and an echo
+    command that outputs its input.
 """
 from plugins.commands import command
 import codecs
@@ -8,9 +9,7 @@ rot13 = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 'N
 
 @command
 def filter(irc, nick, chan, msg, args):
-    """
-    Provides several text filters.
-    """
+    """Provides several text filters: rot13, rot26, lower, upper, reverse."""
     text_filter, msg = msg.split(' ', 1)
 
     if text_filter == 'rot13':
@@ -29,3 +28,9 @@ def filter(irc, nick, chan, msg, args):
         return msg[::-1]
 
     return "Unknown filter"
+
+
+@command
+def echo(irc, nick, chan, msg, args):
+    """Eats and shits"""
+    return msg

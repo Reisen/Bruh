@@ -64,7 +64,7 @@ def add_fact(irc, nick, chan, match, args):
     return "Ok then {}".format(nick)
 
 
-@regex(r'^\?(.*)$')
+@regex(r'^\?(.+)$')
 def get_fact(irc, nick, chan, match, args):
     """
     Parses ?A messages to retrieve facts.
@@ -81,6 +81,8 @@ def get_fact(irc, nick, chan, match, args):
             key = key[1:]
 
         query = irc.db.query(Factoid).where(Factoid.key == key.lower()).one()
+        if query is None:
+            return None
 
         if transitive:
             # Keep looking up values until we find one that doesn't have
@@ -106,9 +108,9 @@ def get_fact(irc, nick, chan, match, args):
         query, connector = query.value, query.connector
 
         # Preprocess returned response. These are all stolen from infobot.
-        query = query.replace('$who', nick)
+        query = query.replace('$nick', nick)
         query = query.replace('$chan', chan)
-        query = query.replace('$nick', irc.userlist[chan][random.randint(0, len(irc.userlist[chan]) -1)])
+        query = query.replace('$rand', irc.userlist[chan][random.randint(0, len(irc.userlist[chan]) -1)])
 
         # Pick a random response if multiple responses are available
         if '|' in query:
@@ -127,4 +129,4 @@ def get_fact(irc, nick, chan, match, args):
         return key + ' {} '.format(connector) + query
 
     except Exception as e:
-        print(e)
+        print('infobot.get_fact: ' + str(e))

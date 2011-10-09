@@ -52,7 +52,6 @@ def regex(pattern):
     return wrapper
 
 
-@event('PRIVMSG')
 def commands(irc, prefix, command, args):
     """
     This command hooks message events, and acts as a second layer of plugin
@@ -76,7 +75,7 @@ def commands(irc, prefix, command, args):
                 output = callback(irc, nick, chan, match, args)
 
                 if output is not None:
-                    irc.reply(output)
+                    return output
 
                 return None
         else:
@@ -95,22 +94,15 @@ def commands(irc, prefix, command, args):
         # modifying of the args submitted to the plugin.
         sandbox_args = args[:]
 
-        # If a command includes arguments, these arguments should be prepended
-        # before the output of the last command. I.E, if .one outputs 'World',
-        # and .two accepts a string to print:
-        #
-        # .one | .two Hello
-        #
-        # The output of one should be concatenated with Hello so that .two
-        # receives '.two Hello World'. This is populated in the sandbox_args to
-        # be sent to the next command.
-        if len(input) > 0: sandbox_args[1] = (input[0] + " " + output).strip()
-        else:              sandbox_args[1] = output
+        # The output of the last command is appended to the input of the next
+        # command, this is done in the fake args environment.
+        if len(input) > 0 and output is not None:
+            sandbox_args[1] = (input[0] + " " + output).strip()
+        else:
+            sandbox_args[1] = output
 
         # Find the plugin to call. If it isn't in the list, then we search the
-        # entire list for partial matches. As long as there's only one partial
-        # match, the command can still be called. As an example, .wik should
-        # still call .wikipedia as a partial match.
+        # entire list for partial matches.
         if cmd in commandlist:
             output = commandlist[cmd](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
 
@@ -122,19 +114,29 @@ def commands(irc, prefix, command, args):
 
             # When no commands are found...
             if len(possibilities) == 0:
-                irc.reply("Didn't find any commands like '%s'" % cmd)
-                return None
+                return "Didn't find any commands like '%s'" % cmd
 
             # When more than one potential command is found...
             if len(possibilities) > 1:
-                irc.reply("Which did you want?  %s" % str(possibilities)[1:-1])
-                return None
+                return "Which did you want?  %s" % str(possibilities)[1:-1]
 
-            # Collect the output of the command into a buffer. If there is
-            # another command to pipe to, this is the input to the next
-            # command. Otherwise it is returned to the user.
+            # The output of the last command is the input to the next one, if
+            # there is no next command, this is returned to the user.
             output = commandlist[possibilities[0]](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
 
+    if output is not None:
+        return output
+
+
+@event('PRIVMSG')
+def command_forwarder(irc, prefix, command, args):
+    """
+    This acts as the actual PRIVMSG handler, the reason for this is that it
+    allows `commands` to return a message instead of using irc.reply, this
+    also means that `commands` can be called manually to simulate a command
+    being called.
+    """
+    output = commands(irc, prefix, command, args)
     if output is not None:
         irc.reply(output)
 
@@ -148,14 +150,12 @@ def help(irc, nick, chan, msg, args):
     .help list
     """
     if msg == '':
-        return "Which command do you want help with?"
-
+        msg = 'help'
 
     # Try and get the help information by looking up the commands docstring
     # from the command dictionary.
     try:
         cmd = msg.split(' ')
-
 
         # Print out currently installed commands if 'list' is the command.
         if cmd[0] == 'list':
@@ -169,10 +169,7 @@ def help(irc, nick, chan, msg, args):
         info = commandlist[cmd[0]].__doc__.strip().split('\n')
 
         # If the user supplied 'full' to their help, we should notice them
-        # instead as the help could be long. This avoids spam. If the plugin
-        # that the user asked for help about is 'help', we should return all
-        # information anyway as the user has no other way of finding out about
-        # things such as 'full'.
+        # instead as the help could be long from long help messages.
         if len(cmd) > 1 and cmd[1] == 'full' or cmd[0] == 'help':
             for line in info:
                 irc.notice(nick, line.strip())
@@ -187,15 +184,3 @@ def help(irc, nick, chan, msg, args):
         return "This command has no help information."
 
     return info[0].strip()
-
-@regex(r'bruh!')
-def respond(irc, nick, chan, match, args):
-    return nick + '!'
-
-@command
-def first(irc, nick, chan, msg, args):
-    return "Output First"
-
-@command
-def echo(irc, nick, chan, msg, args):
-    return msg

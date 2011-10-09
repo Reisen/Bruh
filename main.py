@@ -13,9 +13,13 @@ from plugins import bruh
 servers = []
 
 
-# Register a Ctrl+C Signal
+# Register a Ctrl+C Signal, allows plugins to receive a shutdown signal so they
+# can clean up nicely.
 def quit(signal, frame):
-    print('Quitting')
+    print('Sending shutdown warning to plugins...')
+    for hook in bruh.hooks['GETOUT']:
+        hook()
+        
     sys.exit(0)
 
 signal.signal(signal.SIGINT, quit)
