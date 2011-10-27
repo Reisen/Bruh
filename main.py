@@ -2,12 +2,15 @@
     This file implements plugin loading, connecting to IRC, and the actual main
     loop for dispatching events to plugins.
 """
-import signal
-import sys
+
 import os
+import sys
+import signal
+import argparse
 
 from bruh.irc import IRC, connectIRC
 from plugins import bruh
+
 
 # Collection of open server connections
 servers = []
@@ -19,7 +22,7 @@ def quit(signal, frame):
     print('Sending shutdown warning to plugins...')
     for hook in bruh.hooks['GETOUT']:
         hook()
-        
+
     sys.exit(0)
 
 signal.signal(signal.SIGINT, quit)
@@ -27,13 +30,28 @@ signal.signal(signal.SIGINT, quit)
 
 if __name__ == '__main__':
     #---------------------------------------------------------------------------
+    # Process commandline arguments
+    #---------------------------------------------------------------------------
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-s', '--server', action='store', required=True, help='the IRC server (e.g. irc.rizon.net)')
+    parser.add_argument('-p', '--port', action='store', default=6667, help='the IRC server port (usually 6667)')
+    parser.add_argument('-c', '--channels', action='store', default=[], help='list of comma separated channels')
+    parser.add_argument('-n', '--nick', action='store', default='bruv', help='the nickname of the bot')
+
+    args = parser.parse_args(sys.argv[1:])
+    if args.channels:
+        args.channels = args.channels.split(',')
+
+    #---------------------------------------------------------------------------
     # Import plugins before any IRC connections are made. This is important
     # because plugins need to be able to handle EVERY message from the server,
     # so they should be ready before connections are made.
     #---------------------------------------------------------------------------
 
     blacklist = ['__init__.py', 'bruh.py']
-    plugins   = {} 
+    plugins   = {}
 
     # The plugins dictionary maps plugin names to python module objects. Here
     # we load module objects directly into the plugins dictionary.
@@ -52,8 +70,10 @@ if __name__ == '__main__':
 
     # Test server connection, need some proper dynamic configuration, but that
     # can come later.
-    servers += [connectIRC('irc.rizon.net', 6667, 'bruv')]
-    servers[0].raw('JOIN #bruh\r\n')
+    servers += [connectIRC(args.server, args.port, args.nick)]
+
+    for channel in args.channels:
+        servers[0].raw('JOIN %s\r\n' % channel)
 
     # Plugins work by hooking IRC events. Bruh provides one non-IRC related
     # event, 'BRUH'. Plugins that hook this event are called with the server
