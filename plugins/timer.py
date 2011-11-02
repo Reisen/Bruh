@@ -69,8 +69,9 @@ def timer(irc, nick, chan, msg, args):
     .timer <length> <message>
     .timer 2h5s This will be sent in 2 hours and 5 seconds.
     """
+
     timegod = timegods[irc.server]
-    if len(msg) == 0:
+    if not msg:
         return "There are {:d} active timers".format(len(timegod.timers.keys()))
 
     # Find out the kind of time being parsed.
@@ -98,6 +99,9 @@ def timer(irc, nick, chan, msg, args):
         # Round timer to nearest multiple of 10
         try:
             pieces = msg.split(' ', 1)
+            if len(pieces) < 2:
+                return "Not enough arguments asshole."
+
             days, hours, minutes, seconds = re.match(r'(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?', msg.split(' ', 1)[0]).groups()
             days    = int(days) * 86400 if days else 0
             hours   = int(hours) * 3600 if hours else 0
