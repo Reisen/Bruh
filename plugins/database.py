@@ -276,7 +276,7 @@ class Connection(object):
     mapping objects.
     """
     def __init__(self, irc):
-        self.connection = sqlite3.connect('./data/' + irc.server + '.db', detect_types = sqlite3.PARSE_COLNAMES)
+        self.connection = sqlite3.connect('./data/' + irc.server + '.db', detect_types = sqlite3.PARSE_COLNAMES, check_same_thread = False)
 
     def map(self, mapper):
         """
