@@ -125,7 +125,7 @@ def commands(irc, prefix, command, args):
             output = commandlist[possibilities[0]](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
 
     if output is not None:
-        return output
+        return output[:400]
 
 
 @event('PRIVMSG')

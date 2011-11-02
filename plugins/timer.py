@@ -1,122 +1,93 @@
 """
-    This plugin starts a new thread that will handle timers. Timers are simly
-    lightweight counters that count down minutes (no second based timers).
+    This plugin allows queuing of timed callbacks, callbacks can be recurring
+    and can be used to schedule timed plugins events.
 """
 from plugins.commands import command
-from plugins.database import *
 from plugins.bruh import event
+from functools import wraps
 import threading, time, datetime
-import re
 
-class TimeGod(threading.Thread):
-    """God of time, will kill you whenever it feels like it."""
-    def __init__(self, irc):
+class DeltaQueue(threading.Thread):
+    """
+    Implements a delta queue. Each element in the queue is delayed by every
+    element before it.
+    """
+    def __init__(self):
         threading.Thread.__init__(self)
 
-        # Timers are stored in a dict, the keys are the number of seconds
-        # until the event occurs, the values are lists of messages to be
-        # sent.
-        self.irc = irc
-        self.timers = {}
-        self.unstoppable = True
+        self.running = True
+        self.queue = []
+        self.lock = threading.Lock()
 
     def stop(self):
-        self.unstoppable = False
+        self.running = False
 
     def run(self):
-        while self.unstoppable:
-            time.sleep(10)
+        while self.running:
+            time.sleep(1)
 
-            # First we print all values stored in 0, as these timers
-            # have expired.
-            if 0 in self.timers.keys():
-                for message in self.timers[0]:
-                    # Messages are stored as (channel, message) tuples, say
-                    # accepts arguments in this order.
-                    self.irc.say(*message)
+            # Lock, we don't want any modifications to be made to the queue
+            # while we are already working on it.
+            self.lock.acquire(True)
+            
+            # See if we actually have any events to process.
+            if len(self.queue) > 0:
+                # First we subtract one from the head of the queue.
+                self.queue[0]._delta -= 1
 
-                # Delete key 0 so it doesn't move into negatives.
-                del self.timers[0]
+                # If the head is less than or equal to 0, we run that event as
+                # well as all events after that are also 0.
+                for callback in self.queue[:]:
+                    if callback._delta > 0:
+                        break
 
-            # Now, we shift all messages down 10 seconds.
-            for key in sorted(self.timers):
-                self.timers[key - 10] = self.timers[key]
-                del self.timers[key]
+                    callback()
+                    self.queue = self.queue[1:]
+
+                    # If the callback is repeatable, we stick it back in.
+                    if callback._repeat:
+                        self._insert(callback, callback._delay, callback._repeat)
+
+            self.lock.release()
+
+    def insert(self, f, delay, repeat = False):
+        self.lock.acquire(True)
+
+        self._insert(f, delay, repeat)
+
+        self.lock.release()
+
+    def _insert(self, f, delay, repeat = False):
+        """Function to insert a new callback."""
+        # Store delay states in the callback.
+        f._delay = delay
+        f._delta = delay
+        f._repeat = repeat
+
+        # If the list is empty, just stick that shit right in.
+        if len(self.queue) == 0:
+            self.queue.append(f)
+
+        else:
+            # We search the list until we find a place to insert our new queue
+            # such that all previous elements sum to a larger delay than our
+            # current callback.
+            for position, callback in enumerate(self.queue):
+                if callback._delta <= f._delta:
+                    f._delta -= callback._delta
+
+                else:
+                    callback._delta -= f._delta
+                    self.queue.insert(position, f)
+                    break
+
+            else:
+                self.queue.insert(position + 1, f)
 
 
-timegods = {}
-
-@event('BRUH')
-def setup_timers(irc):
-    """Sets up the timer thread."""
-    # Each server has its own timegod, master of time, slaughterer of children.
-    timegod = TimeGod(irc)
-    timegod.start()
-    timegods[irc.server] = timegod
-
+dq = DeltaQueue()
+dq.start()
 
 @event('GETOUT')
-def shutdown_timers():
-    print('Timers: Shutting down timer threads.')
-    for timegod in timegods.values():
-        timegod.stop()
-
-
-@command
-def timer(irc, nick, chan, msg, args):
-    """
-    Add a timer to bruh, timers are in multiples of 5 seconds.
-    .timer <length> <message>
-    .timer 2h5s This will be sent in 2 hours and 5 seconds.
-    """
-
-    timegod = timegods[irc.server]
-    if not msg:
-        return "There are {:d} active timers".format(len(timegod.timers.keys()))
-
-    # Find out the kind of time being parsed.
-    if ':' in msg:
-        try:
-            # This kind of time is a full timestamp, I.E 03/04/2011 11:30
-            pieces = msg.split(' ', 2)
-            if len(pieces) < 3:
-                return "Not enough arguments asshole."
-
-            # Reconstruct the list so It's the same as if we weren't receiving a timestamp.
-            pieces = [" ".join(pieces[:2]), pieces[2]]
-            print(pieces)
-
-            expiration = datetime.datetime.strptime(pieces[0], '%d/%m/%Y %H:%M:%S')
-            seconds = int(time.mktime(expiration.timetuple())) - int(time.mktime(datetime.datetime.now().timetuple()))
-
-        except ValueError:
-            return "That's not a proper date you idiot."
-
-        except OverflowError:
-            return "What kind of date are you trying to give me, jesus."
-
-    else:
-        # Round timer to nearest multiple of 10
-        try:
-            pieces = msg.split(' ', 1)
-            if len(pieces) < 2:
-                return "Not enough arguments asshole."
-
-            days, hours, minutes, seconds = re.match(r'(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?', msg.split(' ', 1)[0]).groups()
-            days    = int(days) * 86400 if days else 0
-            hours   = int(hours) * 3600 if hours else 0
-            minutes = int(minutes) * 60 if minutes else 0
-            seconds = int(seconds) if seconds else 0
-            seconds = seconds + minutes + hours + days
-            seconds = int(10 * round(float(seconds)/10))
-
-            expiration = datetime.datetime.now() + datetime.timedelta(seconds = seconds)
-
-        except OverflowError:
-            return "What kind of date are you trying to give me, jesus."
-
-    if seconds not in timegod.timers:
-        timegod.timers[seconds] = []
-
-    timegod.timers[seconds].append((chan, pieces[1]))
-    return "Timer set to go off at {}, {:d} seconds from now.".format(expiration.strftime('%b %d %Y, %H:%M:%S'), seconds)
+def stop_timers():
+    dq.stop()

@@ -38,7 +38,7 @@ class IRC(object):
     object.
     """
 
-    def __init__(self, nickname, connection, server):
+    def __init__(self, nickname, connection, server, password = None):
         """Sets up the object so it can communicate with the server"""
 
         # IRC Specific information that relates to this particular connection.
@@ -48,6 +48,10 @@ class IRC(object):
         self.conn = connection
         self.message = ""
         self.server = server
+
+        # Auth if required.
+        if password:
+            self.send('PASS %s' % password)
 
         # Set us up as a valid IRC user. Should move this to a plugin as well
         # in the future.
@@ -88,13 +92,14 @@ class IRC(object):
 
         # Parse the available messages into prefix, command, args form.
         for message in parsable:
+            print(message)
             yield parse(message)
 
 
-def connectIRC(server, port, nick):
+def connectIRC(server, port, nick, password = None):
     """Helper for creating new IRC connections"""
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    connection.connect((server, port))
+    connection.connect((server, int(port)))
 
     # Pack the connection into an IRC object to handle the connection.
-    return IRC(nick, connection, server)
+    return IRC(nick, connection, server, password)

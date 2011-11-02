@@ -9,29 +9,27 @@ from plugins.commands import command
 @event('BRUH')
 def prepare_userlist(irc):
     """Load a userlist dict into irc objects."""
+    # Attach a userlist dict to each server.
     irc.userlist = {}
 
 
 @event('353')
 def parse_names(irc, prefix, command, args):
     """ Parse RPLNAMREPLY messages in response to /NAMES or onjoin."""
-    print('List:', str(args[3]))
-    # If the channel isn't being tracked yet, it should be.
+    # If the channel isn't being tracked yet, it should be. We use sets because
+    # they just fit well here. Dupe users automatically removed etc.
     if args[2] not in irc.userlist:
-        irc.userlist[args[2]] = []
+        irc.userlist[args[2]] = set()
+
+    print('Parsing users on JOIN')
 
     # Begin adding users to the userlist from responses.
     for user in args[3].split(' '):
-        # Make sure the user isn't in the list, could happen if a JOIN
-        # event is parsed first.
-        if user in irc.userlist[args[2]]:
-            return None
-
         # Remove status characters.
         if user[0] in '!+&%@~':
             user = user[1:]
 
-        irc.userlist[args[2]].append(user)
+        irc.userlist[args[2]].add(user)
 
     print('Parsed incoming /names:\n\t', str(irc.userlist[args[2]]))
 
@@ -43,11 +41,11 @@ def join_userlist(irc, prefix, command, args):
 
     # If we aren't tracking a channel, we should be.
     if chan not in irc.userlist:
-        irc.userlist[chan] = []
+        irc.userlist[chan] = set()
 
     # If we're already tracking the user, we shouldn't re-add them.
     if nick not in irc.userlist[chan]:
-        irc.userlist[chan].append(nick)
+        irc.userlist[chan].add(nick)
 
     print(irc.userlist[chan])
 
@@ -59,7 +57,7 @@ def part_userlist(irc, prefix, command, args):
 
     # If we aren't tracking a channel, we should be.
     if chan not in irc.userlist:
-        irc.userlist[chan] = []
+        irc.userlist[chan] = set()
 
     # If we're already tracking the user, we shouldn't re-add them.
     if nick in irc.userlist[chan]:
@@ -75,7 +73,7 @@ def kick_userlist(irc, prefix, command, args):
 
     # If we aren't tracking a channel, we should be.
     if chan not in irc.userlist:
-        irc.userlist[chan] = []
+        irc.userlist[chan] = set()
 
     # If we're already tracking the user, we shouldn't re-add them.
     if nick in irc.userlist[chan]:

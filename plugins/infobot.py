@@ -55,11 +55,13 @@ def add_fact(irc, nick, chan, match, args):
         if fact.value == value:
             return "I already knew that. Tell me something I don't know."
 
-        return "No, it isn't."
+        fact.value = value
+        fact.save()
+        return "Oh ok, I'll remember that."
 
     # Add the new key to the database.
     irc.db.add(Factoid(key, value, connector))
-    return key + " -> " + value
+    return "I'll remember that."
 
     return "Ok then {}".format(nick)
 
@@ -76,7 +78,7 @@ def get_fact(irc, nick, chan, match, args):
         # if the found value also has a definition.
         key = match.groups()[0]
         transitive = False
-        if key[0] == '!':
+        if key[0] == '?':
             transitive = True
             key = key[1:]
 
@@ -84,33 +86,32 @@ def get_fact(irc, nick, chan, match, args):
         if query is None:
             return None
 
-        if transitive:
-            # Keep looking up values until we find one that doesn't have
-            # a definition, or if random returns 0.
-            while transitive:
-                if random.randint(0,1) == 0:
-                    transitive = False
+        # Keep looking up values until we find one that doesn't have
+        # a definition, or if random returns 0.
+        while transitive:
+            if random.randint(0,1) == 0:
+                transitive = False
 
-                # Check if the value is piped, if so there's multiple ways we
-                # could branch our search here.
-                value = query.value
-                if '|' in value:
-                    value = value.split('|')
-                    value = value[random.randint(0, len(value) - 1)]
+            # Check if the value is piped, if so there's multiple ways we
+            # could branch our search here.
+            value = query.value
+            if '|' in value:
+                value = value.split('|')
+                value = value[random.randint(0, len(value) - 1)]
 
-                next_query = irc.db.query(Factoid).where(Factoid.key == value.lower()).one()
+            next_query = irc.db.query(Factoid).where(Factoid.key == value.lower()).one()
 
-                if next_query is not None:
-                    query = next_query
-                else:
-                    transitive = False
+            if next_query is not None:
+                query = next_query
+            else:
+                transitive = False
 
         query, connector = query.value, query.connector
 
         # Preprocess returned response. These are all stolen from infobot.
         query = query.replace('$nick', nick)
         query = query.replace('$chan', chan)
-        query = query.replace('$rand', irc.userlist[chan][random.randint(0, len(irc.userlist[chan]) -1)])
+        query = query.replace('$rand', random.sample(irc.userlist[chan], 1)[0])
 
         # Pick a random response if multiple responses are available
         if '|' in query:

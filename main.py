@@ -39,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', action='store', default=6667, help='the IRC server port (usually 6667)')
     parser.add_argument('-c', '--channels', action='store', default=[], help='list of comma separated channels')
     parser.add_argument('-n', '--nick', action='store', default='bruv', help='the nickname of the bot')
+    parser.add_argument('-k', '--password', action='store', default=None, help='password to the server')
 
     args = parser.parse_args(sys.argv[1:])
     if args.channels:
@@ -70,7 +71,7 @@ if __name__ == '__main__':
 
     # Test server connection, need some proper dynamic configuration, but that
     # can come later.
-    servers += [connectIRC(args.server, args.port, args.nick)]
+    servers += [connectIRC(args.server, args.port, args.nick, args.password)]
 
     for channel in args.channels:
         servers[0].raw('JOIN %s\r\n' % channel)
