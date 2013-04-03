@@ -4,7 +4,7 @@
 from plugins.commands import command
 from random import randint
 
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen
 import json
 
@@ -23,4 +23,4 @@ def gis(irc, nick, chan, msg, args):
     #in this case it's any of the first 4 image results
     query = query['responseData']['results'][randint(0,3)]['url']
 
-    return query
+    return unquote_plus( query, encoding='utf-8', errors='replace' )
