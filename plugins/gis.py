@@ -19,8 +19,8 @@ def gis(irc, nick, chan, msg, args):
     if query['responseStatus'] != 200:
         return query['responseStatus']
 
-        #Then break it down to only the data we need
-        #in this case it's any of the first 4 image results
-	query = query['responseData']['results'][randint(0,3)]['url']
+    #Then break it down to only the data we need
+    #in this case it's any of the first 4 image results
+    query = query['responseData']['results'][randint(0,3)]['url']
 
     return query

@@ -19,6 +19,6 @@ def urban(irc, nick, chan, msg, args):
 
     #OH SHIT AND DICTIONARIES, AND LISTS TOO GOD DAMN
     query = query['list'][0]['definition']
-
+    
     #it can't be over
     return "%s - %s" % (msg, query[:200])
