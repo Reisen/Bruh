@@ -4,7 +4,7 @@
 from plugins.commands import command
 from random import randint
 
-from urllib.parse import urlencode
+from urllib.parse import quote_plus
 from urllib.request import urlopen
 import json
 
