@@ -22,4 +22,4 @@ def google(irc, nick, chan, msg, args):
     query = query['responseData']['results'][0]
     #We have to cut out the bold tags in the title for some reason
     out = '%s -- \x02%s\x02: "%s"' % ( query['url'], query['title'][3:-3], query['content'] )
-    return out
+    return out.replace('<b>', '').replace('</b>', '')
