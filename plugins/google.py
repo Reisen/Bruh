@@ -3,7 +3,7 @@
 """
 from plugins.commands import command
 
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen
 import json
 
@@ -21,5 +21,5 @@ def google(irc, nick, chan, msg, args):
     #Then break it down to only the data we need (which is the first result of our search)
     query = query['responseData']['results'][0]
     #We have to cut out the bold tags in the title for some reason
-    out = '%s -- \x02%s\x02: "%s"' % ( query['url'], query['title'][3:-3], query['content'] )
+    out = '%s -- \x02%s\x02: "%s"' % ( unquote_plus( query['url'], encoding='utf-8', errors='replace'), query['title'], query['content'] )
     return out.replace('<b>', '').replace('</b>', '')
