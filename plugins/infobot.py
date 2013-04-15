@@ -5,129 +5,75 @@
     -----
 
 """
+import random
 from plugins.commands import regex, command
 from plugins.database import *
-import random
 
-class Factoid(object):
+def setup_db(irc):
+    irc.db.execute('''
+        CREATE TABLE IF NOT EXISTS `factoids` (
+            id INTEGER PRIMARY KEY,
+            key TEXT UNIQUE,
+            value TEXT
+        );
+    ''')
+    irc.db.commit()
+
+@command
+def remember(irc, nick, chan, msg, args):
     """
-    Object representing a Factoid. Mapped by the database plugin to a sqlite
-    table.
+    Adds new commands to the database.
     """
-    id        = Integer(primary_key = True)
-    key       = String()
-    value     = String()
-    connector = String()
+    setup_db(irc)
 
-    def __init__(self, key = None, value = None, connector = 'is'):
-        self.key = key
-        self.value = value
-        self.connector = connector
-
-
-@regex(r'^\?(.*?)\s+(is|can|has|are|was|will\sbe|also\sis)\s+(.*)$')
-def add_fact(irc, nick, chan, match, args):
-    """
-    Parses ?A is B messages into factoids.
-    """
-    # If the table is unmapped, map it here. This will also create a table if
-    # one doesn't exist.
-    irc.db.map(Factoid)
-
-    key, connector, value = match.groups()
-
-    # Preprocess the key, if the is keyword was escaped, we should store it
-    # without the backslash.
-    key = key.replace('\\is', 'is').lower()
+    key, value = msg.split(' ', 1)
 
     # See if an object with this key already exists. If it does, overwrite the
     # value instead of creating a new entry.
-    fact = irc.db.query(Factoid).where(Factoid.key == key).one()
+    fact = irc.db.execute('SELECT * FROM factoids WHERE key = ?', (key,)).fetchone()
 
+    # Update existing keys.
     if fact is not None:
-        # If the connector is 'is also', append the definition with a pipe
-        # instead.
-        if connector == 'also is':
-            fact.value += '|' + value
-            fact.save()
-            return "Got that as well."
-
-        if fact.value == value:
+        # Append new data to the definition if the fact already exists.
+        if fact[2] == value:
             return "I already knew that. Tell me something I don't know."
 
-        fact.value = value
-        fact.save()
-        return "Oh ok, I'll remember that."
+        irc.db.execute('UPDATE factoids SET value = value || ? WHERE key = ?', (', ' + value, key))
+        irc.db.commit()
+        return "I'll remember that too."
 
-    # Add the new key to the database.
-    irc.db.add(Factoid(key, value, connector))
+    # Add the new keys to the database.
+    irc.db.execute('INSERT INTO factoids (key, value) VALUES (?, ?)', (key, value))
+    irc.db.commit()
     return "I'll remember that."
 
-    return "Ok then {}".format(nick)
 
-
-@regex(r'^\?(.+)$')
+@regex(r'^\?([^\s]+)$')
 def get_fact(irc, nick, chan, match, args):
     """
     Parses ?A messages to retrieve facts.
     """
-    irc.db.map(Factoid)
+    setup_db(irc)
 
-    try:
-        # Transitive lookups will search the database again for a description
-        # if the found value also has a definition.
-        key = match.groups()[0]
-        transitive = False
-        if key[0] == '?':
-            transitive = True
-            key = key[1:]
+    # Look for a matching key in the database.
+    key = match.groups()[0]
+    query = irc.db.execute('SELECT * FROM factoids WHERE key = ?', (key,)).fetchone()
+    if query is None:
+        return None
 
-        query = irc.db.query(Factoid).where(Factoid.key == key.lower()).one()
-        if query is None:
-            return None
+    # Preprocess returned response. These are all stolen from infobot.
+    query = query[2]
+    query = query.replace('$nick', nick)
+    query = query.replace('$chan', chan)
+    query = query.replace('$rand', random.sample(irc.userlist[chan], 1)[0])
 
-        # Keep looking up values until we find one that doesn't have
-        # a definition, or if random returns 0.
-        while transitive:
-            if random.randint(0,1) == 0:
-                transitive = False
+    # Action messages and shit should actually print actions.
+    if query.startswith('@a'):
+        query = "\01ACTION " + query[2:].strip() + "\01"
+        return query
 
-            # Check if the value is piped, if so there's multiple ways we
-            # could branch our search here.
-            value = query.value
-            if '|' in value:
-                value = value.split('|')
-                value = value[random.randint(0, len(value) - 1)]
+    # Send messages back raw without the connector,
+    if query.startswith('@r'):
+        return query[2:].strip()
 
-            next_query = irc.db.query(Factoid).where(Factoid.key == value.lower()).one()
-
-            if next_query is not None:
-                query = next_query
-            else:
-                transitive = False
-
-        query, connector = query.value, query.connector
-
-        # Preprocess returned response. These are all stolen from infobot.
-        query = query.replace('$nick', nick)
-        query = query.replace('$chan', chan)
-        query = query.replace('$rand', random.sample(irc.userlist[chan], 1)[0])
-
-        # Pick a random response if multiple responses are available
-        if '|' in query:
-            query = query.split('|')
-            query = query[random.randint(0, len(query) - 1)]
-
-        # Action messages and shit.
-        if query.startswith('@a'):
-            query = "\01ACTION " + query[2:].strip() + "\01"
-            return query
-
-        # Send messages back raw without the connector, and shit.
-        if query.startswith('@r'):
-            return query[2:].strip()
-
-        return key + ' {} '.format(connector) + query
-
-    except Exception as e:
-        print('infobot.get_fact: ' + str(e))
+    return '{}: {} '.format(key, query)

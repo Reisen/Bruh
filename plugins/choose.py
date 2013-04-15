@@ -1,8 +1,8 @@
 """
     Help choose a value for people who aren't able to make their own decisions
 """
-from plugins.commands import command
 import random
+from plugins.commands import command
 
 @command
 def choose(irc, nick, chan, msg, args):

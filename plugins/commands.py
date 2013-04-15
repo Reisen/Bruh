@@ -1,39 +1,35 @@
 """
-    Creates three decorators that are used by other plugins to create commands,
-    and a single 'help' command for providing help about particular commands by
-    sending docstrings to the user. Multiline docstring support works by only
-    sending the first line, unless the user requests 'all'.
+    Commands
+    --------
+    Creates two decorators that are used by other plugins to create commands,
+    and a single 'help' command for providing help by returning a commands
+    docstring.
 
     The first decorator creates a command based on the function name, commands
-    are passed 4 arguments, the irc server that called it, the nick, channel,
+    are passed 5 arguments, the irc server that called it, the nick, channel,
     the users input and the parsed IRC message.
 
     @command
     def example(irc, nick, channel, msg, args):
         pass
 
-    This will create a usable command: .example <arguments> in chat. The bot
-    automatically matches shortened commands, so .exam will also call this
-    function, unless more than one command matches.
+    Commands can also be used shorthand if they aren't ambiguous, .exam will
+    call the above function just fine.
 
-
+    Regular Expressions
+    -------------------
     The second decorator will allow a regex pattern to be matched, these
     functions receive regular expression match objects.
 
     @regex('\?(\w+)')
     def f(irc, nick, channel, match, args):
         pass
-
-    The final decorator will allow a plugin to receive ALL messages that are
-    being parsed. This is similar to just hooking @event('PRIVMSG'), except the
-    command plugin will parse nick/channel/msg parts so that the function
-    prototype is consistent.
 """
-
-from plugins.bruh import event
 import re
 import time
+from plugins import event
 
+# Stored commands. Command names mapped to function objects.
 commandlist = {}
 patternlist = []
 
@@ -54,44 +50,77 @@ def regex(pattern):
 
 def commands(irc, prefix, command, args):
     """
-    This command hooks message events, and acts as a second layer of plugin
-    dispatching depending on the command. This wrapper also provides the
-    ability to pipe commands to each other, and match regular expressions.
-    """
+    This function expects a parsed IRC message as input. This function assumes
+    nothing about the input, and returns a string that it expects to be sent to
+    the output. This means this function can be called with fake data, and the
+    result doesn't even have to be printed back to IRC.
 
-    # Find the users nick, useful enough in plugins that this can be passed as
-    # an extra argument.
+    The function can be invoked at any time anywhere to emulate functions being
+    called by users. The most obvious use is simply piping IRC input into it,
+    as done in this module by `command_forwarder`.
+
+    This function also automatically evaluates piped commands, a single call to
+    this function may potentially invoke several modules.
+    """
+    # Find the users nick, passed to @command functions.
     nick = prefix.split('!')[0]
 
-    # Find the channel the message was received from, also useful in commands.
+    # Find the channel the message was received from, also passed to @commands
     chan = args[0] if args[0].startswith('#') else prefix.split('!')[0]
 
-    # If messages don't start with a command character, attempt regex parsing
-    # instead.
+    # The function doesn't assume the input is in any particular format, if the
+    # input isn't a command, then we attempt here to find any regex patterns
+    # that match and pass control to them.
     if args[1][0] != '!':
         for pattern, callback in patternlist:
             match = re.search(pattern, args[1])
             if match is not None:
-                output = callback(irc, nick, chan, match, args)
+                return callback(irc, nick, chan, match, args)
 
-                if output is not None:
-                    return output
-
-                return None
-        else:
-            return None
+        return None
 
     # Split arguments into pipeable pieces, using '|' characters found directly
-    # before another command as the splitting point.
+    # before another command as the splitting point. This is a pretty hairy
+    # regular expression, maybe could be done cleaner at some point.
     pieces = re.findall(r'!(.*?)(?:\|\s*(?=!)|$)', args[1])
 
     output = ""
     for item in pieces:
         cmd, *input = item.strip().split(' ', 1)
 
+        # Check the input to see if it contains any substitutions, and run them
+        # before the command itself is run.
+        if input:
+            substitutions = re.findall(r'(\$\{([^\}]+)\})', input[0])
+
+            # For each substitution, we sandbox and run the substituted command.
+            for substitution in substitutions:
+                replace_text, cmd_string = substitution
+                sub_cmd, sub_input = cmd_string.strip().split(' ', 1)
+
+                # Setup the sandboxed environment.
+                sandbox_args = args[:]
+                sandbox_args[1] = sub_input
+
+                # Find command used in substitution.
+                possibilities = []
+                for candidate in commandlist:
+                    if candidate.startswith(sub_cmd): possibilities.append(candidate)
+
+                if len(possibilities) == 0:
+                    return "Substitution command '{}' didn't match anything".format(sub_cmd)
+
+                if len(possibilities) > 1:
+                    return "Substitution command '{}' matched all of the following: {}".format(str(possibilities)[1:-1])
+
+                replacement = commandlist[possibilities[0]](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
+                input[0] = input[0].replace(replace_text, replacement)
+
         # Create a fake args environment for the command based on current args,
-        # this stops plugins from trashing the default args, and also allows
-        # modifying of the args submitted to the plugin.
+        # this stops plugins from trashing the default args. If we're piping to
+        # new commands, we might also want to modify the environment being
+        # passed to a plugin to appear as though just that one command has been
+        # called.
         sandbox_args = args[:]
 
         # The output of the last command is appended to the input of the next
@@ -105,9 +134,8 @@ def commands(irc, prefix, command, args):
         # entire list for partial matches.
         if cmd in commandlist:
             output = commandlist[cmd](irc, nick, chan, sandbox_args[1], (prefix, command, sandbox_args))
-
         else:
-            # Search for possible commands
+            # Search for partial matches.
             possibilities = []
             for candidate in commandlist:
                 if candidate.startswith(cmd): possibilities.append(candidate)

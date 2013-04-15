@@ -2,17 +2,15 @@
     This plugin allows users in a channel to register for certain TV shows. The
     plugin will announce to the channel when those shows are airing.
 """
-from plugins.commands import command
-from plugins.bruh import event
-from plugins.database import *
-from plugins.timer import dq
-from urllib.error import URLError
-from xml.dom.minidom import parseString
-from json import loads
-import urllib.request
 import re
-import html.entities
 import time
+import urllib.request
+import html.entities
+from json import loads
+from plugins import event
+from urllib.error import URLError
+from plugins.commands import command
+from xml.dom.minidom import parseString
 
 API_KEY = "469B73127CA0C411"
 

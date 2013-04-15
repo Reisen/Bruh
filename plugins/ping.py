@@ -1,4 +1,4 @@
-from plugins.bruh import event
+from plugins import event
 from plugins.commands import regex
 
 # Handles server PINGS

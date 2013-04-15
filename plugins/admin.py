@@ -1,7 +1,6 @@
 """
     Provide a way for users to authenticate themselves with the bot.
 """
-
 from plugins.commands import command
 
 @command

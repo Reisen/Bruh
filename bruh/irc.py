@@ -1,6 +1,6 @@
 """
     This file implements functions and objects that actual deal with an IRC
-    connection itself. This abstracts it away from the bot.
+    protocol itself. This abstracts it away from the bot.
 """
 
 import socket
@@ -13,8 +13,7 @@ def parse(msg):
     msg = msg.strip()
 
     # [Prefix] is optional, [trailing] is the :End part of the message
-    prefix = ''
-    trailing = []
+    prefix, trailing = '', []
 
     # Find prefix, command and arguments
     if msg[0] == ':':
@@ -37,7 +36,6 @@ class IRC(object):
     This class deals with IRC protocol messages coming from a connection
     object.
     """
-
     def __init__(self, nickname, connection, server, password = None):
         """Sets up the object so it can communicate with the server"""
 
@@ -56,8 +54,7 @@ class IRC(object):
         # Set us up as a valid IRC user. Should move this to a plugin as well
         # in the future.
         self.raw('NICK %s\r\n' % nickname)
-        self.raw('USER %s %s bruh :%s\r\n' %
-            ('Br', 'Uh', 'Bruh'))
+        self.raw('USER %s %s bruh :%s\r\n' % ('Br', 'Uh', 'Bruh'))
 
     def raw(self, message):
         """Send a properly encoded message to the server"""

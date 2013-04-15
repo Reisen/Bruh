@@ -3,8 +3,7 @@
     object and patches it at runtime to include some extra useful methods that
     will allow other plugins to more easily use the IRC protocol.
 """
-
-from plugins.bruh import event
+from plugins import event
 
 def reply(self, message):
     """Replies to the channel a message was sent from."""

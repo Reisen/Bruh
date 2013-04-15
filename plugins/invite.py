@@ -3,7 +3,7 @@
     to invite requests by joining the channel automatically
 """
 
-from plugins.bruh import event
+from plugins import event
 
 @event('INVITE')
 def invite(irc, prefix, command, args):
