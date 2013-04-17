@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # Plugins need to be imported before IRC connections are made, as plugins
     # are used to handle core IRC messages.
-    blacklist = ['__init__.py', 'bruh.py', 'tv.py']
+    blacklist = ['__init__.py']
     plugins   = {}
 
     # A map of plugins and their names is kept so that inter-plugin operations

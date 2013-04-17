@@ -75,9 +75,15 @@ class IRC(object):
 
     def __call__(self):
         """Parses incoming messages and yields them as a generator"""
-        # Assume IRC messages are being sent as UTF-8. If they aren't, It's
-        # likely to be decodable as a subset anyway.
-        self.message += self.conn.recv(1024).decode('UTF-8')
+        # Assume IRC messages are being sent as UTF-8. If not, then in the case
+        # of IRC It's mostly likely because someone sent letters not in the
+        # first 127 characters of ASCII, so we can try decoding from
+        # iso-latin-1, if that doesn't work, fuck that guy, his client sucks.
+        data = self.conn.recv(1024)
+        try:
+            self.message += data.decode('UTF-8')
+        except UnicodeDecodeError:
+            self.message += data.decode('iso-8859-1', 'replace')
 
         # Get all the information in the buffer so far. And split it into
         # individual line-broken messages. The last message may not have been

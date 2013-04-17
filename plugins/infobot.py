@@ -1,23 +1,18 @@
-"""
-    This plugin implements a lot of functionality of infobot.
-
-    Usage
-    -----
-
-"""
+"""This plugin implements a lot of functionality of infobot."""
 import random
 from plugins.commands import regex, command
 from plugins.database import *
 
 def setup_db(irc):
     irc.db.execute('''
-        CREATE TABLE IF NOT EXISTS `factoids` (
+        CREATE TABLE IF NOT EXISTS factoids (
             id INTEGER PRIMARY KEY,
             key TEXT UNIQUE,
             value TEXT
         );
     ''')
     irc.db.commit()
+
 
 @command
 def remember(irc, nick, chan, msg, args):
