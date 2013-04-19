@@ -27,22 +27,60 @@ signal.signal(signal.SIGINT, quit)
 
 
 if __name__ == '__main__':
-    # Process commandline arguments, temporary until a proper configuration file is sorted.
-    parser = argparse.ArgumentParser()
+    # Parse configuration files, configuration is used for everything from
+    # servers to plugin options. If no file exists at all, running the bot
+    # generates one and tells the user to go and edit it.
+    try:
+        with open('config') as f:
+            config = json.loads(f.read())
+    except FileNotFoundError:
+        with open('config', 'w') as f:
+            default_config = {
+                'nick': 'bruh',
+                'blacklist': [],
+                'plugins': {},
+                'servers': [
+                    {
+                        'address': 'irc.example.com',
+                        'port': 6667,
+                        'ssl': False,
+                        'verify_ssl': True,
+                        'nick': 'example_nick',
+                        'password': None,
+                        'channels': ['#bruh']
+                    }
+                ]
+            }
+            f.write(json.dumps(default_config, indent = 4, separators = (', ', ': ')))
+            f.close()
 
-    parser.add_argument('-s', '--server', action='store', required=True, help='the IRC server (e.g. irc.rizon.net)')
-    parser.add_argument('-p', '--port', action='store', default=6667, help='the IRC server port (usually 6667)')
-    parser.add_argument('-c', '--channels', action='store', default=[], help='list of comma separated channels')
-    parser.add_argument('-n', '--nick', action='store', default='brux', help='the nickname of the bot')
-    parser.add_argument('-k', '--password', action='store', default=None, help='password to the server')
+            # Tell the user there was no configuration file and quit.
+            print('There was no config file, one has been created.')
+            print('Edit it and run the bot again.\n')
+    except Exception as e:
+        print('Failed to read configuration file:\n    ')
+        print(e)
+    finally:
+        sys.exit(0)
 
-    args = parser.parse_args(sys.argv[1:])
-    if args.channels:
-        args.channels = args.channels.split(',')
+    sys.exit(0)
+    # Check for some major configuration errors, things that should immediately
+    # cause the bot to quit:
+    #   * No servers defined
+    #   * No default nick defined (real name and username can be blank)
+    errors = [
+        ('nick', 'A default nick must be defined, even if servers define their own.'),
+        ('servers', 'No servers were provided, at least one should be given.')
+    ]
+    for key, error in errors:
+        if key not in config:
+            print(error)
+            sys.exit(0)
 
     # Plugins need to be imported before IRC connections are made, as plugins
     # are used to handle core IRC messages.
-    blacklist = ['__init__.py']
+    blacklist = config.get('blacklist', [])
+    blacklist.append('__init__.py')
     plugins   = {}
 
     # A map of plugins and their names is kept so that inter-plugin operations
@@ -56,14 +94,21 @@ if __name__ == '__main__':
         name = plugin[:-3]
         plugins[name] = __import__('plugins.' + name, globals(), locals(), -1)
 
-    # Connect to servers, explicitly connect to one for now, later this should
-    # be done by dynamically reading configuration.
-    servers += [connectIRC(args.server, args.port, args.nick, args.password)]
+    # Connect to all servers provided in the configuration. Plugins have a lot
+    # of access to the bot core, and could potentially add more servers to this
+    # list so don't rely on equivelence to the config.
+    for server in config['servers']:
+        connection = connectIRC(
+            server['address'],
+            server['port'],
+            server.get('nick', config['nick']),
+            server.get('password', None)
+        )
 
-    # Assumes one server, later should be fixed to join channels from a
-    # configuration on the correct corresponding server.
-    for channel in args.channels:
-        servers[0].raw('JOIN %s\r\n' % channel)
+        for channel in server.get('channels', []):
+            connection.raw('JOIN %s\r\n' % channel)
+
+        servers.append(connection)
 
     # The bot provides a fake IRC event called 'BRUH'. It's faked here once
     # before server handling happens so plugins can do some form of initial

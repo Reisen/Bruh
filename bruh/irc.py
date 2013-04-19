@@ -54,7 +54,7 @@ class IRC(object):
         # Set us up as a valid IRC user. Should move this to a plugin as well
         # in the future.
         self.raw('NICK %s\r\n' % nickname)
-        self.raw('USER %s %s bruh :%s\r\n' % ('Br', 'Uh', 'Bruh'))
+        self.raw('USER %s %s bruh :%s\r\n' % (nickname, nickname, nickname))
 
     def raw(self, message):
         """Send a properly encoded message to the server"""
@@ -74,16 +74,18 @@ class IRC(object):
         return self()
 
     def __call__(self):
-        """Parses incoming messages and yields them as a generator"""
+        """Parses incoming messages and returns parsed messages as a list."""
         # Assume IRC messages are being sent as UTF-8. If not, then in the case
         # of IRC It's mostly likely because someone sent letters not in the
         # first 127 characters of ASCII, so we can try decoding from
         # iso-latin-1, if that doesn't work, fuck that guy, his client sucks.
-        data = self.conn.recv(1024)
         try:
+            data = self.conn.recv(1024)
             self.message += data.decode('UTF-8')
         except UnicodeDecodeError:
             self.message += data.decode('iso-8859-1', 'replace')
+        except socket.timeout:
+            return []
 
         # Get all the information in the buffer so far. And split it into
         # individual line-broken messages. The last message may not have been
@@ -92,17 +94,17 @@ class IRC(object):
         # ready.
         parsable = self.message.split('\n')
         self.message = parsable.pop()
+        parsable = map(parse, parsable)
 
         # Parse the available messages into prefix, command, args form.
-        for message in parsable:
-            print(message)
-            yield parse(message)
+        return parsable
 
 
 def connectIRC(server, port, nick, password = None):
     """Helper for creating new IRC connections"""
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connection.connect((server, int(port)))
+    connection.settimeout(0.1)
 
     # Pack the connection into an IRC object to handle the connection.
     return IRC(nick, connection, server, password)
