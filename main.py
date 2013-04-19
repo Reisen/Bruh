@@ -57,13 +57,12 @@ if __name__ == '__main__':
             # Tell the user there was no configuration file and quit.
             print('There was no config file, one has been created.')
             print('Edit it and run the bot again.\n')
+            sys.exit(0)
     except Exception as e:
         print('Failed to read configuration file:\n    ')
         print(e)
-    finally:
         sys.exit(0)
 
-    sys.exit(0)
     # Check for some major configuration errors, things that should immediately
     # cause the bot to quit:
     #   * No servers defined
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     ]
     for key, error in errors:
         if key not in config:
-            print(error)
+            print('Error: {}'.format(error))
             sys.exit(0)
 
     # Plugins need to be imported before IRC connections are made, as plugins
@@ -105,24 +104,25 @@ if __name__ == '__main__':
             server.get('password', None)
         )
 
+        # Modify the server objects with any relevant information plugins might
+        # end up using, such as plugin lists and other core information.
+        connection.core = {}
+        connection.core['plugins'] = plugins
+        connection.core['servers'] = servers
+        connection.config = server
+
+        # The bot provides a fake IRC event called 'BRUH' that is called when
+        # the server first gets created. It's called here, now, and never again
+        # to allow plugins to do any pre-server handling configuration. No
+        # plugins are guaranteed to have been loaded at this point, don't use
+        # this event for any inter-plugin operations (NO DATABASES).
+        for hook in hooks.get('BRUH', []):
+            hook(connection)
+
+        # Save the server and finish joining channels.
+        servers.append(connection)
         for channel in server.get('channels', []):
             connection.raw('JOIN %s\r\n' % channel)
-
-        servers.append(connection)
-
-    # The bot provides a fake IRC event called 'BRUH'. It's faked here once
-    # before server handling happens so plugins can do some form of initial
-    # setup, this guarantees plugins that all other plugins have been loaded
-    # before this message is sent.
-    #
-    # No plugins that depend on other plugins should use this.
-    for server in servers:
-        # Modify each server to expose the plugins dictionary to plugins that
-        # receive them in events.
-        server.plugins = plugins
-
-        for hook in hooks['BRUH']:
-            hook(server)
 
     # The IRC Loop.
     while True:
