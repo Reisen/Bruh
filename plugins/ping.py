@@ -8,6 +8,6 @@ def ping(irc, prefix, command, args):
 
 
 # Users can 'ping' bruh by using 'bruh!' in a message for it to respond to.
-@regex(r'bruh!')
+@regex(r'$nick!')
 def respond(irc, nick, chan, match, args):
     return nick + '!'

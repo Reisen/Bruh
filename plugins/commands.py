@@ -73,6 +73,13 @@ def commands(irc, prefix, command, args):
     # that match and pass control to them.
     if args[1][0] != '!':
         for pattern, callback in patternlist:
+            # Replace matching configuration options.
+            for item in irc.config:
+                pattern = pattern.replace('$' + item, str(irc.config[item]))
+
+            # Try and match the newly substituted pattern. For example, the
+            # pattern '$nick!' after previous replacement may now be 'bruh!'
+            # which is used against the message.
             match = re.search(pattern, args[1])
             if match is not None:
                 return callback(irc, nick, chan, match, args)
