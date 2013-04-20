@@ -11,16 +11,18 @@ import json
 @command
 def gis(irc, nick, chan, msg, args):
     '''Google image search (returns any of the first 4 results)'''
-        
     url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%s&safe=off'
 
-    #Searches are returned as JSON so we need to turn that into a dictionary
+    if not msg:
+        return "Need something to search for."
+
+    # Searches are returned as JSON so we need to turn that into a dictionary
     query = json.loads( urlopen( url % quote_plus( msg ) ).read().decode('UTF-8') )
     if query['responseStatus'] != 200:
         return query['responseStatus']
 
-    #Then break it down to only the data we need
-    #in this case it's any of the first 4 image results
+    # Then break it down to only the data we need in this case it's any of the
+    # first 4 image results
     query = query['responseData']['results'][randint(0,3)]['url']
 
     return unquote_plus( query, encoding='utf-8', errors='replace' )
