@@ -14,6 +14,7 @@ from collections import defaultdict
 from plugins.commands import command
 from xml.dom.minidom import parseString
 
+FORCE = False
 ACTIVITY = defaultdict(lambda: 0)
 API_KEY = "469B73127CA0C411"
 LAST_CH = 0
@@ -48,7 +49,7 @@ def find(args):
     # Update the LAST_ID constant so future commands can use it, if other
     # commands aren't given an ID to work with, LAST_ID is used.
     LAST_ID = prop('showid')
-    return "Found show {} (ID: {})".format(prop('name'), prop('showid'))
+    return "Found show {} ({}) - ID: {}".format(prop('name'), prop('started'), prop('showid'))
 
 
 def refresh(irc):
@@ -56,18 +57,23 @@ def refresh(irc):
     Do a full refresh on all shows in the database from TV Rage. Episode
     release dates are reloaded and any new shows are loaded for the first time.
     """
+    print('Before DB')
     setup_db(irc)
+    print('After DB')
 
-    global LAST_CH, SHOW_DB
+    global LAST_CH, SHOW_DB, FORCE
 
     # Re-check listings and air-times once a day. This doesn't happen often, so
     # it doesn't hurt to rate limit the requests slightly so as not to hammer
     # the API unnecessarily (don't know what exactly would count as spam to TV
     # Rage).
-    if time.time() - LAST_CH > 1 * 24 * 60 * 60:
+    if time.time() - LAST_CH > 1 * 24 * 60 * 60 or FORCE:
         # Reset SHOW_DB to start fresh.
         LAST_CH = time.time()
         SHOW_DB = defaultdict(lambda: defaultdict(lambda: []))
+
+        # If a check was forced, reset it.
+        FORCE = False
 
         shows = irc.db.execute('SELECT * FROM shows').fetchall()
         for id, show_id, channel in shows:
@@ -126,7 +132,7 @@ def add_tv(irc, args, chan):
     """Add a TV show to be tracked by a channel."""
     setup_db(irc)
 
-    global LAST_ID
+    global LAST_ID, FORCE
     if args:
         LAST_ID = args[0]
 
@@ -139,6 +145,9 @@ def add_tv(irc, args, chan):
     irc.db.execute('INSERT INTO shows (show_id, channel) VALUES (?, ?)', (LAST_ID, chan))
     irc.db.commit()
 
+    # Force a re-download of show-data dates.
+    FORCE = True
+
     return "Show added to tracker: " + str(LAST_ID)
 
 
@@ -147,7 +156,7 @@ def remove_tv(irc, args, chan):
     return "Show removed from tracker: " + str(args)
 
 
-def list_tv(irc, chan):
+def list_tv(irc, chan, args):
     """Returns a list of TV shows the bot is tracking for a channel."""
     setup_db(irc)
     shows = irc.db.execute('SELECT * FROM shows WHERE channel=?', (chan,)).fetchall()
@@ -157,8 +166,8 @@ def list_tv(irc, chan):
     refresh(irc)
 
     # Find shows for this channel.
-    for show in SHOW_DB:
-        show = SHOW_DB[show]
+    for show in args:
+        show = args[show]
         if chan in show['channels']:
             title = show['episode'].getElementsByTagName('title')[0].firstChild.toxml()
             days = int((show['episode'].airdate - time.time()) // (24 * 60 * 60))
@@ -208,8 +217,16 @@ def tv(irc, nick, chan, msg, args):
         }
         return commands[command]()
     except KeyError:
-        if not args:
-            return list_tv(irc, chan)
+        # First see if there's no message, in which case list all shows.
+        if not msg:
+            return list_tv(irc, chan, SHOW_DB)
+
+        # Next, if we find that we're already tracking the named show, lets just print
+        # information about that one.
+        for show in SHOW_DB:
+            if msg.lower() in show['name'].lower():
+                return list_tv(irc, chan, [show])
+
 
         return find([msg])
     except:

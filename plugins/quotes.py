@@ -2,13 +2,14 @@
 
 import sys
 import re
-from random import choice
+from random import choice, randrange, shuffle
 from plugins.commands import command
 
 def setup_db(irc):
     irc.db.execute('''
         CREATE TABLE IF NOT EXISTS quotes (
             id INTEGER PRIMARY KEY,
+            chan TEXT,
             by TEXT,
             quote TEXT
         );
@@ -16,13 +17,13 @@ def setup_db(irc):
     irc.db.commit()
 
 
-def add_quote(irc, nick, args):
+def add_quote(irc, chan, nick, args):
     setup_db(irc)
 
     if not args:
         return "Missing a quote to add to the database."
 
-    irc.db.execute('INSERT INTO quotes (by, quote) VALUES (?, ?)', (nick, args[0]))
+    irc.db.execute('INSERT INTO quotes (chan, by, quote) VALUES (?, ?, ?)', (chan, nick, args[0]))
     irc.db.commit()
     return "Awesome, saved."
 
@@ -30,7 +31,7 @@ def add_quote(irc, nick, args):
 def colour_quote(quote):
     """Add colours to nicks in the quote."""
     nicks = set(re.findall(r'<([^>]+)>', quote))
-    colours = [13, 10, 12, 3, 2, 4]
+    colours = shuffle([13, 10, 12, 3, 2, 4])
 
     # For each nick found, assign them a unique colour.
     for nick in nicks:
@@ -40,30 +41,37 @@ def colour_quote(quote):
     return quote
 
 
-def get_quote(irc, args):
+def get_quote(irc, chan, args):
     setup_db(irc)
 
-    # Find a random quote if no search parameters are passed.
-    print(args)
-    if not args:
-        quotes = irc.db.execute('SELECT * FROM quotes').fetchall()
-        id, by, quote = choice(quotes)
-        return colour_quote(quote)
+    quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
+    id, chan, by, quote = quotes[int(args[0]) - 1]
+    return 'Quote [{}/{}]: {}'.format(args[0], len(quotes), colour_quote(quote))
 
-    print('Oh no')
+
+def random_quote(irc, chan):
+    setup_db(irc)
+
+    quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
+    index = randrange(0, len(quotes))
+    id, chan, by, quote = quotes[index]
+    return 'Quote [{}/{}]: {}'.format(index, len(quotes), colour_quote(quote))
 
 
 @command
 def quote(irc, nick, chan, msg, args):
-    """Manage a quotes database."""
+    """
+    Manages a quotes database. No arguments fetch random quotes.
+    .quote add <quote>
+    .quote get <num>
+    """
     command, *args = msg.split(' ', 1)
 
     try:
         commands = {
-            'add':    lambda: add_quote(irc, nick, args),
-            'get':    lambda: get_quote(irc, args),
-            'search': lambda: find_quote(irc, args)
+            'add':    lambda: add_quote(irc, chan, nick, args),
+            'get':    lambda: get_quote(irc, chan, args)
         }
         return commands[command]()
     except:
-        return str(sys.exc_info())
+        return random_quote(irc, chan)

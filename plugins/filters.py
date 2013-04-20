@@ -9,10 +9,13 @@ rot13 = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 'N
 
 @command
 def filter(irc, nick, chan, msg, args):
-    """Provides several text filters: rot13, rot26, lower, upper, reverse."""
-    text_filter, msg = msg.split(' ', 1)
-
+    """
+    Provides several text filters: rot13, rot26, lower, upper, reverse.
+    !filter <filter> text
+    """
     try:
+        text_filter, msg = msg.split(' ', 1)
+
         filters = {
             'rot13':   lambda: msg.translate(rot13),
             'rot26':   lambda: msg,
@@ -22,7 +25,7 @@ def filter(irc, nick, chan, msg, args):
         }
         return filters[text_filter]()
     except:
-        return "Unknown filter"
+        return "Unknown filter."
 
 @command
 def echo(irc, nick, chan, msg, args):

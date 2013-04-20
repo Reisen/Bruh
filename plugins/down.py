@@ -7,7 +7,10 @@ from plugins.commands import command
 
 @command
 def down(irc, nick, chan, msg, args):
-    """Check if a website is down."""
+    """
+    Check if a website is down.
+    .down <url>
+    """
     try:
         if len(msg) == 0:
             return "Yeah let me just go ahead and guess what website you meant. It's probably down."
