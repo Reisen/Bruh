@@ -21,7 +21,9 @@ def remember(irc, nick, chan, msg, args):
     """
     setup_db(irc)
 
-    key, value = msg.split(' ', 1)
+    key, *value = msg.split(' ', 1)
+    if not value:
+        return "What..."
 
     # See if an object with this key already exists. If it does, overwrite the
     # value instead of creating a new entry.

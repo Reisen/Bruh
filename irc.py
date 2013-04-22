@@ -5,32 +5,6 @@
 
 import socket
 
-def parse(msg):
-    """Parses an IRC message into prefix, command, and arguments as per RFC"""
-    if not msg:
-        return None
-
-    msg = msg.strip()
-
-    # [Prefix] is optional, [trailing] is the :End part of the message
-    prefix, trailing = '', []
-
-    # Find prefix, command and arguments
-    if msg[0] == ':':
-        prefix, msg = msg[1:].split(' ', 1)
-
-    if msg.find(' :') != -1:
-        msg, trailing = msg.split(' :', 1)
-        args = msg.split()
-        args.append(trailing)
-    else:
-        args = msg.split()
-
-    # Get the command from the front of the args list
-    command = args.pop(0)
-    return prefix, command, args
-
-
 class IRC(object):
     """
     This class deals with IRC protocol messages coming from a connection
@@ -55,6 +29,29 @@ class IRC(object):
         # in the future.
         self.raw('NICK %s\r\n' % nickname)
         self.raw('USER %s %s bruh :%s\r\n' % (nickname, nickname, nickname))
+
+    def parse(self, msg):
+        """Parses an IRC message into prefix, command, and arguments as per RFC"""
+        if not msg: return None
+        msg = msg.strip()
+
+        # [Prefix] is optional, [trailing] is the :End part of the message
+        prefix, trailing = '', []
+
+        # Find prefix, command and arguments
+        if msg[0] == ':':
+            prefix, msg = msg[1:].split(' ', 1)
+
+        if msg.find(' :') != -1:
+            msg, trailing = msg.split(' :', 1)
+            args = msg.split()
+            args.append(trailing)
+        else:
+            args = msg.split()
+
+        # Get the command from the front of the args list
+        command = args.pop(0)
+        return prefix, command, args
 
     def raw(self, message):
         """Send a properly encoded message to the server"""
@@ -94,7 +91,7 @@ class IRC(object):
         # ready.
         parsable = self.message.split('\n')
         self.message = parsable.pop()
-        parsable = map(parse, parsable)
+        parsable = map(self.parse, parsable)
 
         # Parse the available messages into prefix, command, args form.
         return parsable

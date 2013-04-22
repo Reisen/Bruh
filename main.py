@@ -5,8 +5,8 @@
 
 import os, sys, signal, argparse, json
 
-from bruh.irc import IRC, connectIRC
 from plugins import hooks
+from irc import IRC, connectIRC
 
 
 # Collection of open server connections
@@ -24,6 +24,29 @@ def quit(signal, frame):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, quit)
+
+
+def loopDefault(server):
+    """
+    Default event loop handler for servers. By default just hands IRC events
+    to plugin event handlers.
+    """
+    # __call__ returns an iterable containing any recently receives messages,
+    # pre-parsed into (prefix, command, args) as in the RFC.
+    for prefix, command, args in server():
+        # If no plugins have registered for this messages event event type, it
+        # is not in the hooks dictionary and the message can just be ignored.
+        if command not in hooks:
+            continue
+
+        # Otherwise, the hooks dictionary contains a list of functions that
+        # have registered for that event.
+        for hook in hooks[command]:
+            # The last message is also stored in the server itself.  This state
+            # is useful when inspecting the server during messages. It's not
+            # necessarily useful for plugins themselves.
+            server.parsed_message = (prefix, command, args)
+            hook(server, *server.parsed_message)
 
 
 if __name__ == '__main__':
@@ -106,6 +129,7 @@ if __name__ == '__main__':
 
         # Modify the server objects with any relevant information plugins might
         # end up using, such as plugin lists and other core information.
+        connection.loop = loopDefault
         connection.core = {}
         connection.core['plugins'] = plugins
         connection.core['servers'] = servers
@@ -128,21 +152,5 @@ if __name__ == '__main__':
     while True:
         # For each IRC connection we have open, look for incoming messages.
         for server in servers:
-            # __call__ returns an iterable containing any recently receives
-            # messages, pre-parsed into (prefix, command, args) as in the RFC.
-            for prefix, command, args in server():
-                # If no plugins have registered for this messages event event
-                # type, it is not in the hooks dictionary and the message can
-                # just be ignored.
-                if command not in hooks:
-                    continue
-
-                # Otherwise, the hooks dictionary contains a list of functions
-                # that have registered for that event.
-                for hook in hooks[command]:
-                    # The last message is also stored in the server itself.
-                    # This state is useful when inspecting the server during
-                    # messages. It's not necessarily useful for plugins
-                    # themselves.
-                    server.parsed_message = (prefix, command, args)
-                    hook(server, *server.parsed_message)
+            # Pass control to this servers event loop.
+            server.loop(server)
