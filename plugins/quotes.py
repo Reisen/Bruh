@@ -31,7 +31,8 @@ def add_quote(irc, chan, nick, args):
 def colour_quote(quote):
     """Add colours to nicks in the quote."""
     nicks = set(re.findall(r'<([^>]+)>', quote))
-    colours = shuffle([13, 10, 12, 3, 2, 4])
+    colours = [13, 10, 12, 2, 4, 14]
+    shuffle(colours)
 
     # For each nick found, assign them a unique colour.
     for nick in nicks:
@@ -52,10 +53,13 @@ def get_quote(irc, chan, args):
 def random_quote(irc, chan):
     setup_db(irc)
 
-    quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
-    index = randrange(0, len(quotes))
-    id, chan, by, quote = quotes[index]
-    return 'Quote [{}/{}]: {}'.format(index, len(quotes), colour_quote(quote))
+    try:
+        quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
+        index = randrange(0, len(quotes))
+        id, chan, by, quote = quotes[index]
+        return 'Quote [{}/{}]: {}'.format(index + 1, len(quotes), colour_quote(quote))
+    except:
+        return "No quotes found."
 
 
 @command

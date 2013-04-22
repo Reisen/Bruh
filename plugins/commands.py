@@ -62,6 +62,10 @@ def commands(irc, prefix, command, args):
     This function also automatically evaluates piped commands, a single call to
     this function may potentially invoke several modules.
     """
+    # Ignore empty messages.
+    if not args[1]:
+        return None
+
     # Find the users nick, passed to @command functions.
     nick = prefix.split('!')[0]
 
@@ -103,7 +107,7 @@ def commands(irc, prefix, command, args):
             # For each substitution, we sandbox and run the substituted command.
             for substitution in substitutions:
                 replace_text, cmd_string = substitution
-                sub_cmd, sub_input = cmd_string.strip().split(' ', 1)
+                sub_cmd, *sub_input = cmd_string.strip().split(' ', 1)
 
                 # Setup the sandboxed environment.
                 sandbox_args = args[:]

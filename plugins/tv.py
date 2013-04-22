@@ -111,7 +111,7 @@ LAST_CHECK = time()
 @event('PING')
 def announce(irc, prefix, command, args):
     """Announce series that are airing soon to the channel."""
-    setup_db()
+    setup_db(irc)
 
     # For each show, we need to make sure we have the right air date. Otherwise
     # we're tracking pointless information.
@@ -129,7 +129,6 @@ def announce(irc, prefix, command, args):
                 if (episode['timestamp'] > now and episode['timestamp'] < next_episode['timestamp']) or next_episode['timestamp'] < now:
                     next_episode = episode
 
-            print(str(next_episode))
             irc.db.execute('UPDATE shows SET airs = ?, title = ?, announce = 0 WHERE id = ?', (next_episode['timestamp'], next_episode['title'], show[0]))
             irc.db.commit()
 
@@ -145,7 +144,7 @@ def announce(irc, prefix, command, args):
 
             # Finally, lets tell people their show is airing soon.
             for channel in channels:
-                irc.say(channel[2], '{} will be airing in a few hours.'.format(show[1]))
+                irc.say(channel[1], 'The next episode of {}, "{}" will be airing in a few hours.'.format(show[1], show[5]))
 
 
 def list_tv(irc, chan):
