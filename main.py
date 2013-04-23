@@ -124,7 +124,9 @@ if __name__ == '__main__':
             server['address'],
             server['port'],
             server.get('nick', config['nick']),
-            server.get('password', None)
+            server.get('password', None),
+            server.get('ssl', False),
+            server.get('verify_ssl', True)
         )
 
         # Modify the server objects with any relevant information plugins might
