@@ -75,7 +75,8 @@ def commands(irc, prefix, command, args):
     # The function doesn't assume the input is in any particular format, if the
     # input isn't a command, then we attempt here to find any regex patterns
     # that match and pass control to them.
-    if args[1][0] != '!':
+    command_prefix = irc.core['config'].get('prefix', '.')
+    if args[1][0] != command_prefix:
         for pattern, callback in patternlist:
             # Replace matching configuration options.
             for item in irc.config:
@@ -93,7 +94,7 @@ def commands(irc, prefix, command, args):
     # Split arguments into pipeable pieces, using '|' characters found directly
     # before another command as the splitting point. This is a pretty hairy
     # regular expression, maybe could be done cleaner at some point.
-    pieces = re.findall(r'!(.*?)(?:\|\s*(?=!)|$)', args[1])
+    pieces = re.findall(r'{0}(.*?)(?:\|\s*(?={0})|$)'.format(command_prefix), args[1])
 
     output = ""
     for item in pieces:

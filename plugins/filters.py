@@ -20,7 +20,7 @@ def rainbow(msg):
 def filter(irc, nick, chan, msg, args):
     """
     Provides several text filters: rot13, rot26, lower, upper, reverse, md5 (and others), rainbow.
-    !filter <filter> text
+    .filter <filter> text
     """
     try:
         text_filter, msg = msg.split(' ', 1)

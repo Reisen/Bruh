@@ -60,6 +60,7 @@ if __name__ == '__main__':
         with open('config', 'w') as f:
             default_config = {
                 'nick': 'bruh',
+                'prefix': '.',
                 'blacklist': [],
                 'plugins': {},
                 'servers': [
@@ -133,6 +134,7 @@ if __name__ == '__main__':
         connection.core = {}
         connection.core['plugins'] = plugins
         connection.core['servers'] = servers
+        connection.core['config'] = config
         connection.config = server
 
         # The bot provides a fake IRC event called 'BRUH' that is called when
