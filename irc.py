@@ -98,11 +98,31 @@ class IRC(object):
         return parsable
 
 
-def connectIRC(server, port, nick, password = None):
+def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = True, cert = None):
     """Helper for creating new IRC connections"""
+    # Create the connection object. If SSL is enabled, we wrap it in an SSL
+    # wrapper but otherwise make no distinction. If possible, I am aiming to
+    # expose as little information about the connection as I can to the rest of
+    # the bot.
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if ssl:
+        # Check for SSL support, if none is compiled we should kill the
+        # application immediately rather than allow the user to connect witohut
+        # SSL when SSL is expected.
+        try:
+            from ssl import wrap_socket, SSLError, CERT_NONE, CERT_REQUIRED
+        except ImportError:
+            print('Fatal Error: No SSL support found while trying to connect.')
+            sys.exit(1)
+        else:
+            connection = wrap_socket(
+                connection,
+                cert_reqs = CERT_REQUIRED if ssl_verify else CERT_NONE,
+                certfile = cert
+            )
+
+    # Connect and pack the connection into an IRC object to handle the
+    # connection and message parsing.
     connection.connect((server, int(port)))
     connection.settimeout(0.1)
-
-    # Pack the connection into an IRC object to handle the connection.
     return IRC(nick, connection, server, password)
