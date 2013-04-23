@@ -56,7 +56,7 @@ if __name__ == '__main__':
     try:
         with open('config') as f:
             config = json.loads(f.read())
-    except FileNotFoundError:
+    except IOError:
         with open('config', 'w') as f:
             default_config = {
                 'nick': 'bruh',

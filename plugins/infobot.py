@@ -1,5 +1,5 @@
 """This plugin implements a lot of functionality of infobot."""
-import random
+import random, re
 from plugins.commands import regex, command
 from plugins.database import *
 
@@ -32,7 +32,7 @@ def remember(irc, nick, chan, msg, args):
     # Update existing keys.
     if fact is not None:
         # Append new data to the definition if the fact already exists.
-        if fact[2] == value:
+        if fact[2] == value[0]:
             return "I already knew that. Tell me something I don't know."
 
         irc.db.execute('UPDATE factoids SET value = value || ? WHERE key = ?', (', ' + value, key))
@@ -40,7 +40,7 @@ def remember(irc, nick, chan, msg, args):
         return "I'll remember that too."
 
     # Add the new keys to the database.
-    irc.db.execute('INSERT INTO factoids (key, value) VALUES (?, ?)', (key, value))
+    irc.db.execute('INSERT INTO factoids (key, value) VALUES (?, ?)', (key, value[0]))
     irc.db.commit()
     return "I'll remember that."
 
@@ -62,6 +62,14 @@ def get_fact(irc, nick, chan, match, args):
     query = query[2]
     query = query.replace('$nick', nick)
     query = query.replace('$chan', chan)
+
+    # Replace extra randoms first, because $rand1 will be replaced by the $rand
+    # replacement below otherwise.
+    randoms = set(re.findall(r'\$rand\d', query))
+    for random_nick in randoms:
+        query = query.replace(random_nick, random.sample(irc.userlist[chan], 1)[0])
+
+    # Do the default random replacement.
     query = query.replace('$rand', random.sample(irc.userlist[chan], 1)[0])
 
     # Action messages and shit should actually print actions.
