@@ -4,6 +4,16 @@
 import sqlite3
 from plugins import event
 
+connections = []
+
 @event('BRUH')
 def setup_db(irc):
     irc.db = sqlite3.connect('data/{}.db'.format(irc.server))
+    connections.append(irc.db)
+
+
+@event('GETOUT')
+def shutdown_db():
+    for connection in connections:
+        connection.commit()
+        connection.close()
