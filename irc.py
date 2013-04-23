@@ -91,6 +91,7 @@ class IRC(object):
         # ready.
         parsable = self.message.split('\n')
         self.message = parsable.pop()
+        map(print, parsable)
         parsable = map(self.parse, parsable)
 
         # Parse the available messages into prefix, command, args form.

@@ -26,8 +26,36 @@ def setup_db(irc):
             seen INTEGER
         );
     ''')
-    irc.db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS idx_seen ON seen (nick, chan)''')
+    irc.db.execute('''
+        CREATE TABLE IF NOT EXISTS tell (
+            id INTEGER PRIMARY KEY,
+            nick TEXT,
+            chan TEXT,
+            message TEXT
+        );
+    ''')
+    irc.db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS idx_seen ON seen (nick, chan);''')
     irc.db.commit()
+
+
+@command
+def tell(irc, nick, chan, msg, args):
+    """
+    Leave a message for when a user is next active.
+    .tell <nick> <msg>
+    """
+    # Check the arguments given are actually correct.
+    if not msg:
+        return 'I need to know who you want to leave a message for, and what you want me to tell them.'
+
+    msg, *args = msg.split(' ', 1)
+    if not args:
+        return 'I still need a message.'
+
+    # Save the message in the database to be sent at a later time.
+    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg, chan, args[0]))
+    irc.db.commit()
+    return 'I will pass that along.'
 
 
 @command
@@ -78,3 +106,9 @@ def watch_channel(irc, prefix, command, args):
         irc.db.execute('INSERT OR REPLACE INTO seen (nick, chan, message, seen) VALUES (?, ?, ?, ?)', (
             nick, chan, mesg, last
         ))
+
+        # Check if any messages need to be passed on.
+        messages = irc.db.execute('SELECT * FROM tell WHERE nick = ? and chan = ?', (nick, chan)).fetchall()
+        for message in messages:
+            irc.notice(nick, message[3])
+            irc.db.execute('DELETE FROM tell WHERE id = ?', (message[0],))
