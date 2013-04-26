@@ -11,6 +11,8 @@ import json
 def google(irc, nick, chan, msg, args):
     '''Google web search'''
     url = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s'
+
+    print(nick, chan, msg, str(args))
     
     if not msg:
         return "Need something to search for."

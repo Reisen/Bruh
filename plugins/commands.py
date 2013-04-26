@@ -112,7 +112,7 @@ def commands(irc, prefix, command, args):
 
                 # Setup the sandboxed environment.
                 sandbox_args = args[:]
-                sandbox_args[1] = sub_input
+                sandbox_args[1] = sub_input[0]
 
                 # Find command used in substitution.
                 possibilities = []
@@ -154,7 +154,7 @@ def commands(irc, prefix, command, args):
 
             # When no commands are found...
             if len(possibilities) == 0:
-                return "Didn't find any commands like '%s'" % cmd
+                return None
 
             # When more than one potential command is found...
             if len(possibilities) > 1:

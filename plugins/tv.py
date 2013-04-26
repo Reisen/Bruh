@@ -102,6 +102,8 @@ def add_tv(irc, chan, show_id):
         irc.db.execute('INSERT INTO show_channels (show_id, channel) VALUES (?, ?)', (show_id, chan))
         irc.db.commit()
         return 'Now tracking show: {}'.format(show[1])
+    except ValueError:
+        return 'That show has finished airing, you can\'t track it.'
     except:
         return 'You are already tracking {} in this channel.'.format(show[1])
 

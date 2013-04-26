@@ -15,16 +15,19 @@ def calculate_length(seconds):
     return timestring + '{}s'.format(seconds % 60)
 
 
-def fetch_video(query):
+def fetch_video(query, search = False):
     # Fetch the first results Video information from the Youtube API. Details
     # on the response can be found here on the Youtube API reference:
     # https://developers.google.com/youtube/2.0/reference#Searching_for_videos
     query = quote_plus(query)
-    video = urlopen('https://gdata.youtube.com/feeds/api/videos/?q={}&v=2&alt=jsonc&max-results=1'.format(query))
+    query = '?q=' + query + '&' if search else query + '?'
+    video = urlopen('https://gdata.youtube.com/feeds/api/videos/{}v=2&alt=jsonc'.format(query))
     video = loads(video.read().decode('utf-8'))
 
     # Pull out all the information we actually care about showing.
-    video = video['data']['items'][0]
+    video = video['data']
+    if 'items' in video:
+        video = video['items'][0]
 
     return '{} - length {} - rated {:.2f}/5.00 ({}/{}) - {} views - {} ({})'.format(
         video['title'],
@@ -53,4 +56,4 @@ def youtube(irc, nick, chan, msg, args):
     if not msg:
         return 'Need something to search for.'
 
-    return fetch_video(msg)
+    return fetch_video(msg, True)
