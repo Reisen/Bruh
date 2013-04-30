@@ -38,18 +38,23 @@ def RAGE(irc, show_id):
     detail = 'http://services.tvrage.com/feeds/showinfo.php?sid={}'.format(show_id)
     detail = parseString(urlopen(detail).read())
 
+    # Make sure the show is still airing, otherwise the rest of this function
+    # is entirely purposeless.
+    airstate = detail.getElementsByTagName('status')[0].firstChild.toxml()
+    if 'Returning' not in airstate:
+        raise ValueError
+
     episodes = 'http://services.tvrage.com/feeds/episode_list.php?sid={}'.format(show_id)
     episodes = parseString(urlopen(episodes).read())
 
     # Build a dictionary containing important information about the series.
     show_info = {}
-    for item in ['showid', 'showname', 'seasons', 'started', 'status', 'airtime']:
+    for item in ['showid', 'showname', 'seasons', 'started', 'airtime']:
         show_info[item] = detail.getElementsByTagName(item)[0].firstChild.toxml()
 
     show_info['episodes'] = []
     for episode in episodes.getElementsByTagName('episode'):
         episode_info = {}
-        show_info['episodes'].append(episode_info)
         for item in ['epnum', 'seasonnum', 'airdate', 'title']:
             # Some episodes might not actually have some data, we'll just fail
             # cleanly and code that uses this data can deal with the
@@ -57,10 +62,17 @@ def RAGE(irc, show_id):
             try:    episode_info[item] = episode.getElementsByTagName(item)[0].firstChild.toxml()
             except: episode_info[item] = None
 
-        # Provide a UNIX timestamp for the air date/time as well.
-        timestamp = datetime.strptime('{} {}'.format(show_info['airtime'], episode_info['airdate']), '%H:%M %Y-%m-%d')
-        timestamp = mktime(timestamp.timetuple())
-        episode_info['timestamp'] = timestamp
+        # Provide a UNIX timestamp for the air date/time as well. TV Rage
+        # returns dates literally as 00:00:00 for some reason for some
+        # episodes, so we have to expect strptime to fail.
+        try:
+            timestamp = datetime.strptime('{} {}'.format(show_info['airtime'], episode_info['airdate']), '%H:%M %Y-%m-%d')
+            timestamp = mktime(timestamp.timetuple())
+            episode_info['timestamp'] = timestamp
+        except:
+            continue
+
+        show_info['episodes'].append(episode_info)
 
     return show_info
 
@@ -102,7 +114,8 @@ def add_tv(irc, chan, show_id):
         irc.db.execute('INSERT INTO show_channels (show_id, channel) VALUES (?, ?)', (show_id, chan))
         irc.db.commit()
         return 'Now tracking show: {}'.format(show[1])
-    except ValueError:
+    except ValueError as e:
+        raise e
         return 'That show has finished airing, you can\'t track it.'
     except:
         return 'You are already tracking {} in this channel.'.format(show[1])
@@ -113,6 +126,7 @@ LAST_CHECK = time()
 @event('PING')
 def announce(irc, prefix, command, args):
     """Announce series that are airing soon to the channel."""
+    global LAST_CHECK
     setup_db(irc)
 
     # For each show, we need to make sure we have the right air date. Otherwise
@@ -121,18 +135,28 @@ def announce(irc, prefix, command, args):
         # If the timestamp is in the past, then the episode we WERE tracking
         # has already aired and we need to get the next episode.
         now, timestamp = time(), int(show[3])
-        if timestamp - now <= 0:
+        if timestamp - now <= 0 and (now - LAST_CHECK > 7200 or prefix == None):
+            # Update check so we don't spam the API too much. Once every two
+            # hours is enough.
+            LAST_CHECK = time()
+
             # Fetch TV RAGE show information.
-            details = RAGE(irc, show[2])
+            try:
+                details = RAGE(irc, show[2])
 
-            # Update the time in the database to the next upcoming episode.
-            next_episode = details['episodes'][-1]
-            for episode in reversed(details['episodes']):
-                if (episode['timestamp'] > now and episode['timestamp'] < next_episode['timestamp']) or next_episode['timestamp'] < now:
-                    next_episode = episode
+                # Update the time in the database to the next upcoming episode.
+                next_episode = details['episodes'][-1]
+                for episode in reversed(details['episodes']):
+                    if (episode['timestamp'] > now and episode['timestamp'] < next_episode['timestamp']) or next_episode['timestamp'] < now:
+                        next_episode = episode
 
-            irc.db.execute('UPDATE shows SET airs = ?, title = ?, announce = 0 WHERE id = ?', (next_episode['timestamp'], next_episode['title'], show[0]))
-            irc.db.commit()
+                irc.db.execute('UPDATE shows SET airs = ?, title = ?, announce = 0 WHERE id = ?', (next_episode['timestamp'], next_episode['title'], show[0]))
+                irc.db.commit()
+            except ValueError:
+                # ValueError should occur when a TV series is no longer
+                # returning so we should just remove it from the database.
+                irc.db.execute('DELETE FROM shows WHERE show_id = ?', (show[2],))
+                irc.db.commit()
 
         # Now that we're sure we have the right air-date, we just need to find
         # out if we're close enough to mention that to any channels who care
@@ -149,13 +173,20 @@ def announce(irc, prefix, command, args):
                 irc.say(channel[1], 'The next episode of {}, "{}" will be airing in a few hours.'.format(show[1], show[5]))
 
 
-def list_tv(irc, chan):
+def list_tv(irc, chan, nick):
     """List currently tracked TV series."""
     announce(irc, None, None, None)
     shows = irc.db.execute('SELECT shows.*, show_channels.* FROM show_channels JOIN shows ON shows.show_id = show_channels.show_id WHERE channel = ?', (chan,)).fetchall()
     for show in shows:
-        irc.reply('The next episode of {}, "{}", airs in {} days.'.format(show[1], show[5], int((show[3] - time()) / 86400)))
-        sleep(0.1)
+        time_until = int((show[3] - time()) / 86400)
+        if len(shows) > 3:
+            if time_until < 0: irc.notice(nick, 'No upcoming episodes of {} have been announced.'.format(show[1]))
+            else:              irc.notice(nick, 'The next episode of {}, "{}", airs in {} days.'.format(show[1], show[5], time_until))
+        else:
+            if time_until < 0: irc.reply('No upcoming episodes of {} have been announced.'.format(show[1]))
+            else:              irc.reply('The next episode of {}, "{}", airs in {} days.'.format(show[1], show[5], time_until))
+
+        sleep(0.4)
 
 
 @command
@@ -169,8 +200,8 @@ def tv(irc, nick, chan, msg, args):
             'add':    lambda: add_tv(irc, chan, *args),
             'find':   lambda: find(irc, *args),
             'force':  lambda: announce(irc, None, None, None),
-            'list':   lambda: list_tv(irc, chan)
+            'list':   lambda: list_tv(irc, chan, nick)
         }
         return commands[command]()
     except KeyError:
-        return list_tv(irc, chan)
+        return list_tv(irc, chan, nick)
