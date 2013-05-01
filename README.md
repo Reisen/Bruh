@@ -1,4 +1,4 @@
-**Just Another IRC Bot**
+** NOT!!!!! Just Another IRC Bot**
 
 ## Installing
 
