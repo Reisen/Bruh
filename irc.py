@@ -5,7 +5,10 @@
 
 import socket
 
-class IRC(object):
+class IRC:
+    pass
+
+class DefaultIRC(IRC):
     """
     This class deals with IRC protocol messages coming from a connection
     object.
@@ -125,4 +128,4 @@ def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = Tr
     # connection and message parsing.
     connection.connect((server, int(port)))
     connection.settimeout(0.1)
-    return IRC(nick, connection, server, password)
+    return DefaultIRC(nick, connection, server, password)

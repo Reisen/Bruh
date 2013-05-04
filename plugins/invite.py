@@ -7,4 +7,4 @@ from plugins import event
 
 @event('INVITE')
 def invite(irc, prefix, command, args):
-    irc.raw('JOIN %s\r\n' % args[1])
+    irc.join(args[1])

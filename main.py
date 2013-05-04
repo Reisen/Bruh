@@ -149,8 +149,6 @@ if __name__ == '__main__':
 
         # Save the server and finish joining channels.
         servers.append(connection)
-        for channel in server.get('channels', []):
-            connection.raw('JOIN %s\r\n' % channel)
 
     # The IRC Loop.
     while True:
