@@ -11,17 +11,32 @@ def reply(self, message):
 
     # Determine whether the message was from a query, or a channel.
     target = args[0] if args[0].startswith('#') else prefix.split('!')[0]
-    self.raw('PRIVMSG %s :%s\r\n' % (target, message))
+    self.raw('PRIVMSG {} :{}\r\n'.format(target, message))
 
 
 def say(self, channel, message):
     """Sends a message to the channel the event was received from."""
-    self.raw('PRIVMSG %s :%s\r\n' % (channel, message))
+    self.raw('PRIVMSG {} :{}\r\n'.format(channel, message))
 
 
 def notice(self, user, message):
     """Sends a notice to the channel an event was received from"""
-    self.raw('NOTICE %s :%s\r\n' % (user, message))
+    self.raw('NOTICE {} :{}\r\n'.format(user, message))
+
+
+def action(self, channel, message):
+    """Sends an action message to a target channel."""
+    self.raw('PRIVMSG {} :\x0A{}\x0A\r\n'.format(channel, message))
+
+
+def join(self, channel):
+    """Join a target channel."""
+    self.raw('JOIN {}\r\n'.format(channel))
+
+
+def part(self, channel):
+    """Leaves a channel."""
+    self.raw('PART {}\r\n'.format(channel))
 
 
 @event('BRUH')
@@ -36,3 +51,6 @@ def addCoreFunctionality(irc):
     container.reply  = reply
     container.say    = say
     container.notice = notice
+    container.action = action
+    container.join   = join
+    container.part   = part
