@@ -53,7 +53,7 @@ def tell(irc, nick, chan, msg, args):
         return 'I still need a message.'
 
     # Save the message in the database to be sent at a later time.
-    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg, chan, args[0]))
+    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, args[0]))
     irc.db.commit()
     return 'I will pass that along.'
 
@@ -69,7 +69,7 @@ def seen(irc, nick, chan, msg, args):
 
     # Try and see if we've even seen the person.
     setup_db(irc)
-    user = irc.db.execute('SELECT * FROM seen WHERE nick = ? and chan = ?', (msg, chan)).fetchone()
+    user = irc.db.execute('SELECT * FROM seen WHERE nick = ? and chan = ?', (msg.lower(), chan)).fetchone()
     if not user:
         return 'I\'ve never seen {}.'.format(msg)
 
