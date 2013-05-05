@@ -112,7 +112,7 @@ def commands(irc, prefix, command, args):
 
                 # Setup the sandboxed environment.
                 sandbox_args = args[:]
-                sandbox_args[1] = sub_input[0]
+                sandbox_args[1] = sub_input[0] if sub_input else ''
 
                 # Find command used in substitution.
                 possibilities = []

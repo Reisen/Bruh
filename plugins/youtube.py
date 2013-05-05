@@ -23,19 +23,20 @@ def fetch_video(query, search = False):
     query = '?q=' + query + '&' if search else query + '?'
     video = urlopen('https://gdata.youtube.com/feeds/api/videos/{}v=2&alt=jsonc'.format(query))
     video = loads(video.read().decode('utf-8'))
+    print(video)
 
     # Pull out all the information we actually care about showing.
     video = video['data']
     if 'items' in video:
         video = video['items'][0]
 
-    return '{} - length {} - rated {:.2f}/5.00 ({}/{}) - {} views - {} ({})'.format(
+    return '\x02{}\x02 - length \x02{}\x02 - rated \x02{:.2f}/5.00\x02 ({}/{}) - \x02{}\x02 views - {} ({})'.format(
         video['title'],
         calculate_length(video['duration']),
-        video['rating'],
-        video['likeCount'],
-        video['ratingCount'],
-        video['viewCount'],
+        video.get('rating', 0),
+        video.get('likeCount', 0),
+        video.get('ratingCount', 0),
+        video.get('viewCount', 0),
         video['uploader'],
         'https://www.youtube.com/watch?v={}'.format(video['id'])
     )
