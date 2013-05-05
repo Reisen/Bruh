@@ -41,7 +41,7 @@ def RAGE(irc, show_id):
     # Make sure the show is still airing, otherwise the rest of this function
     # is entirely purposeless.
     airstate = detail.getElementsByTagName('status')[0].firstChild.toxml()
-    if 'Returning' not in airstate:
+    if 'Returning' not in airstate and airstate != 'New Series':
         raise ValueError
 
     episodes = 'http://services.tvrage.com/feeds/episode_list.php?sid={}'.format(show_id)
@@ -114,8 +114,7 @@ def add_tv(irc, chan, show_id):
         irc.db.execute('INSERT INTO show_channels (show_id, channel) VALUES (?, ?)', (show_id, chan))
         irc.db.commit()
         return 'Now tracking show: {}'.format(show[1])
-    except ValueError as e:
-        raise e
+    except ValueError:
         return 'That show has finished airing, you can\'t track it.'
     except:
         return 'You are already tracking {} in this channel.'.format(show[1])
