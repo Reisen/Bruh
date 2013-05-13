@@ -30,7 +30,7 @@ def fetch_video(query, search = False):
     if 'items' in video:
         video = video['items'][0]
 
-    return '\x02{}\x02 - length \x02{}\x02 - rated \x02{:.2f}/5.00\x02 ({}/{}) - \x02{}\x02 views - {} ({})'.format(
+    return '\x02{}\x02 - length \x02{}\x02 - rated \x02{:.2f}/5.00\x02 ({}/{}) - \x02{}\x02 views - {} {}'.format(
         video['title'],
         calculate_length(video['duration']),
         video.get('rating', 0),
@@ -38,7 +38,7 @@ def fetch_video(query, search = False):
         video.get('ratingCount', 0),
         video.get('viewCount', 0),
         video['uploader'],
-        'https://www.youtube.com/watch?v={}'.format(video['id'])
+        '(https://www.youtube.com/watch?v={})'.format(video['id']) if not search else ''
     )
     
 
