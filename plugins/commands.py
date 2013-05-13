@@ -176,9 +176,12 @@ def command_forwarder(irc, prefix, command, args):
     also means that `commands` can be called manually to simulate a command
     being called.
     """
-    output = commands(irc, prefix, command, args)
-    if output is not None:
-        irc.reply(output)
+    try:
+        output = commands(irc, prefix, command, args)
+        if output is not None:
+            irc.reply(output)
+    except:
+        return None
 
 
 @command
