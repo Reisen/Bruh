@@ -53,7 +53,7 @@ def tell(irc, nick, chan, msg, args):
         return 'I still need a message.'
 
     # Save the message in the database to be sent at a later time.
-    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, 'From {}: {}'.format(args[0])))
+    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, 'From {}: {}'.format(nick, args[0])))
     irc.db.commit()
     return 'I will pass that along.'
 

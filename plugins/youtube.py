@@ -38,7 +38,7 @@ def fetch_video(query, search = False):
         video.get('ratingCount', 0),
         video.get('viewCount', 0),
         video['uploader'],
-        '(https://www.youtube.com/watch?v={})'.format(video['id']) if not search else ''
+        '(https://www.youtube.com/watch?v={})'.format(video['id']) if search else ''
     )
     
 
