@@ -53,7 +53,7 @@ def tell(irc, nick, chan, msg, args):
         return 'I still need a message.'
 
     # Save the message in the database to be sent at a later time.
-    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, args[0]))
+    irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, 'From {}: {}'.format(args[0])))
     irc.db.commit()
     return 'I will pass that along.'
 
@@ -104,11 +104,11 @@ def watch_channel(irc, prefix, command, args):
         mesg = args[1]
         last = time()
         irc.db.execute('INSERT OR REPLACE INTO seen (nick, chan, message, seen) VALUES (?, ?, ?, ?)', (
-            nick, chan, mesg, last
+            nick.lower(), chan, mesg, last
         ))
 
         # Check if any messages need to be passed on.
-        messages = irc.db.execute('SELECT * FROM tell WHERE nick = ? and chan = ?', (nick, chan)).fetchall()
+        messages = irc.db.execute('SELECT * FROM tell WHERE nick = ? and chan = ?', (nick.lower(), chan)).fetchall()
         for message in messages:
             irc.notice(nick, message[3])
             irc.db.execute('DELETE FROM tell WHERE id = ?', (message[0],))
