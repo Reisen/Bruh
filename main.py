@@ -6,7 +6,7 @@
 import os, sys, signal, argparse, json
 
 from plugins import hooks
-from irc import IRC, connectIRC
+from irc import IRC, connectIRC, reconnectIRC
 
 
 # Collection of open server connections
@@ -33,20 +33,26 @@ def loopDefault(server):
     """
     # __call__ returns an iterable containing any recently receives messages,
     # pre-parsed into (prefix, command, args) as in the RFC.
-    for prefix, command, args in server():
-        # If no plugins have registered for this messages event event type, it
-        # is not in the hooks dictionary and the message can just be ignored.
-        if command not in hooks:
-            continue
+    try:
+        for prefix, command, args in server():
+            # If no plugins have registered for this messages event event type, it
+            # is not in the hooks dictionary and the message can just be ignored.
+            if command not in hooks:
+                continue
 
-        # Otherwise, the hooks dictionary contains a list of functions that
-        # have registered for that event.
-        for hook in hooks[command]:
-            # The last message is also stored in the server itself.  This state
-            # is useful when inspecting the server during messages. It's not
-            # necessarily useful for plugins themselves.
-            server.parsed_message = (prefix, command, args)
-            hook(server, *server.parsed_message)
+            # Otherwise, the hooks dictionary contains a list of functions that
+            # have registered for that event.
+            for hook in hooks[command]:
+                # The last message is also stored in the server itself.  This state
+                # is useful when inspecting the server during messages. It's not
+                # necessarily useful for plugins themselves.
+                server.parsed_message = (prefix, command, args)
+                hook(server, *server.parsed_message)
+    except ValueError:
+        # This will normally happen if for some reason the connection has been
+        # dropped. This can happen for a lot of reasons but the solution taken
+        # here is to simply reconnect and go on as before.
+        reconnectIRC(server)
 
 
 if __name__ == '__main__':

@@ -23,7 +23,6 @@ def fetch_video(query, search = False):
     query = '?q=' + query + '&' if search else query + '?'
     video = urlopen('https://gdata.youtube.com/feeds/api/videos/{}v=2&alt=jsonc'.format(query))
     video = loads(video.read().decode('utf-8'))
-    print(video)
 
     # Pull out all the information we actually care about showing.
     video = video['data']
@@ -44,7 +43,6 @@ def fetch_video(query, search = False):
 
 @regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
 def youtube_match(irc, nick, chan, match, args):
-    print('Youtube matcher')
     return fetch_video(match.group(1))
 
 

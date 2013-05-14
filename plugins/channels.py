@@ -4,7 +4,6 @@ from plugins import event
 
 @event('004')
 def setup_channels(irc, prefix, command, args):
-    print(irc.config)
     if 'identify' in irc.config:
         irc.say('nickserv', 'identify {}'.format(irc.config['identify']))
         sleep(2)

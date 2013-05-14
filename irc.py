@@ -13,7 +13,7 @@ class DefaultIRC(IRC):
     This class deals with IRC protocol messages coming from a connection
     object.
     """
-    def __init__(self, nickname, connection, server, password = None):
+    def __init__(self, nickname, connection, server, port = 6667, password = None):
         """Sets up the object so it can communicate with the server"""
 
         # IRC Specific information that relates to this particular connection.
@@ -84,8 +84,12 @@ class DefaultIRC(IRC):
             self.message += data.decode('UTF-8')
         except UnicodeDecodeError:
             self.message += data.decode('iso-8859-1', 'replace')
+            print('Error Decoding as UTF-8: {}'.format(data.decode('iso-8859-1', 'replace')))
         except socket.timeout:
             return []
+
+        if not data:
+            raise ValueError("Socket returned empty.")
 
         # Get all the information in the buffer so far. And split it into
         # individual line-broken messages. The last message may not have been
@@ -94,11 +98,22 @@ class DefaultIRC(IRC):
         # ready.
         parsable = self.message.split('\n')
         self.message = parsable.pop()
-        map(print, parsable)
-        parsable = map(self.parse, parsable)
+        for message in parsable:
+            print(message)
 
-        # Parse the available messages into prefix, command, args form.
-        return parsable
+        # Parse the available messages into prefix, command, args form and
+        # return the iterable.
+        return map(self.parse, parsable)
+
+
+def reconnectIRC(server):
+    """Helper for reconnecting a dead IRC object gracefully."""
+    try:
+        server.conn.close()
+        server.conn.connect((server.server, server.port))
+        server.conn.settimeout(0.1)
+    except:
+        print('Error occurred while reconnecting to: {}'.format(server.server))
 
 
 def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = True, cert = None):
@@ -128,4 +143,4 @@ def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = Tr
     # connection and message parsing.
     connection.connect((server, int(port)))
     connection.settimeout(0.1)
-    return DefaultIRC(nick, connection, server, password)
+    return DefaultIRC(nick, connection, server, port, password)
