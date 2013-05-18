@@ -6,7 +6,7 @@
 import os, sys, signal, argparse, json
 
 from plugins import hooks
-from irc import IRC, connectIRC, reconnectIRC
+from irc import *
 
 
 # Collection of open server connections
