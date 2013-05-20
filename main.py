@@ -48,11 +48,11 @@ def loopDefault(server):
                 # necessarily useful for plugins themselves.
                 server.parsed_message = (prefix, command, args)
                 hook(server, *server.parsed_message)
-    except ValueError:
+    except (ValueError, OSError):
         # This will normally happen if for some reason the connection has been
         # dropped. This can happen for a lot of reasons but the solution taken
         # here is to simply reconnect and go on as before.
-        reconnectIRC(server)
+        server.reconnect()
 
 
 if __name__ == '__main__':
@@ -127,13 +127,13 @@ if __name__ == '__main__':
     # of access to the bot core, and could potentially add more servers to this
     # list so don't rely on equivelence to the config.
     for server in config['servers']:
-        connection = connectIRC(
+        connection = IRC(
             server['address'],
-            server['port'],
+            server.get('port', 6667),
             server.get('nick', config['nick']),
             server.get('password', None),
             server.get('ssl', False),
-            server.get('verify_ssl', True)
+            server.get('verify_ssl', True),
         )
 
         # Modify the server objects with any relevant information plugins might
