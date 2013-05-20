@@ -3,37 +3,63 @@
     protocol itself. This abstracts it away from the bot.
 """
 
-import socket
+import socket, time
 
 class IRC:
-    pass
-
-class DefaultIRC(IRC):
     """
     This class deals with IRC protocol messages coming from a connection
     object.
     """
-    def __init__(self, nickname, connection, server, port = 6667, password = None, ssl = False):
+    def __init__(self, server, port, nick, password = None, ssl = False, verify_ssl = True, cert = None):
         """Sets up the object so it can communicate with the server"""
 
         # IRC Specific information that relates to this particular connection.
         # Plugins have access to this data.
-        self.nickname = nickname
-        self.port = port
-        self.channel = []
-        self.conn = connection
-        self.message = ""
         self.server = server
+        self.port = port
+        self.nick = nick
+        self.password = password
         self.ssl = ssl
+        self.verify_ssl = verify_ssl
+        self.cert = cert
+        self.channel = []
+        self.message = ""
+
+        self.connect()
+
+    def reconnect(self):
+        if self.conn:
+            self.conn.close()
+            time.sleep(1)
+
+        self.connect()
+
+    def connect(self):
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if self.ssl:
+            try:
+                from ssl import wrap_socket, SSLError, CERT_NONE, CERT_REQUIRED
+            except ImportError:
+                print('Fatal Error: No SSL support found while trying to connect.')
+                sys.exit(1)
+            else:
+                self.conn = wrap_socket(
+                    self.conn,
+                    cert_reqs = CERT_REQUIRED if self.verify_ssl else CERT_NONE,
+                    certfile = self.cert
+                )
+
+        self.conn.connect((self.server, int(self.port)))
+        self.conn.settimeout(0.1)
 
         # Auth if required.
-        if password:
-            self.send('PASS %s' % password)
+        if self.password:
+            self.send('PASS %s' % self.password)
 
         # Set us up as a valid IRC user. Should move this to a plugin as well
         # in the future.
-        self.raw('NICK %s\r\n' % nickname)
-        self.raw('USER %s %s bruh :%s\r\n' % (nickname, nickname, nickname))
+        self.raw('NICK %s\r\n' % self.nick)
+        self.raw('USER %s %s bruh :%s\r\n' % (self.nick, self.nick, self.nick))
 
     def parse(self, msg):
         """Parses an IRC message into prefix, command, and arguments as per RFC"""
@@ -107,33 +133,6 @@ class DefaultIRC(IRC):
         # return the iterable.
         return map(self.parse, parsable)
 
-
-def reconnectIRC(server):
-    """Helper for reconnecting a dead IRC object gracefully."""
-    try:
-        server.conn.close()
-        server.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if server.ssl:
-            # Check for SSL support, if none is compiled we should kill the
-            # application immediately rather than allow the user to connect witohut
-            # SSL when SSL is expected.
-            try:
-                from ssl import wrap_socket, SSLError, CERT_NONE, CERT_REQUIRED
-            except ImportError:
-                print('Fatal Error: No SSL support found while trying to connect.')
-                sys.exit(1)
-            else:
-                server.conn = wrap_socket(
-                    server.conn,
-                    cert_reqs = CERT_REQUIRED if ssl_verify else CERT_NONE
-                )
-
-        server.conn.connect((server.server, server.port))
-        server.conn.settimeout(0.1)
-    except:
-        print('Error occurred while reconnecting to: {}'.format(server.server))
-
-
 def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = True, cert = None):
     """Helper for creating new IRC connections"""
     # Create the connection object. If SSL is enabled, we wrap it in an SSL
@@ -161,4 +160,4 @@ def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = Tr
     # connection and message parsing.
     connection.connect((server, int(port)))
     connection.settimeout(0.1)
-    return DefaultIRC(nick, connection, server, port, password, ssl = ssl)
+    return IRC(nick, connection, server, port, password, ssl = ssl)
