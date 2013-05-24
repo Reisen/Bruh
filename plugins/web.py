@@ -23,8 +23,8 @@ def run_server():
 def initialze_web(irc):
     global WThread, port
 
-    if 'web' in irc.core['plugins']:
-        port = irc.core['plugins']['web'].get('port', 8081)
+    if 'web' in irc.core['config']['plugins']:
+        port = irc.core['config']['plugins']['web'].get('port', 8081)
 
     WThread = Thread(target = run_server)
     run_server.running = True
@@ -40,9 +40,9 @@ def shutdown_web():
     # request.
     #
     # TODO: Hire a genius to make this not shit.
+    run_server.running = False
     try:
-        run_server.running = False
-        urlopen('http://localhost:8081/').read()
+        urlopen('http://localhost:{}/'.format(port)).read()
     except:
         # Again, fuck HTTPServer, we're expecting an error here no matter what,
         # so lets just quit this shit. Fuck HTTPServer.
