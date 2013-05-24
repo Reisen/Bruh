@@ -4,7 +4,7 @@
 """
 from json import loads
 from plugins import event
-from bottle import route, request
+from bottle import route, request, post
 from plugins.commands import command
 
 # Dirty solution to route requests lacking context. Keep a list of all IRC
@@ -28,16 +28,37 @@ def setup_db(irc):
     irc.db.commit()
 
 
-@route('/github/')
+@post('/github/')
 def index():
+    # Parse Github's Payload.
     payload = loads(request.params.payload)
-    print(str(payload))
-    #for irc in irc_map:
-    #    interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (request.query.repo)).fetchall()
-    #    for interest in interests:
-    #        irc.say(interest[1], request.query.status)
+    repo_name = '{}/{}'.format(
+        payload['repository']['owner']['name'],
+        payload['repository']['name']
+    )
+
+    # Scan IRC objects looking for ones that contain interest in their github
+    # databases.
+    for irc in irc_map:
+        interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
+        for interest in interests:
+            repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
+                repo_name,
+                len(payload['commits']),
+                payload['head_commit']['message'],
+                payload['head_commit']['id'][:7],
+                payload['head_commit']['author']['username']
+            )
+
+            irc.say(interest[1], repo_status)
 
     return ''
+
+
+def github_add(irc, chan, name):
+    irc.db.execute('INSERT INTO github_repos (channel, name) VALUES (?, ?)', (chan, name))
+    irc.db.commit()
+    return "Now tracking {}".format(name)
 
 
 @command
@@ -53,7 +74,7 @@ def github(irc, nick, chan, msg, args):
     command, *args = msg.split(' ', 1)
     try:
         commands = {
-            'add': lambda: add(irc, args[0])
+            'add': lambda: github_add(irc, chan, args[0])
         }
         return commands[command]()
     except KeyError:
