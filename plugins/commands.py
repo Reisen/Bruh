@@ -180,7 +180,8 @@ def command_forwarder(irc, prefix, command, args):
         output = commands(irc, prefix, command, args)
         if output is not None:
             irc.reply(output)
-    except:
+    except Exception as e:
+        print(e)
         return None
 
 

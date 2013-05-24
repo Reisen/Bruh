@@ -101,7 +101,7 @@ def do_authenticate(irc, nick, password):
     # user and leave early.
     user = irc.db.execute('SELECT * FROM users WHERE username = ?', (nick,)).fetchone()
     if not user:
-        return "Couldn't find your username, are you sure you registered? See .help register"
+        return False
 
     # Otherwise, we can go ahead and verify. Each user stores a 128 byte
     # authentication token in the database consisting of a salt and their
@@ -137,26 +137,41 @@ def login(irc, nick, chan, msg, args):
     setup_db(irc)
 
     if args[0] in irc.auth_list:
-        return "You're already authenticated!"
+        return "You're already logged in!"
 
     # Catch common problems while authing and warn the user. First we stop them
     # authing publicly.
     if chan.startswith('#'):
-        return "You just tried to auth in a channel, publicly. You should try and auth again in a PM, then change your password."
+        return "You just tried to login in a channel, publicly. You should try and auth again in a PM, then change your password."
 
     # Also make sure they actually provided their password.
     if not msg:
-        return "You need to provide a passworth when you authenticate."
+        return "You need to provide a passworth when you login."
 
     try:
         if do_authenticate(irc, nick, msg):
             irc.auth_list.add(args[0])
             return "You're now logged in."
 
-        return "Your password seems to be wrong, if you're sure it is right, there might be an error. Contact the bot owner."
+        return "Either your user doesn't exist, or your password is wrong."
     except Exception as e:
         print(e)
-        return "There was an error authenticating you. This was a bot error, please report it."
+        return "There was an error logging in. This was an error in the bot, please report it."
+
+
+@command
+@authenticated
+def destroy(irc, nick, chan, msg, args, user):
+    """
+    Removes your user from the database and destroys all data associated with it.
+    .destroy <password>
+    """
+    userid = irc.db.execute('SELECT * FROM users WHERE username=?', (nick,)).fetchone()[0]
+    irc.db.execute('DELETE FROM user_properties WHERE user_id=?', (userid,))
+    irc.db.execute('DELETE FROM users WHERE id=?', (userid,))
+    irc.db.commit()
+    irc.auth_list.remove(args[0])
+    return "Your user has been murdered."
 
 
 @command
@@ -166,6 +181,9 @@ def register(irc, nick, chan, msg, args):
     .register <password>
     """
     setup_db(irc)
+
+    if not msg:
+        return "You can't register without providing a password."
 
     # Users may be dumb and register in a public channel, if they are the best
     # choise is to not register and force them to try again in a PM.
@@ -180,7 +198,7 @@ def register(irc, nick, chan, msg, args):
         irc.db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (nick, base64.b64encode(data)))
         irc.db.commit()
 
-        return "Welcome {}. You are now registered. You can authenticate now with .authenticate (In a PM).".format(nick)
+        return "You are now registered as {}. You can login now with .login <password>.".format(nick)
     except Exception as e:
         print(e)
         return "You seem to be already registered. Or someone with your nick already registered at least."
