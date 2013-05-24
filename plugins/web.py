@@ -10,17 +10,21 @@ from bottle import route, run, template
 # The web server will run in a seperate thread, which we can refer to later
 # when the plugin is being shut down.
 WThread = None
+port = 8081
 
 
 def run_server():
-    srv = run(host='0.0.0.0', port = 8081)
+    srv = run(host='0.0.0.0', port = port)
     while run_server.running:
         srv.handle_request()
 
 
 @event('BRUH')
 def initialze_web(irc):
-    global WThread
+    global WThread, port
+
+    if 'web' in irc.core['plugins']:
+        port = irc.core['plugins']['web'].get('port', 8081)
 
     WThread = Thread(target = run_server)
     run_server.running = True
