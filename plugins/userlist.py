@@ -1,6 +1,8 @@
 """
     This plugin keeps track of user lists for channels that the bot is idling
-    in, these are exposed to other plugins through the irc object.
+    in, these are exposed to other plugins through the irc object. As well as
+    the current state of the user-list, it also provides hooking callbacks for
+    when users leave or join.
 """
 from plugins import event
 from plugins.commands import command
@@ -65,6 +67,6 @@ def quit_userlist(irc, prefix, command, args):
 
     # Unlike other events, we don't know which channel a QUIT event comes from,
     # so we just try and remove them from ALL channels.
-    for userlist in irc.userlist.values():
+    for channel, userlist in irc.userlist.items():
         if nick in userlist:
             userlist.remove(nick)
