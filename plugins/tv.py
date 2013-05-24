@@ -190,7 +190,12 @@ def list_tv(irc, chan, nick):
 
 @command
 def tv(irc, nick, chan, msg, args):
-    """Channel alerts about TV series."""
+    """
+    Channel alerts about TV series.
+    .tv add <TV Rage Show ID>
+    .tv find <Show Name>
+    .tv list
+    """
     setup_db(irc)
 
     command, *args = msg.split(' ', 1)
