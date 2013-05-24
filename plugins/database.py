@@ -8,7 +8,7 @@ connections = []
 
 @event('BRUH')
 def setup_db(irc):
-    irc.db = sqlite3.connect('data/{}.db'.format(irc.server))
+    irc.db = sqlite3.connect('data/{}.db'.format(irc.server), check_same_thread = False)
     connections.append(irc.db)
 
 
