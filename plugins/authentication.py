@@ -58,7 +58,7 @@ def setup_db(irc):
     irc.db.execute('''
         CREATE TABLE IF NOT EXISTS user_properties (
             user_id INTEGER,
-            key TEXT UNIQUE,
+            key TEXT,
             value TEXT
         );
     ''')
@@ -84,6 +84,11 @@ def authenticated(f):
         # Any changes the user made to the dictionary should be updated in the
         # database so that future authed calls see the correct users state.
         for key, value in pairs.items():
+            print('INSERT OR REPLACE INTO user_properties VALUES ({}, {}, {})'.format(
+                userid,
+                key,
+                value
+            ))
             irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (
                 userid,
                 key,
