@@ -19,7 +19,7 @@ def prepare_github(irc):
 
 def setup_db(irc):
     irc.db.execute('''
-        CREATE TABLE github_repos (
+        CREATE TABLE IF NOT EXISTS github_repos (
             id INTEGER PRIMARY KEY,
             channel TEXT,
             name TEXT
