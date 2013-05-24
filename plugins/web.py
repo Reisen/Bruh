@@ -15,7 +15,6 @@ WThread = None
 def run_server():
     srv = run(host='0.0.0.0', port = 8081)
     while run_server.running:
-        print('Waiting for Request')
         srv.handle_request()
 
 
