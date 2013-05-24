@@ -16,10 +16,14 @@ servers = []
 # Register a Ctrl+C Signal, allows plugins to receive a shutdown signal so they
 # can clean up nicely.
 def quit(signal, frame):
-    print('\nSending shutdown warning to plugins...')
-    for hook in hooks.get('GETOUT', []):
-        hook()
-    print('Done')
+    try:
+        print('\nSending shutdown warning to plugins...')
+        for hook in hooks.get('GETOUT', []):
+            hook()
+        print('Done')
+    except Exception as e:
+        print('An Exception occured trying to shut-down.')
+        print(e)
 
     sys.exit(0)
 
