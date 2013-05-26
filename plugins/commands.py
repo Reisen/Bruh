@@ -28,6 +28,7 @@
 import re
 import time
 from plugins import event
+from traceback import print_exc
 
 # Stored commands. Command names mapped to function objects.
 commandlist = {}
@@ -180,8 +181,8 @@ def command_forwarder(irc, prefix, command, args):
         output = commands(irc, prefix, command, args)
         if output is not None:
             irc.reply(output)
-    except Exception as e:
-        print(e)
+    except:
+        print_exc()
         return None
 
 
