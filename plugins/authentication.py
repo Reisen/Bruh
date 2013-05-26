@@ -59,7 +59,8 @@ def setup_db(irc):
         CREATE TABLE IF NOT EXISTS user_properties (
             user_id INTEGER,
             key TEXT,
-            value TEXT
+            value TEXT,
+            PRIMARY KEY(user_id, key)
         );
     ''')
     irc.db.commit()
