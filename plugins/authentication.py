@@ -72,7 +72,7 @@ def authenticated(f):
         # Only allow the command to continue if we're sure the user is already
         # authenticated.
         if irc_args[0] not in irc.auth_list:
-            return "You need to be logged in to use this command. Check .help login, or .help register"
+            return "You need to be logged in to use this command."
 
         # The database contains a list of Key/Value pairs related to a user, we
         # populate these as a dictionary here, before the function call, and
