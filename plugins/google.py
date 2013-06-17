@@ -8,7 +8,7 @@ from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen
 import json
 
-@command
+@command(['g'])
 def google(irc, nick, chan, msg, args):
     '''Google web search'''
     url = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s'
