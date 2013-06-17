@@ -27,6 +27,7 @@
 """
 import re
 import time
+from functools import wraps
 from plugins import event
 from traceback import print_exc
 
@@ -36,6 +37,30 @@ patternlist = []
 
 def command(f):
     """This decorator creates new command entry."""
+    # If the argument to the function is a list, then the decorator has
+    # been called witha list like so:
+    #
+    #   @command(['g', 'gog'])
+    #
+    # This list is a list of commands that must also explicitly match the
+    # command. This helps resolve naming conflicts, for example. The github
+    # plugin registers .github, and the google plugin registers .google -
+    # however 99% of the time someone doing .g will want to google, but because
+    # of Bruh's matching, this will conflict and the bot will ask which plugin
+    # the user wanted. Providing an explicit short name to the google plugin
+    # with `@command(['g'])` can solve this.
+    if isinstance(f, list):
+        def shortname_wrapper(g):
+            for shortname in f:
+                commandlist[shortname] = g
+
+            commandlist[g.__name__] = g
+            return g
+
+        return shortname_wrapper
+
+    # When the argument is a function then the decorator has been called with
+    # no short names and we just add directly.
     commandlist[f.__name__] = f
     return f
 

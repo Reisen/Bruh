@@ -78,4 +78,4 @@ def github(irc, nick, chan, msg, args):
         }
         return commands[command]()
     except KeyError:
-        return "Tried to run unknown command '{}'.".format(command)
+        return "Tried to run unknown github subcommand: {}.".format(command)
