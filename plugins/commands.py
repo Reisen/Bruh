@@ -88,8 +88,8 @@ def commands(irc, prefix, command, args):
     This function also automatically evaluates piped commands, a single call to
     this function may potentially invoke several modules.
     """
-    # Ignore empty messages.
-    if not args[1]:
+    # Ignore empty messages, and messages consisting of only the command dot.
+    if len(args[1]) < 2:
         return None
 
     # Find the users nick, passed to @command functions.
@@ -184,7 +184,7 @@ def commands(irc, prefix, command, args):
 
             # When more than one potential command is found...
             if len(possibilities) > 1:
-                return "Which did you want?  %s" % str(possibilities)[1:-1]
+                return "The following commands matched: {}".format(', '.join(possibilities))
 
             # The output of the last command is the input to the next one, if
             # there is no next command, this is returned to the user.
