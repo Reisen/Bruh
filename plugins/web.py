@@ -2,6 +2,7 @@
     Implement a web server in bruh. Allows serving bot content, and also
     providing URL's for other purposes such as Github's repo Service Hooks.
 """
+from traceback import format_stack
 from urllib.request import urlopen
 from threading import Thread
 from plugins import event
@@ -22,6 +23,10 @@ def run_server():
 @event('BRUH')
 def initialze_web(irc):
     global WThread, port
+
+    print('Initializing Web Server, Debug Call Stack:')
+    for line in format_stack():
+        print('--> ' + line.strip())
 
     if 'web' in irc.core['config']['plugins']:
         port = irc.core['config']['plugins']['web'].get('port', 8081)

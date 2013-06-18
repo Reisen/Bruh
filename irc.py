@@ -40,7 +40,7 @@ class IRC:
             try:
                 from ssl import wrap_socket, SSLError, CERT_NONE, CERT_REQUIRED
             except ImportError:
-                print('Fatal Error: No SSL support found while trying to connect.')
+                print('!  Fatal Error: No SSL support found while trying to connect.')
                 sys.exit(1)
             else:
                 self.conn = wrap_socket(
@@ -86,8 +86,8 @@ class IRC:
 
     def raw(self, message):
         """Send a properly encoded message to the server"""
+        print('-> ' + message.strip())
         message = message.encode('UTF-8')
-        print(message)
         self.conn.send(message)
 
     def send(self, message):
@@ -112,7 +112,7 @@ class IRC:
             self.message += data.decode('UTF-8')
         except UnicodeDecodeError:
             self.message += data.decode('iso-8859-1', 'replace')
-            print('Error Decoding as UTF-8: {}'.format(data.decode('iso-8859-1', 'replace')))
+            print('!  Error Decoding as UTF-8: {}'.format(data.decode('iso-8859-1', 'replace')))
         except socket.timeout:
             return []
 
@@ -127,7 +127,7 @@ class IRC:
         parsable = self.message.split('\n')
         self.message = parsable.pop()
         for message in parsable:
-            print(message)
+            print('<- ' + message)
 
         # Parse the available messages into prefix, command, args form and
         # return the iterable.
@@ -147,7 +147,7 @@ def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = Tr
         try:
             from ssl import wrap_socket, SSLError, CERT_NONE, CERT_REQUIRED
         except ImportError:
-            print('Fatal Error: No SSL support found while trying to connect.')
+            print('!  Fatal Error: No SSL support found while trying to connect.')
             sys.exit(1)
         else:
             connection = wrap_socket(

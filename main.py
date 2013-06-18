@@ -17,12 +17,12 @@ servers = []
 # can clean up nicely.
 def quit(signal, frame):
     try:
-        print('\nSending shutdown warning to plugins...')
+        print('\n!  Sending shutdown warning to plugins...')
         for hook in hooks.get('GETOUT', []):
             hook()
         print('Done')
     except Exception as e:
-        print('An Exception occured trying to shut-down.')
+        print('E  An Exception occured trying to shut-down.')
         print(e)
 
     sys.exit(0)
@@ -47,15 +47,19 @@ def loopDefault(server):
             # Otherwise, the hooks dictionary contains a list of functions that
             # have registered for that event.
             for hook in hooks[command]:
+                if server.config.get('debug', False):
+                    print('!  {} Triggering {}'.format(command, str(hook)))
+
                 # The last message is also stored in the server itself.  This state
                 # is useful when inspecting the server during messages. It's not
                 # necessarily useful for plugins themselves.
                 server.parsed_message = (prefix, command, args)
                 hook(server, *server.parsed_message)
-    except (ValueError, OSError):
+    except (ValueError, OSError) as e:
         # This will normally happen if for some reason the connection has been
         # dropped. This can happen for a lot of reasons but the solution taken
         # here is to simply reconnect and go on as before.
+        print('E  {}'.format(str(e)))
         server.reconnect()
 
 
@@ -107,14 +111,20 @@ if __name__ == '__main__':
     ]
     for key, error in errors:
         if key not in config:
-            print('Error: {}'.format(error))
+            print('E  {}'.format(error))
             sys.exit(0)
 
     # Plugins need to be imported before IRC connections are made, as plugins
     # are used to handle core IRC messages.
+    plugins   = {}
     blacklist = config.get('blacklist', [])
     blacklist.append('__init__.py')
-    plugins   = {}
+
+    if config.get('debug', False):
+        print('!  Ignoring Blacklisted Plugins:')
+        for blacklisted in blacklist:
+            print('    {}'.format(blacklisted))
+        print()
 
     # A map of plugins and their names is kept so that inter-plugin operations
     # are possible. Useful for enforcing dependencies between plugins.
@@ -127,10 +137,16 @@ if __name__ == '__main__':
         name = plugin[:-3]
         plugins[name] = __import__('plugins.' + name, globals(), locals(), -1)
 
+        if config.get('debug', False):
+            print('!  Loaded Plugin: {}'.format(name))
+
     # Connect to all servers provided in the configuration. Plugins have a lot
     # of access to the bot core, and could potentially add more servers to this
     # list so don't rely on equivelence to the config.
     for server in config['servers']:
+        if config.get('debug', False):
+            print('Preparing {}:{}'.format(server['address'], server.get('port', 6667)))
+
         connection = IRC(
             server['address'],
             server.get('port', 6667),
