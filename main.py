@@ -47,7 +47,7 @@ def loopDefault(server):
             # Otherwise, the hooks dictionary contains a list of functions that
             # have registered for that event.
             for hook in hooks[command]:
-                if server.config.get('debug', False):
+                if server.core['config'].get('debug', False):
                     print('!  {} Triggering {}'.format(command, str(hook)))
 
                 # The last message is also stored in the server itself.  This state
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # list so don't rely on equivelence to the config.
     for server in config['servers']:
         if config.get('debug', False):
-            print('Preparing {}:{}'.format(server['address'], server.get('port', 6667)))
+            print('!  Preparing {}:{}'.format(server['address'], server.get('port', 6667)))
 
         connection = IRC(
             server['address'],
