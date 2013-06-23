@@ -2,8 +2,11 @@
     Provides a Karma Bot. Works the same as every other IRC Karma bot with
     username++/--.
 """
+from time import time
+from collections import defaultdict
 from plugins.commands import command, regex
 
+karma_timer = defaultdict(lambda: 0)
 
 def setup_db(irc):
     irc.db.execute('''
@@ -22,11 +25,16 @@ def catch_karma(irc, nick, chan, match, args):
     setup_db(irc)
 
     target = match.group(1)
+    # Prevent Karma spamming.
+    if time() - karma_timer[nick.lower()] < 1800:
+        return 'You manipulated karma too recently to change {}\'s life.'.format(target)
+
+    karma_timer[nick.lower()] = time()
     if target in irc.userlist[chan]:
         # Setup a row for the user if one doesn't already exist, being careful
         # not to overwrite their karma if they do.
         irc.db.execute('INSERT OR IGNORE INTO karma VALUES (?, ?, ?)', (
-            target,
+            target.lower(),
             chan,
             0
         ))
@@ -52,7 +60,7 @@ def karma(irc, nick, chan, msg, args):
     # about, and return that Karma.
     if msg:
         try:
-            user_karma = irc.db.execute('SELECT karma FROM karma WHERE username = ? AND channel = ?', (msg, chan)).fetchone()
+            user_karma = irc.db.execute('SELECT karma FROM karma WHERE username = ? AND channel = ?', (msg.lower(), chan)).fetchone()
             return 'Current karma for {} is: {}'.format(msg, user_karma[0])
         except Exception as e:
             print(e)
