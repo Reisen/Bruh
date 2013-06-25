@@ -11,7 +11,7 @@ karma_timer = defaultdict(lambda: 0)
 def setup_db(irc):
     irc.db.execute('''
         CREATE TABLE IF NOT EXISTS karma (
-            username TEXT,
+            username TEXT COLLATE NOCASE,
             channel TEXT,
             karma INTEGER,
             PRIMARY KEY (username, channel)
@@ -34,7 +34,7 @@ def catch_karma(irc, nick, chan, match, args):
         # Setup a row for the user if one doesn't already exist, being careful
         # not to overwrite their karma if they do.
         irc.db.execute('INSERT OR IGNORE INTO karma VALUES (?, ?, ?)', (
-            target.lower(),
+            target,
             chan,
             0
         ))
@@ -60,7 +60,7 @@ def karma(irc, nick, chan, msg, args):
     # about, and return that Karma.
     if msg:
         try:
-            user_karma = irc.db.execute('SELECT karma FROM karma WHERE username = ? AND channel = ?', (msg.lower(), chan)).fetchone()
+            user_karma = irc.db.execute('SELECT karma FROM karma WHERE username = ? AND channel = ?', (msg, chan)).fetchone()
             return 'Current karma for {} is: {}'.format(msg, user_karma[0])
         except Exception as e:
             print(e)
