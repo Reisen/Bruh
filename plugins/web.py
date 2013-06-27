@@ -17,7 +17,11 @@ port = 8081
 def run_server():
     srv = run(host='0.0.0.0', port = port)
     while run_server.running:
-        srv.handle_request()
+        try:
+            srv.handle_request()
+        except Exception as e:
+            print('E  ' + str(e))
+            print('E  Exception occured while handling request.')
 
 
 @event('BRUH')
