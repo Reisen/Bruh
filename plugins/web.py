@@ -28,6 +28,9 @@ def run_server():
 def initialze_web(irc):
     global WThread, port
 
+    if WThread:
+        return None
+
     print('Initializing Web Server, Debug Call Stack:')
     for line in format_stack():
         print('--> ' + line.strip())
