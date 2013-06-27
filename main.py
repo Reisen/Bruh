@@ -4,7 +4,7 @@
 """
 
 import os, sys, signal, argparse, json
-
+from traceback import print_exc
 from plugins import hooks
 from irc import *
 
@@ -61,6 +61,10 @@ def loopDefault(server):
         # here is to simply reconnect and go on as before.
         print('E  {}'.format(str(e)))
         server.reconnect()
+    except Exception as e:
+        print('E! An unexpected fatal error occured. Printing Traceback and quitting.\n')
+        print_exc()
+        sys.exit(1)
 
 
 if __name__ == '__main__':

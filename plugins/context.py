@@ -18,15 +18,18 @@ def message_tracker(irc, prefix, command, args):
 
     # Ignore messages that begin with a command prefix. I don't think there's
     # any point in logging them, might change this if I'm wrong.
-    if args[1][0] == irc.core['config'].get('prefix', '.'):
-        return
+    try:
+        if args[1][0] == irc.core['config'].get('prefix', '.'):
+            return
 
-    # Append the message to the end of the current channels log, along with the
-    # nick of the user who sent it. Any messages further back than the last 30
-    # are removed.
-    logs[channel].append((prefix.split('!')[0], args[1]))
-    if len(logs[channel]) > 30:
-        logs[channel].pop(0)
+        # Append the message to the end of the current channels log, along with the
+        # nick of the user who sent it. Any messages further back than the last 30
+        # are removed.
+        logs[channel].append((prefix.split('!')[0], args[1]))
+        if len(logs[channel]) > 30:
+            logs[channel].pop(0)
+    except:
+        return
 
 
 @command

@@ -50,7 +50,7 @@ def index():
                 payload['head_commit']['author']['username']
             )
 
-            irc.say(interest[1], repo_status)
+            irc.say(interest[0], repo_status)
 
     return ''
 
