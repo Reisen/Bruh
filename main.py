@@ -60,8 +60,19 @@ def loopDefault(server):
         # dropped. This can happen for a lot of reasons but the solution taken
         # here is to simply reconnect and go on as before.
         print('E  {}'.format(str(e)))
-        server.reconnect()
+        try:
+            server.reconnect()
+        except:
+            # An exception raised by reconnect might mean the server has died
+            # for some reason. This is fatal, remove the server from reconnects
+            # altogether.
+            # TODO: Add support for querying/commanding the bot to reconnect
+            # from IRC itself.
+            servers.remove(server)
+
     except Exception as e:
+        # At this point, something has gone really, really wrong. Dump
+        # everything and just kill the bot.
         print('E! An unexpected fatal error occured. Printing Traceback and quitting.\n')
         print_exc()
         sys.exit(1)
