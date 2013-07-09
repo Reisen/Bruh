@@ -7,7 +7,6 @@ from json import loads
 from urllib.error import URLError
 from urllib.request import urlopen
 from plugins.commands import regex
-from plugins.youtube import fetch_video
 
 @regex(r'reddit\.com/r/([^/]+)/comments/([\w]+)')
 def reddit_match(irc, nick, chan, match, args):
@@ -16,6 +15,7 @@ def reddit_match(irc, nick, chan, match, args):
     listing = listing[0]['data']['children'][0]['data']
 
     # Parse Youtube URL's out of Reddit Links.
-    youtube_check = re.search(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))', listing['url'])
-    if youtube_check:
-        return fetch_video(youtube_check.group(1), True)
+    if 'youtube' in irc.plugins:
+        youtube_check = re.search(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))', listing['url'])
+        if youtube_check:
+            return irc.plugins['youtube'].fetch_video(youtube_check.group(1), True)
