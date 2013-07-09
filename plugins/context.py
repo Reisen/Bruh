@@ -19,7 +19,7 @@ def message_tracker(irc, prefix, command, args):
     # Ignore messages that begin with a command prefix. I don't think there's
     # any point in logging them, might change this if I'm wrong.
     try:
-        if args[1][0] == irc.core['config'].get('prefix', '.'):
+        if args[1][0] == irc.config.get('prefix', '.'):
             return
 
         # Append the message to the end of the current channels log, along with the

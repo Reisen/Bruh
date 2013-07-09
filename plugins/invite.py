@@ -19,8 +19,8 @@ join_tracker = defaultdict(lambda: 0)
 def invite(irc, prefix, command, args):
     # Make sure the channel we're being asked to join is not blacklisted in the
     # config file.
-    if 'invite' in irc.core['config']['plugins']:
-        if args[1] in irc.core['config']['plugins']['invite'].get('ignore', []):
+    if 'invite' in irc.config['plugins']:
+        if args[1] in irc.config['plugins']['invite'].get('ignore', []):
             return
 
         # Only join if time since last join was 10 minutes.
