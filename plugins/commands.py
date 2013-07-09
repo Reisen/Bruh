@@ -101,12 +101,12 @@ def commands(irc, prefix, command, args):
     # The function doesn't assume the input is in any particular format, if the
     # input isn't a command, then we attempt here to find any regex patterns
     # that match and pass control to them.
-    command_prefix = irc.core['config'].get('prefix', '.')
+    command_prefix = irc.config.get('prefix', '.')
     if args[1][0] != command_prefix:
         for pattern, callback in patternlist:
             # Replace matching configuration options.
-            for item in irc.config:
-                pattern = pattern.replace('$' + item, str(irc.config[item]))
+            for item in irc.server:
+                pattern = pattern.replace('$' + item, str(irc.server[item]))
 
             # Try and match the newly substituted pattern. For example, the
             # pattern '$nick!' after previous replacement may now be 'bruh!'

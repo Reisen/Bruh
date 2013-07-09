@@ -35,8 +35,8 @@ def initialze_web(irc):
     for line in format_stack():
         print('--> ' + line.strip())
 
-    if 'web' in irc.core['config']['plugins']:
-        port = irc.core['config']['plugins']['web'].get('port', 8081)
+    if 'web' in irc.config['plugins']:
+        port = irc.config['plugins']['web'].get('port', 8081)
 
     WThread = Thread(target = run_server)
     run_server.running = True

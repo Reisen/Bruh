@@ -47,7 +47,7 @@ def loopDefault(server):
             # Otherwise, the hooks dictionary contains a list of functions that
             # have registered for that event.
             for hook in hooks[command]:
-                if server.core['config'].get('debug', False):
+                if server.config.get('debug', False):
                     print('!  {} Triggering {}'.format(command, str(hook)))
 
                 # The last message is also stored in the server itself.  This state
@@ -55,6 +55,7 @@ def loopDefault(server):
                 # necessarily useful for plugins themselves.
                 server.parsed_message = (prefix, command, args)
                 hook(server, *server.parsed_message)
+
     except (ValueError, OSError) as e:
         # This will normally happen if for some reason the connection has been
         # dropped. This can happen for a lot of reasons but the solution taken
@@ -91,7 +92,11 @@ if __name__ == '__main__':
                 'nick': 'bruh',
                 'prefix': '.',
                 'blacklist': [],
-                'plugins': {},
+                'plugins': {
+                    'invite': {
+                        'ignore': []
+                    }
+                },
                 'servers': [
                     {
                         'address': 'irc.example.com',
@@ -175,10 +180,10 @@ if __name__ == '__main__':
         # end up using, such as plugin lists and other core information.
         connection.loop = loopDefault
         connection.core = {}
-        connection.core['plugins'] = plugins
-        connection.core['servers'] = servers
-        connection.core['config'] = config
-        connection.config = server
+        connection.plugins = plugins
+        connection.conns = servers
+        connection.config = config
+        connection.server = server
 
         # The bot provides a fake IRC event called 'BRUH' that is called when
         # the server first gets created. It's called here, now, and never again
