@@ -10,12 +10,12 @@ class IRC:
     This class deals with IRC protocol messages coming from a connection
     object.
     """
-    def __init__(self, server, port, nick, password = None, ssl = False, verify_ssl = True, cert = None):
+    def __init__(self, address, port, nick, password = None, ssl = False, verify_ssl = True, cert = None):
         """Sets up the object so it can communicate with the server"""
 
         # IRC Specific information that relates to this particular connection.
         # Plugins have access to this data.
-        self.server = server
+        self.address = address
         self.port = port
         self.nick = nick
         self.password = password
@@ -49,7 +49,7 @@ class IRC:
                     certfile = self.cert
                 )
 
-        self.conn.connect((self.server, int(self.port)))
+        self.conn.connect((self.address, int(self.port)))
         self.conn.settimeout(0.1)
 
         # Auth if required.
@@ -133,7 +133,7 @@ class IRC:
         # return the iterable.
         return map(self.parse, parsable)
 
-def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = True, cert = None):
+def connectIRC(address, port, nick, password = None, ssl = False, ssl_verify = True, cert = None):
     """Helper for creating new IRC connections"""
     # Create the connection object. If SSL is enabled, we wrap it in an SSL
     # wrapper but otherwise make no distinction. If possible, I am aiming to
@@ -158,6 +158,6 @@ def connectIRC(server, port, nick, password = None, ssl = False, ssl_verify = Tr
 
     # Connect and pack the connection into an IRC object to handle the
     # connection and message parsing.
-    connection.connect((server, int(port)))
+    connection.connect((address, int(port)))
     connection.settimeout(0.1)
-    return IRC(nick, connection, server, port, password, ssl = ssl)
+    return IRC(nick, connection, address, port, password, ssl = ssl)
