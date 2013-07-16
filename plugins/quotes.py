@@ -42,12 +42,12 @@ def colour_quote(quote):
     return quote
 
 
-def get_quote(irc, chan, args):
+def get_quote(irc, chan, arg):
     setup_db(irc)
 
     quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
-    id, chan, by, quote = quotes[int(args[0]) - 1]
-    return 'Quote [{}/{}]: {}'.format(args[0], len(quotes), colour_quote(quote))
+    id, chan, by, quote = quotes[int(arg) - 1]
+    return 'Quote [{}/{}]: {}'.format(arg, len(quotes), colour_quote(quote))
 
 
 def random_quote(irc, chan):
@@ -62,6 +62,50 @@ def random_quote(irc, chan):
         return "No quotes found."
 
 
+def find_quote(irc, chan, arg, short = True):
+    setup_db(irc)
+
+    try:
+        # Find all quotes, so that we can return valid quote indexes to the
+        # channels copy of its quote DB.
+        all_quotes = irc.db.execute('SELECT * FROM quotes WHERE chan = ?', (chan,)).fetchall()
+
+        # Find matches quotes using globs or like depending on whether short
+        # mode is used. Short mode is when no command is provided to .q
+        if short:
+            quotes = irc.db.execute(
+                'SELECT * FROM quotes WHERE chan = ? AND quote LIKE ?',
+                (chan, '%{}%'.format(arg))
+            ).fetchall()
+        else:
+            quotes = irc.db.execute(
+                'SELECT * FROM quotes WHERE chan = ? AND quote GLOB ?',
+                (chan, '*{}*'.format(arg))
+            ).fetchall()
+
+        if not quotes:
+            return 'No quotes found.'
+
+        # Return either the first matching quote, or a list of matching quotes.
+        id, chan, by, quote = quotes[0]
+        if short:
+            return 'Quote [1/{}]: {}'.format(len(quotes), colour_quote(quote))
+
+        # Slice to a reasonable sized subset.
+        sub_quotes = quotes[:10]
+
+        # Scan the original list for matches so we have legit ID's.
+        quote_ids = []
+        for real_pos, real_quote in enumerate(all_quotes):
+            for matched_quote in sub_quotes:
+                if real_quote[0] == matched_quote[0]:
+                    quote_ids.append(str(real_pos + 1))
+
+        return 'Found {}, the first {} are: {}'.format(len(quotes), len(sub_quotes), ','.join(quote_ids))
+    except Exception as e:
+        return 'There was an error searching for that quote: ' + str(e)
+
+
 @command
 def quote(irc, nick, chan, msg, args):
     """
@@ -73,9 +117,14 @@ def quote(irc, nick, chan, msg, args):
 
     try:
         commands = {
-            'add':    lambda: add_quote(irc, chan, nick, args),
-            'get':    lambda: get_quote(irc, chan, args)
+            'add':  lambda: add_quote(irc, chan, nick, args),
+            'get':  lambda: get_quote(irc, chan, args[0]),
+            'find': lambda: find_quote(irc, chan, args[0], False)
         }
         return commands[command]()
-    except:
+    except Exception as e:
+        # Try and find a quote matching the text.
+        if msg:
+            return find_quote(irc, chan, command)
+
         return random_quote(irc, chan)
