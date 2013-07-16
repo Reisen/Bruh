@@ -25,28 +25,31 @@ def catch_karma(irc, nick, chan, match, args):
     setup_db(irc)
 
     target = match.group(1)
+    if target not in irc.userlist[chan]:
+        return None
+
     # Prevent Karma spamming.
     if time() - karma_timer[nick.lower()] < 1800:
         return 'You manipulated karma too recently to change {}\'s life.'.format(target)
 
     karma_timer[nick.lower()] = time()
-    if target in irc.userlist[chan]:
-        # Setup a row for the user if one doesn't already exist, being careful
-        # not to overwrite their karma if they do.
-        irc.db.execute('INSERT OR IGNORE INTO karma VALUES (?, ?, ?)', (
-            target,
-            chan,
-            0
-        ))
 
-        operation = match.group(2)
-        if operation == '++':
-            irc.db.execute('UPDATE karma SET karma = karma + 1 WHERE username = ? AND channel = ?', (target, chan))
-            return '{}, you gained karma.'.format(target)
+    # Setup a row for the user if one doesn't already exist, being careful
+    # not to overwrite their karma if they do.
+    irc.db.execute('INSERT OR IGNORE INTO karma VALUES (?, ?, ?)', (
+        target,
+        chan,
+        0
+    ))
 
-        if operation == '--':
-            irc.db.execute('UPDATE karma SET karma = karma - 1 WHERE username = ? AND channel = ?', (target, chan))
-            return '{}, you lost karma.'.format(target)
+    operation = match.group(2)
+    if operation == '++':
+        irc.db.execute('UPDATE karma SET karma = karma + 1 WHERE username = ? AND channel = ?', (target, chan))
+        return '{}, you gained karma.'.format(target)
+
+    if operation == '--':
+        irc.db.execute('UPDATE karma SET karma = karma - 1 WHERE username = ? AND channel = ?', (target, chan))
+        return '{}, you lost karma.'.format(target)
 
 
 @command
