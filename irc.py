@@ -15,6 +15,7 @@ class IRC:
 
         # IRC Specific information that relates to this particular connection.
         # Plugins have access to this data.
+        self.enabled = True
         self.address = address
         self.port = port
         self.nick = nick
@@ -28,6 +29,9 @@ class IRC:
         self.connect()
 
     def reconnect(self):
+        if not self.enabled:
+            return
+
         if self.conn:
             self.conn.close()
             time.sleep(1)
@@ -35,6 +39,7 @@ class IRC:
         self.connect()
 
     def connect(self):
+        self.enabled = True
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.ssl:
             try:
@@ -101,12 +106,19 @@ class IRC:
         """
         return self()
 
+    def disable(self):
+        self.enabled = False
+        self.conn.close()
+
     def __call__(self):
         """Parses incoming messages and returns parsed messages as a list."""
         # Assume IRC messages are being sent as UTF-8. If not, then in the case
         # of IRC It's mostly likely because someone sent letters not in the
         # first 127 characters of ASCII, so we can try decoding from
         # iso-latin-1, if that doesn't work, fuck that guy, his client sucks.
+        if not self.enabled:
+            return []
+
         try:
             data = self.conn.recv(1024)
             self.message += data.decode('UTF-8')
