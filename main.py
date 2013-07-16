@@ -65,11 +65,8 @@ def loopDefault(server):
             server.reconnect()
         except:
             # An exception raised by reconnect might mean the server has died
-            # for some reason. This is fatal, remove the server from reconnects
-            # altogether.
-            # TODO: Add support for querying/commanding the bot to reconnect
-            # from IRC itself.
-            servers.remove(server)
+            # for some reason. This is fatal, disable the server.
+            server.disable()
 
     except Exception as e:
         # At this point, something has gone really, really wrong. Dump
