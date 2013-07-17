@@ -120,7 +120,7 @@ def commands(irc, prefix, command, args):
     # Split arguments into pipeable pieces, using '|' characters found directly
     # before another command as the splitting point. This is a pretty hairy
     # regular expression, maybe could be done cleaner at some point.
-    pieces = re.findall(r'{0}(.*?)(?:\|\s*(?={0})|$)'.format(command_prefix), args[1])
+    pieces = re.findall(r'\{0}(.*?)(?:\|\s*(?=\{0})|$)'.format(command_prefix), args[1])
 
     output = ""
     for item in pieces:
