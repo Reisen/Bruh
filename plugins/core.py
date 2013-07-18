@@ -58,50 +58,52 @@ def addCoreFunctionality(irc):
     container.join   = join
     container.part   = part
 
-@command(['say'])
-@authenticated
-def do_say(irc, nick, chan, msg, args, user):
-    if user.get('Rank', None) not in ['Admin', 'Moderator']:
-        return 'You do not have high enough a rank to use this command.'
 
+# Implement commands wrapping core functionality of the bot. Allows controlling
+# the bot more easily for regular IRC like behaviour.
+@command(['say'])
+@authenticated(['Admin', 'Moderator'])
+def do_say(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     irc.say(target, msg)
 
 
 @command(['notice'])
-@authenticated
+@authenticated(['Admin', 'Moderator'])
 def do_notice(irc, nick, chan, msg, args, user):
-    if user.get('Rank', None) not in ['Admin', 'Moderator']:
-        return 'You do not have high enough a rank to use this command.'
-
     target, msg = msg.split(' ', 1)
     irc.notice(target, msg)
 
 
 @command(['action'])
-@authenticated
+@authenticated(['Admin', 'Moderator'])
 def do_action(irc, nick, chan, msg, args, user):
-    if user.get('Rank', None) not in ['Admin', 'Moderator']:
-        return 'You do not have high enough a rank to use this command.'
-
     target, msg = msg.split(' ', 1)
     print(repr(msg))
     irc.action(target, msg)
 
 
 @command(['join'])
-@authenticated
+@authenticated(['Admin', 'Moderator'])
 def do_join(irc, nick, chan, msg, args, user):
-    if user.get('Rank', None) not in ['Admin', 'Moderator']:
-        return 'You do not have high enough a rank to use this command.'
-
     irc.join(msg)
 
 
 @command(['part'])
-@authenticated
+@authenticated(['Admin', 'Moderator'])
 def do_part(irc, nick, chan, msg, args, user):
-    if user.get('Rank', None) not in ['Admin', 'Moderator']:
-        return 'You do not have high enough a rank to use this command.'
-
     irc.part(msg)
+
+
+@command(['kick'])
+@authenticated(['Admin', 'Moderator'])
+def do_kick(irc, nick, chan, msg, args, user):
+    target, *msg = msg.split(' ', 1)
+    msg = 'Requested' if not msg else msg[0]
+    irc.send('KICK {} {} :{}'.format(chan, target, msg))
+
+
+@command(['op'])
+@authenticated(['Admin', 'Moderator'])
+def do_admin(irc, nick, chan, msg, args, user):
+    irc.send('MODE {} +o {}'.format(chan, msg))
