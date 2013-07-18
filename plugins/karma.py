@@ -19,7 +19,7 @@ def setup_db(irc):
     ''')
     irc.db.commit()
 
-@regex(r'^([\w\[\]\\`_\^\{\}\|]+)(\+\+|--)')
+@regex(r'^([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
 def catch_karma(irc, nick, chan, match, args):
     setup_db(irc)
 

@@ -107,3 +107,17 @@ def do_kick(irc, nick, chan, msg, args, user):
 @authenticated(['Admin', 'Moderator'])
 def do_admin(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +o {}'.format(chan, msg))
+
+
+@command(['voice'])
+@authenticated(['Admin', 'Moderator'])
+def do_voice(irc, nick, chan, msg, args, user):
+    irc.send('MODE {} +v {}'.format(chan, msg))
+
+
+# Preferably, don't use this. Adding it to test things on my own personal IRC
+# instance. The bot being in oper mode is just bad news.
+@command(['oper'])
+@authenticated(['Admin', 'Moderator'])
+def do_operator(irc, nick, chan, msg, args, user):
+    irc.send('OPER {}'.format(msg))
