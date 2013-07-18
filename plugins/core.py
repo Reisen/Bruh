@@ -4,6 +4,9 @@
     will allow other plugins to more easily use the IRC protocol.
 """
 from plugins import event
+from plugins.commands import command
+from plugins.authentication import authenticated
+
 
 def reply(self, message):
     """Replies to the channel a message was sent from."""
@@ -54,3 +57,50 @@ def addCoreFunctionality(irc):
     container.action = action
     container.join   = join
     container.part   = part
+
+@command(['say'])
+@authenticated
+def do_say(irc, nick, chan, msg, args, user):
+    if user.get('Rank', None) not in ['Admin', 'Moderator']:
+        return 'You do not have high enough a rank to use this command.'
+
+    target, msg = msg.split(' ', 1)
+    irc.say(target, msg)
+
+
+@command(['notice'])
+@authenticated
+def do_notice(irc, nick, chan, msg, args, user):
+    if user.get('Rank', None) not in ['Admin', 'Moderator']:
+        return 'You do not have high enough a rank to use this command.'
+
+    target, msg = msg.split(' ', 1)
+    irc.notice(target, msg)
+
+
+@command(['action'])
+@authenticated
+def do_action(irc, nick, chan, msg, args, user):
+    if user.get('Rank', None) not in ['Admin', 'Moderator']:
+        return 'You do not have high enough a rank to use this command.'
+
+    target, msg = msg.split(' ', 1)
+    irc.action(target, msg)
+
+
+@command(['join'])
+@authenticated
+def do_join(irc, nick, chan, msg, args, user):
+    if user.get('Rank', None) not in ['Admin', 'Moderator']:
+        return 'You do not have high enough a rank to use this command.'
+
+    irc.join(msg)
+
+
+@command(['part'])
+@authenticated
+def do_part(irc, nick, chan, msg, args, user):
+    if user.get('Rank', None) not in ['Admin', 'Moderator']:
+        return 'You do not have high enough a rank to use this command.'
+
+    irc.part(msg)
