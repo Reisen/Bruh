@@ -95,8 +95,8 @@ def authenticated(f):
                 key,
                 value
             ))
-        irc.db.commit()
 
+        irc.db.commit()
         return result
 
     return auth_wrapper
@@ -178,6 +178,40 @@ def destroy(irc, nick, chan, msg, args, user):
     irc.db.commit()
     irc.auth_list.remove(args[0])
     return "Your user has been murdered."
+
+
+@command
+@authenticated
+def modify(irc, nick, chan, msg, args, user):
+    """
+    Modify state stored about another user. Must be an admin.
+    .modify <user> <key> <value>
+    """
+    if user.get('Rank', None) != 'Admin':
+        return 'You need to be an admin to use this command.'
+
+    try:
+        # Find user details provided by the command.
+        target, key, *value = msg.split(' ', 2)
+        userid = irc.db.execute('SELECT * FROM users WHERE username=?', (target,)).fetchone()[0]
+        if not userid:
+            return 'Couldn\'t find any user named {}.'.format(target)
+
+        # Attempt to fetch current key value, or update key value to the new
+        # value provided by the user.
+        if value:
+            irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (userid, key, value[0]))
+            return 'Key Changed: {} = {} for {}'.format(key, value[0], target)
+
+        value = irc.db.execute('SELECT * FROM user_properties WHERE user_id = ? AND key = ?', (userid, key)).fetchone()
+        value = 'None' if not value else value[2]
+        return 'Key Value: {} = {} for {}'.format(key, value, target)
+
+    except ValueError:
+        return 'You need to provide a key and a value to make changes. Or at least a key.'
+
+    except Exception as e:
+        return 'Error occured modifying user: {}'.format(str(e))
 
 
 @command
