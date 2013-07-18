@@ -29,7 +29,7 @@ def notice(self, user, message):
 
 def action(self, channel, message):
     """Sends an action message to a target channel."""
-    self.raw('PRIVMSG {} :\x0A{}\x0A\r\n'.format(channel, message))
+    self.raw('PRIVMSG {} :\01ACTION {}\01\r\n'.format(channel, message))
 
 
 def join(self, channel):
@@ -85,6 +85,7 @@ def do_action(irc, nick, chan, msg, args, user):
         return 'You do not have high enough a rank to use this command.'
 
     target, msg = msg.split(' ', 1)
+    print(repr(msg))
     irc.action(target, msg)
 
 
