@@ -66,40 +66,50 @@ def setup_db(irc):
     irc.db.commit()
 
 
-def authenticated(f):
-    @wraps(f)
-    def auth_wrapper(irc, nick, chan, msg, irc_args, *args, **kwargs):
-        # Only allow the command to continue if we're sure the user is already
-        # authenticated.
-        if irc_args[0] not in irc.auth_list:
-            return "You need to be logged in to use this command."
+def authenticated(auth_arg):
+    # We wrap the wrapper so that we can manipulate the wrappers arguments with
+    # additional information.
+    def wrap_wrapper(f):
+        @wraps(f)
+        def auth_wrapper(irc, nick, chan, msg, irc_args, *args, **kwargs):
+            # Only allow the command to continue if we're sure the user is already
+            # authenticated.
+            if irc_args[0] not in irc.auth_list:
+                return "You need to be logged in to use this command."
 
-        # The database contains a list of Key/Value pairs related to a user, we
-        # populate these as a dictionary here, before the function call, and
-        # then provide it as an extra argument to the resulting function.
-        userid = irc.db.execute('SELECT * FROM users WHERE username = ?', (nick,)).fetchone()[0]
-        pairs  = dict(irc.db.execute('SELECT key, value FROM user_properties JOIN users ON users.id = user_id WHERE users.id = ?', (userid,)).fetchall())
+            # The database contains a list of Key/Value pairs related to a user, we
+            # populate these as a dictionary here, before the function call, and
+            # then provide it as an extra argument to the resulting function.
+            userid = irc.db.execute('SELECT * FROM users WHERE username = ?', (nick,)).fetchone()[0]
+            upairs = irc.db.execute('SELECT key, value FROM user_properties JOIN users ON users.id = user_id WHERE users.id = ?', (userid,)).fetchall()
+            if upairs:
+                upairs = dict(upairs)
 
-        result = f(irc, nick, chan, msg, irc_args, pairs, *args, **kwargs)
+            # Check if we have a list of authentication targets provided by the
+            # outer wrapping.
+            if isinstance(auth_arg, list) and upairs.get('Rank', None) not in auth_arg:
+                return 'You do not have the right rank to use this command.'
 
-        # Any changes the user made to the dictionary should be updated in the
-        # database so that future authed calls see the correct users state.
-        for key, value in pairs.items():
-            print('INSERT OR REPLACE INTO user_properties VALUES ({}, {}, {})'.format(
-                userid,
-                key,
-                value
-            ))
-            irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (
-                userid,
-                key,
-                value
-            ))
+            result = f(irc, nick, chan, msg, irc_args, upairs, *args, **kwargs)
 
-        irc.db.commit()
-        return result
+            # Any changes the user made to the dictionary should be updated in the
+            # database so that future authed calls see the correct users state.
+            for key, value in upairs.items():
+                irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (
+                    userid,
+                    key,
+                    value
+                ))
 
-    return auth_wrapper
+            irc.db.commit()
+            return result
+
+        return auth_wrapper
+
+    if isinstance(auth_arg, list):
+        return wrap_wrapper
+    else:
+        return wrap_wrapper(auth_arg)
 
 
 def do_authenticate(irc, nick, password):
@@ -181,15 +191,12 @@ def destroy(irc, nick, chan, msg, args, user):
 
 
 @command
-@authenticated
+@authenticated(['Admin'])
 def modify(irc, nick, chan, msg, args, user):
     """
     Modify state stored about another user. Must be an admin.
     .modify <user> <key> <value>
     """
-    if user.get('Rank', None) != 'Admin':
-        return 'You need to be an admin to use this command.'
-
     try:
         # Find user details provided by the command.
         target, key, *value = msg.split(' ', 2)
