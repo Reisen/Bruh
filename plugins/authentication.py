@@ -162,17 +162,17 @@ def login(irc, nick, chan, msg, args):
 
     # Also make sure they actually provided their password.
     if not msg:
-        return "You need to provide a passworth when you login."
+        return "You need to provide a password when you login."
 
     try:
         if do_authenticate(irc, nick, msg):
             irc.auth_list.add(args[0])
             return "You're now logged in."
 
-        return "Either your user doesn't exist, or your password is wrong."
+        return "Either your user doesn't exist, or your password is wrong. Check .register for the former."
     except Exception as e:
         print(e)
-        return "There was an error logging in. This was an error in the bot, please report it."
+        return "There was an error logging in. This was an error in the bot itself, please report it."
 
 
 @command
