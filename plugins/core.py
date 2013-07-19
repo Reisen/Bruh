@@ -17,6 +17,11 @@ def reply(self, message):
     self.raw('PRIVMSG {} :{}\r\n'.format(target, message))
 
 
+def ctcp(self, target, message):
+    """Send a ctcp response to a target."""
+    self.send('NOTICE {} :\01{}\01'.format(target, message))
+
+
 def say(self, channel, message):
     """Sends a message to the channel the event was received from."""
     self.raw('PRIVMSG {} :{}\r\n'.format(channel, message))
@@ -57,6 +62,7 @@ def addCoreFunctionality(irc):
     container.action = action
     container.join   = join
     container.part   = part
+    container.ctcp   = ctcp
 
 
 # Implement commands wrapping core functionality of the bot. Allows controlling
