@@ -227,13 +227,15 @@ def help(irc, nick, chan, msg, args):
     try:
         cmd = msg.split(' ')
 
-        # Print out currently installed commands if 'list' is the command.
+        # Print out currently installed commands if 'list' is the command. Any
+        # command starting with an underscore are hidden.
         if cmd[0] == 'list':
             output = "Commands: "
-            for item in commandlist.keys():
-                output += item + ', '
+            commands = [command for command in commandlist.keys() if not command.startswith('_')]
+            commands = sorted(commands)
+            commands = ', '.join(commands)
 
-            return output[:-2]
+            return output + commands
 
         # Fetch the commands docstring.
         info = commandlist[cmd[0]].__doc__.strip().split('\n')
