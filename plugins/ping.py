@@ -17,16 +17,18 @@ def ctcps(irc, prefix, command, args):
     if args[0] != irc.nick:
         return None
 
-    ctcp = args[1]
+    ctcp = args[1].replace('\x01', '')
+    ctcp, *ctcp_parts = ctcp.split(' ', 1)
     target = prefix.split('!',1)[0]
     try:
         irc.ctcp(target, {
-            '\x01VERSION\x01': 'VERSION Bruh 0.1-rc (http://github.com/Reisen/Bruh)',
-            '\x01SOURCE\x01':  'SOURCE http://github.com/Reisen/Bruh'
-        }[ctcp])
+            'VERSION': lambda: 'VERSION Bruh 0.1-rc (http://github.com/Reisen/Bruh)',
+            'SOURCE':  lambda: 'SOURCE http://github.com/Reisen/Bruh',
+            'PING':    lambda: 'PING {}'.format(ctcp_parts[0]),
+        }[ctcp]())
     except Exception as e:
         # TODO: Make this a more robust log later.
-        print('Invalid CTCP Attempted: {} ({})'.format(ctcp[1:-1]), str(e))
+        irc.ctcp(target, 'ERRMSG There was an error handling that CTCP message.')
 
 
 # Users can 'ping' bruh by using 'bruh!' in a message for it to respond to.
