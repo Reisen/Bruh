@@ -63,21 +63,21 @@ def addCoreFunctionality(irc):
 # the bot more easily for regular IRC like behaviour.
 @command(['say'])
 @authenticated(['Admin', 'Moderator'])
-def do_say(irc, nick, chan, msg, args, user):
+def _say(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     irc.say(target, msg)
 
 
 @command(['notice'])
 @authenticated(['Admin', 'Moderator'])
-def do_notice(irc, nick, chan, msg, args, user):
+def _notice(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     irc.notice(target, msg)
 
 
 @command(['action'])
 @authenticated(['Admin', 'Moderator'])
-def do_action(irc, nick, chan, msg, args, user):
+def _action(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     print(repr(msg))
     irc.action(target, msg)
@@ -85,19 +85,19 @@ def do_action(irc, nick, chan, msg, args, user):
 
 @command(['join'])
 @authenticated(['Admin', 'Moderator'])
-def do_join(irc, nick, chan, msg, args, user):
+def _join(irc, nick, chan, msg, args, user):
     irc.join(msg)
 
 
 @command(['part'])
 @authenticated(['Admin', 'Moderator'])
-def do_part(irc, nick, chan, msg, args, user):
+def _part(irc, nick, chan, msg, args, user):
     irc.part(msg)
 
 
 @command(['kick'])
 @authenticated(['Admin', 'Moderator'])
-def do_kick(irc, nick, chan, msg, args, user):
+def _kick(irc, nick, chan, msg, args, user):
     target, *msg = msg.split(' ', 1)
     msg = 'Requested' if not msg else msg[0]
     irc.send('KICK {} {} :{}'.format(chan, target, msg))
@@ -105,13 +105,13 @@ def do_kick(irc, nick, chan, msg, args, user):
 
 @command(['op'])
 @authenticated(['Admin', 'Moderator'])
-def do_admin(irc, nick, chan, msg, args, user):
+def _admin(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +o {}'.format(chan, msg))
 
 
 @command(['voice'])
 @authenticated(['Admin', 'Moderator'])
-def do_voice(irc, nick, chan, msg, args, user):
+def _voice(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +v {}'.format(chan, msg))
 
 
@@ -119,5 +119,5 @@ def do_voice(irc, nick, chan, msg, args, user):
 # instance. The bot being in oper mode is just bad news.
 @command(['oper'])
 @authenticated(['Admin', 'Moderator'])
-def do_operator(irc, nick, chan, msg, args, user):
+def _operator(irc, nick, chan, msg, args, user):
     irc.send('OPER {}'.format(msg))
