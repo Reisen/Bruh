@@ -14,7 +14,7 @@ def ping(irc, prefix, command, args):
 # Respond to common CTCP's
 @event('PRIVMSG')
 def ctcps(irc, prefix, command, args):
-    if args[0] != irc.nick:
+    if args[0] != irc.nick or '\x01' not in args[1]:
         return None
 
     ctcp = args[1].replace('\x01', '')
