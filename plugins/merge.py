@@ -20,7 +20,6 @@ def merge_thru(irc, prefix, command, args):
     username = prefix.split('!')[0] 
         
     # Pipe messages from channel -> user.
-    print(username, merge_list)
     if args[0].startswith('#') or username in merge_list:
         target = args[0] if args[0].startswith('#') else username
         for target in merge_list[target]:
