@@ -21,11 +21,12 @@ def ctcps(irc, prefix, command, args):
     ctcp, *ctcp_parts = ctcp.split(' ', 1)
     target = prefix.split('!',1)[0]
     try:
-        irc.ctcp(target, {
-            'VERSION': lambda: 'VERSION Bruh 0.1-rc (http://github.com/Reisen/Bruh)',
-            'SOURCE':  lambda: 'SOURCE http://github.com/Reisen/Bruh',
-            'PING':    lambda: 'PING {}'.format(ctcp_parts[0]),
-        }[ctcp]())
+        if ctcp != 'ACTION':
+            irc.ctcp(target, {
+                'VERSION': lambda: 'VERSION Bruh 0.1-rc (http://github.com/Reisen/Bruh)',
+                'SOURCE':  lambda: 'SOURCE http://github.com/Reisen/Bruh',
+                'PING':    lambda: 'PING {}'.format(ctcp_parts[0]),
+            }[ctcp]())
     except Exception as e:
         # TODO: Make this a more robust log later.
         irc.ctcp(target, 'ERRMSG There was an error handling that CTCP message.')
