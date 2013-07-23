@@ -17,10 +17,14 @@ def merge_thru(irc, prefix, command, args):
     if args[1].startswith(irc.config.get('prefix', '.')):
         return None
 
+    username = prefix.split('!')[0] 
+        
     # Pipe messages from channel -> user.
-    if args[0].startswith('#'):
-        for target in merge_list[args[0]]:
-            irc.say(target, '<{}:{}> {}'.format(args[0], prefix.split('!')[0], args[1]))
+    print(username, merge_list)
+    if args[0].startswith('#') or username in merge_list:
+        target = args[0] if args[0].startswith('#') else username
+        for target in merge_list[target]:
+            irc.say(target, '<{}:{}> {}'.format(args[0], username, args[1]))
             sleep(0.1) 
 
     # Pipe messages from user -> channel.
@@ -28,13 +32,13 @@ def merge_thru(irc, prefix, command, args):
         # Find all targets that the user currently is merged to.
         mergers = []
         for key in merge_list:
-            if prefix.split('!')[0] in merge_list[key]:
+            if username in merge_list[key]:
                 mergers.append(key)
 
         # If we're using more than one target, we don't want to spam all
         # channels so we just disallow it.
         if len(mergers) > 1:
-            irc.say(prefix.split('!')[0], 'You are merged to more than one channel. Talking only works with one marge target.')
+            irc.say(username, 'You are merged to more than one channel. Talking only works with one marge target.')
             return None
 
         if len(mergers) == 1:
