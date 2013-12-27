@@ -10,8 +10,15 @@ from plugins.commands import command, regex
 
 def calculate_length(seconds):
     timestring = ''
-    if seconds // 3600: timestring += '{}h '.format(seconds // 3600)
-    if seconds // 60:   timestring += '{}m '.format(seconds // 60)
+    # Length in Hours
+    if seconds // 3600:
+        timestring += '{}h '.format(seconds // 3600)
+
+    # Minutes?
+    if 0 != (seconds // 60) % 60:
+        timestring += '{}m '.format((seconds // 60) % 60)
+
+    # Append seconds always.
     return timestring + '{}s'.format(seconds % 60)
 
 
