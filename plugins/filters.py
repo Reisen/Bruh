@@ -11,7 +11,7 @@ def rainbow(msg):
     output = ""
     colour_cycle = 2
     for character in msg:
-        output += '\x03{}{}'.format((colour_cycle % 13) + 2, character)
+        output += '\x03{:0>2d}{}'.format((colour_cycle % 13) + 2, character)
         colour_cycle += 1
 
     return output
@@ -19,7 +19,7 @@ def rainbow(msg):
 @command
 def filter(irc, nick, chan, msg, args):
     """
-    Provides several text filters: rot13, rot26, lower, upper, reverse, md5 (and others), rainbow.
+    Provides several text filters: rot13, rot26, lower, upper, reverse, md5 (and others), rainbow, and base64.
     .filter <filter> text
     """
     try:
