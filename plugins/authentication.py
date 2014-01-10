@@ -82,11 +82,12 @@ def authenticated(auth_arg):
             # then provide it as an extra argument to the resulting function.
             userid = irc.db.execute('SELECT * FROM users WHERE username = ?', (nick,)).fetchone()[0]
             upairs = irc.db.execute('SELECT key, value FROM user_properties JOIN users ON users.id = user_id WHERE users.id = ?', (userid,)).fetchall()
-            if upairs:
-                upairs = dict(upairs)
+            if upairs is None:
+                upairs = []
 
             # Check if we have a list of authentication targets provided by the
             # outer wrapping.
+            upairs = dict(upairs)
             if isinstance(auth_arg, list) and upairs.get('Rank', None) not in auth_arg:
                 return 'You do not have the right rank to use this command.'
 
