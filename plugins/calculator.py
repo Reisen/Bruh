@@ -1,10 +1,10 @@
 """
     Do calculations with Google calculator.
 """
-from re import sub
+import re
 from json import loads
 from plugins.commands import command
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 from urllib.parse import quote_plus
 from html.parser import HTMLParser
 
@@ -16,10 +16,25 @@ def calculate(irc, nick, chan, message, args):
     """
     # Fetch and fix-up invalid JSON.
     try:
-        result = urlopen('http://www.google.com/ig/calculator?q={}'.format(quote_plus(message)))
+        # Need to create a Request object because google goes nuts if you don't
+        # have reasonable browser-looking headers.
+        request = Request(
+            'https://encrypted.google.com/search?hl=en&source=hp&biw=&bih=&q={}&btnG=Google+Search&gbv=1'.format(quote_plus(message)),
+            headers = {
+                'Referer': 'http://github.com/Reisen/Bruh',
+                'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'
+            }
+        )
+
+        # Try and parse out the result (Regex... I know, fuck it).
+        result = urlopen(request)
         result = HTMLParser().unescape(result.read().decode('unicode-escape'))
-        result = result.replace('<sup>', '^(').replace('</sup>', ')')
-        result = loads(sub(r'([a-z]+):', '"\\1":', result))
-        return result['rhs']
-    except:
+        result = re.findall('<h2 class="r".*?>(.*)</h2>', result, re.M | re.I | re.S)
+        if result:
+            return result[0].strip()
+
         return "Google couldn't calculate this."
+
+    except Exception as e:
+        return str(e)
+        return "There was an error trying to calculate this."
