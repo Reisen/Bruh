@@ -54,7 +54,7 @@ def shutdown_web():
     # TODO: Hire a genius to make this not shit.
     run_server.running = False
     try:
-        urlopen('http://localhost:{}/'.format(port)).read()
+        urlopen('http://localhost:{}/'.format(port), timeout = 7).read()
     except:
         # Again, fuck HTTPServer, we're expecting an error here no matter what,
         # so lets just quit this shit. Fuck HTTPServer.

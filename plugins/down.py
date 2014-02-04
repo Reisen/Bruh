@@ -18,7 +18,7 @@ def down(irc, nick, chan, msg, args):
         if 'http://' not in msg:
             msg = 'http://' + msg
 
-        urllib.request.urlopen(msg)
+        urllib.request.urlopen(msg, timeout = 7)
     except URLError:
         return "It's not just you, {} seems to be down.".format(msg)
 

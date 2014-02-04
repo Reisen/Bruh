@@ -28,7 +28,7 @@ def fetch_video(query, search = False):
     # https://developers.google.com/youtube/2.0/reference#Searching_for_videos
     query = quote_plus(query)
     query = '?q=' + query + '&' if search else query + '?'
-    video = urlopen('https://gdata.youtube.com/feeds/api/videos/{}v=2&alt=jsonc'.format(query))
+    video = urlopen('https://gdata.youtube.com/feeds/api/videos/{}v=2&alt=jsonc'.format(query), 10)
     video = loads(video.read().decode('utf-8'))
 
     # Pull out all the information we actually care about showing.

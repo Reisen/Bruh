@@ -10,7 +10,7 @@ from plugins.commands import regex
 
 @regex(r'reddit\.com/r/([^/]+)/comments/([\w]+)')
 def reddit_match(irc, nick, chan, match, args):
-    listing = urlopen('http://reddit.com/r/{}/duplicates/{}.json'.format(match.group(1), match.group(2)))
+    listing = urlopen('http://reddit.com/r/{}/duplicates/{}.json'.format(match.group(1), match.group(2)), timeout = 7)
     listing = loads(listing.read().decode('utf-8'))
     listing = listing[0]['data']['children'][0]['data']
 

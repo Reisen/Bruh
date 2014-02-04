@@ -36,7 +36,7 @@ def setup_db(irc):
 def RAGE(irc, show_id):
     """Fetch TVRage information about a series."""
     detail = 'http://services.tvrage.com/feeds/showinfo.php?sid={}'.format(show_id)
-    detail = parseString(urlopen(detail).read())
+    detail = parseString(urlopen(detail, timeout = 7).read())
 
     # Make sure the show is still airing, otherwise the rest of this function
     # is entirely purposeless.
@@ -45,7 +45,7 @@ def RAGE(irc, show_id):
         raise ValueError
 
     episodes = 'http://services.tvrage.com/feeds/episode_list.php?sid={}'.format(show_id)
-    episodes = parseString(urlopen(episodes).read())
+    episodes = parseString(urlopen(episodes, timeout = 7).read())
 
     # Build a dictionary containing important information about the series.
     show_info = {}
@@ -81,7 +81,7 @@ def find(irc, show_name):
     """Fetch TVRage matches on a show name, and return the ID."""
     search = 'http://services.tvrage.com/feeds/search.php?show={}'.format(quote_plus(show_name))
     try:
-        search = parseString(urlopen(search).read()).getElementsByTagName('show')[0]
+        search = parseString(urlopen(search).read(), timeout = 7).getElementsByTagName('show')[0]
 
         # Fetch relevant information about the series, including the ID.
         show_id = search.getElementsByTagName('showid')[0].firstChild.toxml()

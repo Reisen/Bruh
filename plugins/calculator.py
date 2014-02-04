@@ -27,7 +27,7 @@ def calculate(irc, nick, chan, message, args):
         )
 
         # Try and parse out the result (Regex... I know, fuck it).
-        result = urlopen(request)
+        result = urlopen(request, timeout = 7)
         result = HTMLParser().unescape(result.read().decode('unicode-escape'))
         result = re.findall('<h2 class="r".*?>(.*)</h2>', result, re.M | re.I | re.S)
         if result:
