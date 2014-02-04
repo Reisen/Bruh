@@ -59,13 +59,13 @@ def google(irc, nick, chan, msg, args):
 @command
 def image(irc, nick, chan, msg, args):
     '''Google image search (returns any of the first 4 results)'''
-    url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%s&safe=off'
+    url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={}&safe=off'
 
     if not msg:
         return 'Need something to search for.'
 
     # Searches are returned as JSON so we need to turn that into a dictionary
-    query = json.loads( urlopen( url % quote_plus( msg ) ).read().decode('UTF-8') )
+    query = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))
     if query['responseStatus'] != 200:
         return query['responseStatus']
 
