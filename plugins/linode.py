@@ -28,7 +28,7 @@ def linode_list(irc, linode_key):
 
         # Fetch API information from Linode, which returns a nice JSON response
         # to work with.
-        api_response = loads(urlopen('https://api.linode.com/?api_key={}&api_action=linode.list'.format(linode_key)).read().decode('UTF-8'))
+        api_response = loads(urlopen('https://api.linode.com/?api_key={}&api_action=linode.list'.format(linode_key)).read().decode('UTF-8'), timeout = 7)
         linode_list = 'Your Linodes: '
         for server in api_response['DATA']:
             linode_list += '\x02{}\x02 - HD Space: \x02{}\x02 - RAM: \x02{}\x02 - Bandwidth: \x02{}\x02, '.format(

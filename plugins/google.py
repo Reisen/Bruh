@@ -29,7 +29,7 @@ def google(irc, nick, chan, msg, args):
     try:
         # Searches are returned as JSON so we need to turn that into a
         # dictionary.
-        query = json.loads(urlopen(request).read().decode('UTF-8'))
+        query = json.loads(urlopen(request).read().decode('UTF-8'), timeout = 7)
 
         # Check for any statuses that aren't a successful search.
         if query['responseStatus'] != 200:
