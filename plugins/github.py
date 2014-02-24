@@ -42,6 +42,7 @@ def index():
     for irc in irc_map:
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
         for interest in interests:
+            print('Printing Github Commit to: {}'.format(interest[0]))
             repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                 repo_name,
                 len(payload['commits']),
