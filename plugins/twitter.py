@@ -25,7 +25,7 @@ def twitter(irc, nick, chan, msg, args):
         if request.status_code != 200:
             raise Exception("bad status code")
 
-        # removing the first and last characters because they are [' ']'
+        # removing the first and last characters because they are '[' and ']'
         request = loads(request.text[1:-1])
         return "{}  -  https://twitter.com/{}/status/{}".format(request['text'],request['user']['name'],request['id'])
 		
