@@ -41,9 +41,7 @@ def index():
     # databases.
     for irc in irc_map:
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
-        print('Checking {}'.format(irc))
         for interest in interests:
-            print('Printing Github Commit to: {}'.format(interest[0]))
             repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                 repo_name,
                 len(payload['commits']),
@@ -70,7 +68,7 @@ def github_remove(irc, chan, name):
 
 
 def github_list(irc, chan):
-    repos = irc.db.execute('SELECT * FROM github_repos').fetchall()
+    repos = irc.db.execute('SELECT name FROM github_repos WHERE chan = ?').fetchall()
     return "Tracked repositories: {}".format(', '.join(repos))
 
 
