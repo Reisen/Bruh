@@ -8,8 +8,8 @@ from bottle import route, request, post
 from plugins.commands import command
 
 # Dirty solution to route requests lacking context. Keep a list of all IRC
-# objects and iterate through them on web-requests. This is akin to having
-# a command run for every network at the same time.
+# objects and iterate through them on web-requests. This is akin to having a
+# command run for every network at the same time.
 irc_map = []
 
 @event('BRUH')
@@ -41,12 +41,13 @@ def index():
     # databases.
     for irc in irc_map:
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
+        print('Checking {}'.format(irc))
         for interest in interests:
             print('Printing Github Commit to: {}'.format(interest[0]))
             repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                 repo_name,
                 len(payload['commits']),
-                payload['head_commit']['message'],
+                payload['head_commit']['message'].split('\n')[0],
                 payload['head_commit']['id'][:7],
                 payload['head_commit']['author']['username']
             )
@@ -62,6 +63,17 @@ def github_add(irc, chan, name):
     return "Now tracking {}".format(name)
 
 
+def github_remove(irc, chan, name):
+    irc.db.execute('DELETE FROM github_repos WHERE channel = ? AND name = ?', (chan, name))
+    irc.db.commit()
+    return "No longer tracking {}".format(name)
+
+
+def github_list(irc, chan):
+    repos = irc.db.execute('SELECT * FROM github_repos').fetchall()
+    return "Tracked repositories: {}".format(', '.join(repos))
+
+
 @command
 def github(irc, nick, chan, msg, args):
     """
@@ -75,8 +87,11 @@ def github(irc, nick, chan, msg, args):
     command, *args = msg.split(' ', 1)
     try:
         commands = {
-            'add': lambda: github_add(irc, chan, args[0])
+            'add':    lambda: github_add(irc, chan, args[0]),
+            'remove': lambda: github_remove(irc, chan, args[0]),
+            'list':   lambda: github_list(irc, chan)
         }
         return commands[command]()
+
     except KeyError:
         return "Tried to run unknown github subcommand: {}.".format(command)
