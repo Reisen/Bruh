@@ -178,13 +178,12 @@ def commands(irc, prefix, command, args):
             for candidate in commandlist:
                 if candidate.startswith(cmd): possibilities.append(candidate)
 
-            # When no commands are found...
-            if len(possibilities) == 0:
+            # When no commands, or more than one potential command is found,
+            # return nothing. This might be slightly confusing but It's better
+            # than spam. This mostly will happen with users shortening commands
+            # so they already know they probably just need to be more specific.
+            if len(possibilities) != 1:
                 return None
-
-            # When more than one potential command is found...
-            if len(possibilities) > 1:
-                return "The following commands matched: {}".format(', '.join(possibilities))
 
             # The output of the last command is the input to the next one, if
             # there is no next command, this is returned to the user.

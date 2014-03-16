@@ -6,7 +6,19 @@ from json import loads
 from urllib.error import URLError
 from urllib.request import urlopen
 from urllib.parse import quote_plus
+from plugins import event
 from plugins.commands import command, regex
+
+
+def setup_db(irc):
+    irc.db.execute('''
+        CREATE TABLE IF NOT EXISTS youtube_optout (
+            channel TEXT,
+            status INTEGER DEFAULT 1,
+            PRIMARY KEY(channel)
+        );
+    ''')
+
 
 def calculate_length(seconds):
     timestring = ''
@@ -46,11 +58,26 @@ def fetch_video(query, search = False):
         video['uploader'],
         '(https://www.youtube.com/watch?v={})'.format(video['id']) if search else ''
     )
-    
+
 
 @regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
 def youtube_match(irc, nick, chan, match, args):
-    return fetch_video(match.group(1))
+    setup_db(irc)
+    try:
+        status = irc.db.execute('SELECT status FROM youtube_optout WHERE channel = ?', (chan,)).fetchone()
+        if status is not None and status[0] != 0:
+            return fetch_video(match.group(1))
+
+    except Exception as e:
+        # No row for records just means opt-in by default I guess.
+        return fetch_video(match.group(1))
+
+
+def youtube_toggle(irc, chan, status):
+    setup_db(irc)
+    irc.db.execute('INSERT OR REPLACE INTO youtube_optout (channel, status) VALUES (?, ?)', (chan, int(status)))
+    irc.db.commit()
+    return 'Auto-Youtube Information: {}'.format(status)
 
 
 @command
@@ -58,8 +85,19 @@ def youtube(irc, nick, chan, msg, args):
     """
     Search youtube, because you're too lazy to open your browser.
     .youtube <query>
+    .youtube off - Turn off automatic youtube data.
+    .youtube on  - Turn automatic youtube data back on.
     """
     if not msg:
-        return 'Need something to search for.'
+        return "Need some terms to search youtube for."
 
-    return fetch_video(msg, True)
+    command, *args = msg.split(' ', 1)
+    try:
+        commands = {
+            'on':  lambda: youtube_toggle(irc, chan, True),
+            'off': lambda: youtube_toggle(irc, chan, False),
+        }
+        return commands[command]()
+
+    except KeyError:
+        return fetch_video(msg, True)
