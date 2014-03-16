@@ -8,7 +8,10 @@ from TwitterAPI import TwitterAPI
 
 @command
 def twitter(irc, nick, chan, msg, args):
-    '''Retrieves requested users latest tweet'''
+    '''
+    Retrieves requested users latest tweet.
+    .twitter <username>
+    '''
 
     if 'twitter' in irc.config['plugins']:
         consumer_key, consumer_secret, access_token_key, access_token_secret = irc.config['plugins']['twitter']['keys']
@@ -34,4 +37,4 @@ def twitter(irc, nick, chan, msg, args):
         )
 
     except:
-        return "Something went wrong"
+        return "There was an error in this module."
