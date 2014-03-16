@@ -30,15 +30,18 @@ def wikiget(msg):
         # We also need to remove all the html formatting from the text.
         text = sub(r'\<.*?>|\n','', text['query']['pages'][key]['extract'])
 
-        return "{}... - https://en.wikipedia.org/wiki/{}".format(text[:120], msg)
+        return "{}... - https://en.wikipedia.org/wiki/{}".format(text[:200], msg)
 
 
 @command
 def wikipedia(irc, nick, chan, msg, args):
-    '''Search and display wikipedia articles'''
-
+    '''
+    Search and display wikipedia articles.
+    .wiki <terms>        - Fetch article by exact name.
+    .wiki search <terms> - Fetch list of closely matching articles.
+    '''
     if not msg:
-        return "Need something to search for"
+        return "Need terms to search for, or an exact article title."
 
     try:
         command, *args = msg.split(' ', 1)
@@ -53,5 +56,4 @@ def wikipedia(irc, nick, chan, msg, args):
         return wikiget(msg)
 
     except Exception as e:
-        return str(e)
-        return "Something went wrong"
+        return "There was an error in this module."
