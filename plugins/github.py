@@ -79,7 +79,7 @@ def github_list(irc, chan):
     if not repos:
         return "I am not tracking any respositories for this channel."
 
-    return "Tracked repositories: {}".format(', '.join(repos))
+    return "Tracked repositories: {}".format(', '.join(map(lambda v: v[0], repos)))
 
 
 @command
