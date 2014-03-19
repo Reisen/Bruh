@@ -10,16 +10,21 @@ from re import sub
 import json
 
 def wikisearch(msg):
-    url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&srprop=timestamp&format=json"
+    try:
+        url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&srprop=timestamp&format=json"
 
-    query = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))
-    query = [x['title'] for x in query['query']['search'][:5]]
+        query = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))
+        query = [x['title'] for x in query['query']['search'][:5]]
 
-    # Removing the [] that surround our titles for channel printing.
-    return str(query)[1:-1]
+        # Removing the [] that surround our titles for channel printing.
+        return str(query)[1:-1]
+
+    except:
+        return "No articles were found for those search terms."
 
 
 def wikiget(msg):
+    try:
         url = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&titles={}&redirects=true"
 
         text = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))
@@ -27,10 +32,14 @@ def wikiget(msg):
         # One of the keys is just a random number that we can't/won't predict.
         key = list(text['query']['pages'])[0]
 
-        # We also need to remove all the html formatting from the text.
-        text = sub(r'\<.*?>|\n','', text['query']['pages'][key]['extract'])
+        return "{}... - https://en.wikipedia.org/wiki/{}".format(
+            sub(r'\<.*?>|\n','', text['query']['pages'][key]['extract'])[:200],
+            text['query']['pages'][key]['title'].replace(' ', '_')
+        )
 
-        return "{}... - https://en.wikipedia.org/wiki/{}".format(text[:200], msg)
+    except Exception as e:
+        return str(e)
+        return "No article was found with that title."
 
 
 @command

@@ -65,7 +65,7 @@ def youtube_match(irc, nick, chan, match, args):
     setup_db(irc)
     try:
         status = irc.db.execute('SELECT status FROM youtube_optout WHERE channel = ?', (chan,)).fetchone()
-        if status is not None and status[0] != 0:
+        if status is None or status[0] != 0:
             return fetch_video(match.group(1))
 
     except Exception as e:

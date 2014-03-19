@@ -12,8 +12,10 @@ from plugins.commands import command
 # command run for every network at the same time.
 irc_map = []
 
+import sys
 @event('BRUH')
 def prepare_github(irc):
+    print('Github Tracking: {}'.format(irc))
     irc_map.append(irc)
 
 
@@ -41,6 +43,7 @@ def index():
     # databases.
     for irc in irc_map:
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
+        print('Github Checking: {} : {}'.format(irc, interests))
         for interest in interests:
             repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                 repo_name,
@@ -56,9 +59,13 @@ def index():
 
 
 def github_add(irc, chan, name):
-    irc.db.execute('INSERT INTO github_repos (channel, name) VALUES (?, ?)', (chan, name))
-    irc.db.commit()
-    return "Now tracking {}".format(name)
+    try:
+        irc.db.execute('INSERT INTO github_repos (channel, name) VALUES (?, ?)', (chan, name))
+        irc.db.commit()
+        return "Now tracking {}".format(name)
+
+    except:
+        return "I am already tracking that repository."
 
 
 def github_remove(irc, chan, name):
@@ -68,7 +75,10 @@ def github_remove(irc, chan, name):
 
 
 def github_list(irc, chan):
-    repos = irc.db.execute('SELECT name FROM github_repos WHERE chan = ?').fetchall()
+    repos = irc.db.execute('SELECT name FROM github_repos WHERE channel = ?', (chan,)).fetchall()
+    if not repos:
+        return "I am not tracking any respositories for this channel."
+
     return "Tracked repositories: {}".format(', '.join(repos))
 
 
