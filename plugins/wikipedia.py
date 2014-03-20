@@ -38,7 +38,6 @@ def wikiget(msg):
         )
 
     except Exception as e:
-        return str(e)
         return "No article was found with that title."
 
 

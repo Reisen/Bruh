@@ -53,7 +53,6 @@ def google(irc, nick, chan, msg, args):
         )
 
     except Exception as e:
-        return str(e)
         return 'No results found.'
 
 

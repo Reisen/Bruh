@@ -12,9 +12,9 @@ from plugins.commands import command
 # command run for every network at the same time.
 irc_map = []
 
-import sys
 @event('BRUH')
 def prepare_github(irc):
+    global irc_map
     print('Github Tracking: {}'.format(irc))
     irc_map.append(irc)
 
@@ -41,6 +41,7 @@ def index():
 
     # Scan IRC objects looking for ones that contain interest in their github
     # databases.
+    print(irc_map)
     for irc in irc_map:
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
         print('Github Checking: {} : {}'.format(irc, interests))
