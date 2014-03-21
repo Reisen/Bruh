@@ -15,7 +15,7 @@ irc_map = []
 @event('BRUH')
 def prepare_github(irc):
     global irc_map
-    print('Github Tracking: {}'.format(irc))
+    print('Github Tracking: {} {}'.format(irc, irc_map))
     irc_map.append(irc)
 
 
