@@ -41,10 +41,15 @@ def index():
 
     # Scan IRC objects looking for ones that contain interest in their github
     # databases.
+    print('Github Map: {}'.format(irc_map))
     for irc in irc_map:
+        setup_db(irc)
+
         interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
+        print('Github Interests: {}'.format(interests))
         if interests:
             for interest in interests:
+                print('Github Interest: {}'.format(interest))
                 repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                     repo_name,
                     len(payload['commits']),
@@ -53,8 +58,10 @@ def index():
                     payload['head_commit']['author']['username']
                 )
 
+                print('Github Forwarding: {}'.format(irc))
                 irc.say(interest[0], repo_status)
 
+    print('Return an Empty String to the Request')
     return ''
 
 
