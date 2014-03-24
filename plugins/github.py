@@ -33,36 +33,40 @@ def setup_db(irc):
 @post('/github/')
 def index():
     # Parse Github's Payload.
-    payload = loads(request.params.payload)
-    repo_name = '{}/{}'.format(
-        payload['repository']['owner']['name'],
-        payload['repository']['name']
-    )
+    try:
+        payload = loads(request.params.payload)
+        repo_name = '{}/{}'.format(
+            payload['repository']['owner']['name'],
+            payload['repository']['name']
+        )
 
-    # Scan IRC objects looking for ones that contain interest in their github
-    # databases.
-    print('Github Map: {}'.format(irc_map))
-    for irc in irc_map:
-        setup_db(irc)
+        # Scan IRC objects looking for ones that contain interest in their github
+        # databases.
+        print('Github Map: {}'.format(irc_map))
+        for irc in irc_map:
+            setup_db(irc)
 
-        interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
-        print('Github Interests: {}'.format(interests))
-        if interests:
-            for interest in interests:
-                print('Github Interest: {}'.format(interest))
-                repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
-                    repo_name,
-                    len(payload['commits']),
-                    payload['head_commit']['message'].split('\n')[0],
-                    payload['head_commit']['id'][:7],
-                    payload['head_commit']['author']['username']
-                )
+            interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
+            print('Github Interests: {}'.format(interests))
+            if interests:
+                for interest in interests:
+                    print('Github Interest: {}'.format(interest))
+                    repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
+                        repo_name,
+                        len(payload['commits']),
+                        payload['head_commit']['message'].split('\n')[0],
+                        payload['head_commit']['id'][:7],
+                        payload['head_commit']['author']['username']
+                    )
 
-                print('Github Forwarding: {}'.format(irc))
-                irc.say(interest[0], repo_status)
+                    print('Github Forwarding: {}'.format(irc))
+                    irc.say(interest[0], repo_status)
 
-    print('Return an Empty String to the Request')
-    return ''
+        print('Return an Empty String to the Request')
+        return ''
+
+    except Exception as e:
+        print(str(e))
 
 
 def github_add(irc, chan, name):
