@@ -197,14 +197,15 @@ def commands(irc, prefix, command, args):
 def command_forwarder(irc, prefix, command, args):
     """
     This acts as the actual PRIVMSG handler, the reason for this is that it
-    allows `commands` to return a message instead of using irc.reply, this
-    also means that `commands` can be called manually to simulate a command
-    being called.
+    allows `commands` to return a message instead of using irc.reply, this also
+    means that `commands` can be called manually to simulate a command being
+    called.
     """
     try:
         output = commands(irc, prefix, command, args)
         if output is not None:
             irc.reply(output)
+
     except:
         print_exc()
         return None
