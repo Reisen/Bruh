@@ -47,7 +47,7 @@ def index():
             setup_db(irc)
 
             interests = irc.db.execute('SELECT * FROM github_repos WHERE name=?', (repo_name,)).fetchall()
-            print('Github Interests: {}.'.format(interests))
+            print('Github Interests: {}'.format(interests))
             if interests:
                 for interest in interests:
                     print('Github Interest: {}'.format(interest))
