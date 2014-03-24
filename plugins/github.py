@@ -49,7 +49,7 @@ def index():
         print('Github Interests: {}'.format(interests))
         if interests:
             for interest in interests:
-                print('Github Interest: {}.'.format(interest))
+                print('Github Interest: {}'.format(interest))
                 repo_status = '{} - {} commits pushed. {} ({}) - Pushed By {}'.format(
                     repo_name,
                     len(payload['commits']),
