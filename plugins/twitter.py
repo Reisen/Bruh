@@ -32,7 +32,7 @@ def twitter(irc, nick, chan, msg, args):
         request = loads(request.text[1:-1])
         return "{}  -  https://twitter.com/{}/status/{}".format(
             request['text'],
-            request['user']['name'],
+            request['user']['screen_name'],
             request['id']
         )
 
