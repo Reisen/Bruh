@@ -7,6 +7,42 @@
 from plugins import event
 from plugins.commands import command
 from collections import defaultdict
+from functools import wraps
+
+
+def mode(min_mode):
+    def mode_function(f):
+        @wraps(f)
+        def mode_wrapper(irc, nick, chan, msg, irc_args, *args, **kwargs):
+            # Only allow the command to continue if the user executing the
+            # command is ofthe right mode level. The mode given is the minimum
+            # level to execute, so if voice is the level then any user above
+            # can too.
+            modes = irc.modelist[chan][nick]['mode']
+            umode = 0
+            for mode in modes:
+                level = '+%@&~'.find(mode) + 1
+                if level > umode:
+                    umode = level
+
+            # Find out what the minimum mode level for this command is.
+            req_mode = '+%@&~'.find(min_mode) + 1
+
+            # If we're the right level, we're good to go.
+            if umode >= req_mode:
+                return f(irc, nick, chan, msg, irc_args, *args, **kwargs)
+
+            return "You need a mode of at least {}({}) to use this command.".format({
+                '+': 'voiced',
+                '%': 'hopped',
+                '@': 'opped',
+                '&': 'protected',
+                '~': 'owner'
+            }[min_mode], min_mode)
+
+        return mode_wrapper
+
+    return mode_function
 
 
 @command
@@ -94,7 +130,6 @@ def quit_userlist(irc, prefix, command, args):
 def mode_userlist(irc, prefix, command, args):
     """Track changes in user modes in the channel."""
     chan, mode, *nicks = args
-    print(chan, mode, nicks)
     nicks.reverse()
 
     mode_lookup = {
