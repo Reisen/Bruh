@@ -4,6 +4,7 @@ import sys
 import re
 from random import choice, randrange, shuffle
 from plugins.commands import command
+from plugins.userlist import min_mode
 
 def setup_db(irc):
     irc.db.execute('''
@@ -26,6 +27,18 @@ def add_quote(irc, chan, nick, args):
     irc.db.execute('INSERT INTO quotes (chan, by, quote) VALUES (?, ?, ?)', (chan, nick, args[0]))
     irc.db.commit()
     return "Awesome, saved."
+
+
+def del_quote(irc, nick, chan, quote):
+    setup_db(irc)
+
+    # Make sure the user is high enough mode to do this.
+    if min_mode(irc, nick, chan, '%'):
+        irc.db.execute('DELETE FROM quotes WHERE id = ?', (quote,))
+        irc.db.commit()
+        return "Quote #{} deleted.".format(quote)
+
+    return "You need to be at least a half-op to do this."
 
 
 def colour_quote(quote):
@@ -112,6 +125,8 @@ def quote(irc, nick, chan, msg, args):
     Manages a quotes database. No arguments fetch random quotes.
     .quote add <quote>
     .quote get <num>
+    .quote del <num>
+    .uote find <terms>
     """
     command, *args = msg.split(' ', 1)
 
@@ -119,6 +134,7 @@ def quote(irc, nick, chan, msg, args):
         commands = {
             'add':  lambda: add_quote(irc, chan, nick, args),
             'get':  lambda: get_quote(irc, chan, args[0]),
+            'del':  lambda: del_quote(irc, nick, chan, args[0]),
             'find': lambda: find_quote(irc, chan, args[0], False)
         }
         return commands[command]()
