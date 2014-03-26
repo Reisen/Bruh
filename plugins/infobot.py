@@ -2,6 +2,7 @@
 import random, re
 from plugins.commands import regex, command
 from plugins.database import *
+from plugins.authentication import authenticated
 
 def setup_db(irc):
     irc.db.execute('''
@@ -17,7 +18,7 @@ def setup_db(irc):
 @command
 def remember(irc, nick, chan, msg, args):
     """
-    Adds new commands to the database.
+    Adds new facts to the database.
     """
     setup_db(irc)
 
@@ -35,7 +36,7 @@ def remember(irc, nick, chan, msg, args):
         if fact[2] == value[0]:
             return "I already knew that. Tell me something I don't know."
 
-        irc.db.execute('UPDATE factoids SET value = value || ? WHERE key = ?', (', ' + value, key))
+        irc.db.execute('UPDATE factoids SET value = value || ? WHERE key = ?', (', ' + value[0], key))
         irc.db.commit()
         return "I'll remember that too."
 
@@ -43,6 +44,20 @@ def remember(irc, nick, chan, msg, args):
     irc.db.execute('INSERT INTO factoids (key, value) VALUES (?, ?)', (key, value[0]))
     irc.db.commit()
     return "I'll remember that."
+
+
+@command
+@authenticated
+def forget(irc, nick, chan, msg, args, user):
+    """
+    Remove facts from the database.
+    """
+    if not msg:
+        return "Need a key to delete from the facts database."
+
+    irc.db.execute('DELETE FROM factoids WHERE key = ?', (msg,))
+    irc.db.commit()
+    return "I've forgotten about {}.".format(msg)
 
 
 @regex(r'^\?([^\s]+)$')

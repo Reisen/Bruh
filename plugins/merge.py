@@ -17,14 +17,14 @@ def merge_thru(irc, prefix, command, args):
     if args[1].startswith(irc.config.get('prefix', '.')):
         return None
 
-    username = prefix.split('!')[0] 
-        
+    username = prefix.split('!')[0]
+
     # Pipe messages from channel -> user.
     if args[0].startswith('#') or username in merge_list:
         target = args[0] if args[0].startswith('#') else username
         for target in merge_list[target]:
             irc.say(target, '<{}:{}> {}'.format(args[0], username, args[1]))
-            sleep(0.1) 
+            sleep(0.1)
 
     # Pipe messages from user -> channel.
     elif args[0] == irc.nick:
