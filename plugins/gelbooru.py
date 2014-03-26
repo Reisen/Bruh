@@ -19,7 +19,7 @@ def gelbooru(irc, nick, chan, match, args):
     .gelbooru <tag>
     """
     global comment_count, comment_cache, comment_delay
-    if not comment_cache or comment_count > 25 or time() - comment_delay >= 1200:
+    if not comment_cache or comment_count > 25 or time() - comment_delay >= 21600:
         # To limit the API hits, we cache the result and print from it until 25
         # comments have been printed or 20 minutes has passed.
         listing       = urlopen('http://gelbooru.com/index.php?page=dapi&s=comment&q=index', timeout = 7).read().decode('UTF-8')
