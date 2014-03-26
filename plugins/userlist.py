@@ -133,35 +133,39 @@ def quit_userlist(irc, prefix, command, args):
 @event('MODE')
 def mode_userlist(irc, prefix, command, args):
     """Track changes in user modes in the channel."""
-    chan, mode, *nicks = args
-    nicks.reverse()
+    try:
+        chan, mode, *nicks = args
+        nicks.reverse()
 
-    mode_lookup = {
-        'v': '+',
-        'h': '%',
-        'o': '@',
-        'a': '&',
-        'q': '~'
-    }
+        mode_lookup = {
+            'v': '+',
+            'h': '%',
+            'o': '@',
+            'a': '&',
+            'q': '~'
+        }
 
-    # Mode strings can consist of multiple flags, toggles, and arguments. We
-    # just have to find the ones we care about though and make sure we track
-    # them correctly.
-    direction = False
-    while mode:
-        # Find out whether we're adding or removing flags, and eat the char.
-        # Direction should persist until a new +/- is seen.
-        if mode[0] in '+-':
-            direction = True if mode[0] == '+' else False
+        # Mode strings can consist of multiple flags, toggles, and arguments. We
+        # just have to find the ones we care about though and make sure we track
+        # them correctly.
+        direction = False
+        while mode:
+            # Find out whether we're adding or removing flags, and eat the char.
+            # Direction should persist until a new +/- is seen.
+            if mode[0] in '+-':
+                direction = True if mode[0] == '+' else False
+                mode = mode[1:]
+
+            # Voice(+), Halfop(%), Op(@), Protected(&), Owner(~)
+            if mode[0] in 'vhoaq':
+                target = nicks.pop()
+                if direction:
+                    irc.modelist[chan][target]['mode'].add(mode_lookup[mode[0]])
+                else:
+                    irc.modelist[chan][target]['mode'].remove(mode_lookup[mode[0]])
+
+            # Eat the mode character and continue on.
             mode = mode[1:]
 
-        # Voice(+), Halfop(%), Op(@), Protected(&), Owner(~)
-        if mode[0] in 'vhoaq':
-            target = nicks.pop()
-            if direction:
-                irc.modelist[chan][target]['mode'].add(mode_lookup[mode[0]])
-            else:
-                irc.modelist[chan][target]['mode'].remove(mode_lookup[mode[0]])
-
-        # Eat the mode character and continue on.
-        mode = mode[1:]
+    except Exception as e:
+        print(str(e))
