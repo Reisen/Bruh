@@ -96,6 +96,9 @@ def join_userlist(irc, prefix, command, args):
     # Add the user to the set, if the user is already in the set nothing
     # happens.
     irc.userlist[chan].add(nick)
+    irc.modelist[chan][nick] = {
+        'mode': set()
+    }
 
 
 @event('PART')
@@ -106,6 +109,7 @@ def part_userlist(irc, prefix, command, args):
     # If we're not tracking the user, we can't remove them.
     if nick in irc.userlist[chan]:
         irc.userlist[chan].remove(nick)
+        del irc.modelist[chan][nick]
 
 
 @event('KICK')
@@ -116,6 +120,7 @@ def kick_userlist(irc, prefix, command, args):
     # If we're not tracking the user, we can't remove them.
     if nick in irc.userlist[chan]:
         irc.userlist[chan].remove(nick)
+        del irc.modelist[chan][nick]
 
 
 @event('QUIT')
@@ -128,6 +133,10 @@ def quit_userlist(irc, prefix, command, args):
     for channel, userlist in irc.userlist.items():
         if nick in userlist:
             userlist.remove(nick)
+
+    for channel, modelist in irc.modelist.items():
+        if nick in modelist:
+            del modelist[nick]
 
 
 @event('MODE')
