@@ -223,6 +223,36 @@ def modify(irc, nick, chan, msg, args, user):
 
 
 @command
+@authenticated
+def password(irc, nick, chan, msg, args, user):
+    """
+    Change the password for your current login.
+    .password <new>
+    .password <new> <user>
+    """
+    if chan.startswith('#'):
+        return "I would recommend changing your password by sending me a PM, not in a channel full of people."
+
+    if not msg:
+        return "Need a new password to set for your account."
+
+    password, *username = msg.split(' ', 1)
+    if username and user.get('Rank', None) != 'Admin':
+        return "You need to be an admin to change other users passwords."
+
+    if not username:
+        username.append(nick)
+
+    salt = os.urandom(64)
+    key  = DF(password.encode('UTF-8'), salt, 1000, 64)
+    data = salt + key
+    irc.db.execute('UPDATE users SET password = ? WHERE username = ?', (base64.b64encode(data), username[0]))
+    irc.db.commit()
+
+    return "Password changed."
+
+
+@command
 def register(irc, nick, chan, msg, args):
     """
     Register a new user with the bot.
@@ -236,7 +266,7 @@ def register(irc, nick, chan, msg, args):
     # Users may be dumb and register in a public channel, if they are the best
     # choise is to not register and force them to try again in a PM.
     if chan.startswith('#'):
-        return "You seem to be registering in a channel which is public. You should PM me and try again, with a new password people haven't already seen."
+        return "You seem to be registering in a channel where people can see your password. You should PM me and try again, with a new password people haven't already seen."
 
     # Generate User's Key.
     salt = os.urandom(64)
