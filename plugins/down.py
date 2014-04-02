@@ -12,13 +12,14 @@ def down(irc, nick, chan, msg, args):
     .down <url>
     """
     try:
-        if len(msg) == 0:
-            return "Yeah let me just go ahead and guess what website you meant. It's probably down."
+        if not msg:
+            return "Syntax: .down <url>"
 
-        if 'http://' not in msg:
+        if not msg.startswith('http://'):
             msg = 'http://' + msg
 
         urllib.request.urlopen(msg, timeout = 7)
+
     except URLError:
         return "It's not just you, {} seems to be down.".format(msg)
 

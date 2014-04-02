@@ -97,6 +97,9 @@ def github(irc, nick, chan, msg, args):
     """
     setup_db(irc)
 
+    if not msg:
+        return "Syntax: .github <command> [<arg>, ...]"
+
     command, *args = msg.split(' ', 1)
     try:
         commands = {

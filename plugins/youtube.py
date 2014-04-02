@@ -84,12 +84,12 @@ def youtube_toggle(irc, chan, status):
 def youtube(irc, nick, chan, msg, args):
     """
     Search youtube, because you're too lazy to open your browser.
-    .youtube <query>
+    .youtube <search terms>
     .youtube off - Turn off automatic youtube data.
     .youtube on  - Turn automatic youtube data back on.
     """
     if not msg:
-        return "Need some terms to search youtube for."
+        return "Syntax: .youtube <search terms>"
 
     command, *args = msg.split(' ', 1)
     try:

@@ -163,7 +163,7 @@ def login(irc, nick, chan, msg, args):
 
     # Also make sure they actually provided their password.
     if not msg:
-        return "You need to provide a password when you login."
+        return "Syntax: .login <password>"
 
     try:
         if do_authenticate(irc, nick, msg):
@@ -195,10 +195,13 @@ def destroy(irc, nick, chan, msg, args, user):
 @authenticated(['Admin'])
 def modify(irc, nick, chan, msg, args, user):
     """
-    Modify state stored about another user. Must be an admin.
-    .modify <user> <key> <value>
+    Modify or view state stored about another user. Must be an admin.
+    .modify <user> <key> [<value>]
     """
     try:
+        if not msg:
+            return "Syntax: .modify <user> <key> [<value>]"
+
         # Find user details provided by the command.
         target, key, *value = msg.split(' ', 2)
         userid = irc.db.execute('SELECT * FROM users WHERE username=?', (target,)).fetchone()[0]
@@ -230,26 +233,32 @@ def password(irc, nick, chan, msg, args, user):
     .password <new>
     .password <new> <user>
     """
+    # Make sure users aren't being dumb enough to login in a channel.
     if chan.startswith('#'):
-        return "I would recommend changing your password by sending me a PM, not in a channel full of people."
+        return "You are trying to change your password in a public channel. PM me and try again with a password people haven't already seen."
 
     if not msg:
-        return "Need a new password to set for your account."
+        return "Syntax: .password <newpassword> [<user>]"
 
+    # If a username was provided, we have to make sure they have the right rank
+    # to modify other users.
     password, *username = msg.split(' ', 1)
     if username and user.get('Rank', None) != 'Admin':
         return "You need to be an admin to change other users passwords."
 
+    # If the username isn't set at this point, set it to the current user as
+    # that is the only user they should have permission to modify.
     if not username:
         username.append(nick)
 
+    # Generate new hash to store for the user's password.
     salt = os.urandom(64)
     key  = DF(password.encode('UTF-8'), salt, 1000, 64)
     data = salt + key
     irc.db.execute('UPDATE users SET password = ? WHERE username = ?', (base64.b64encode(data), username[0]))
     irc.db.commit()
 
-    return "Password changed."
+    return "Successfully changed password."
 
 
 @command
@@ -260,13 +269,14 @@ def register(irc, nick, chan, msg, args):
     """
     setup_db(irc)
 
-    if not msg:
-        return "You can't register without providing a password."
-
     # Users may be dumb and register in a public channel, if they are the best
     # choise is to not register and force them to try again in a PM.
     if chan.startswith('#'):
         return "You seem to be registering in a channel where people can see your password. You should PM me and try again, with a new password people haven't already seen."
+
+    # Check arguments were actually given.
+    if not msg:
+        return "Syntax: .register <password>"
 
     # Generate User's Key.
     salt = os.urandom(64)
@@ -277,6 +287,6 @@ def register(irc, nick, chan, msg, args):
         irc.db.commit()
 
         return "You are now registered as {}. You can login now with .login <password>.".format(nick)
+
     except Exception as e:
-        print(e)
-        return "You seem to be already registered. Or someone with your nick already registered at least."
+        return "You are already registered. Try logging in with .login <password>."

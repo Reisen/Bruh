@@ -15,11 +15,12 @@ def twitter(irc, nick, chan, msg, args):
 
     if 'twitter' in irc.config['plugins']:
         consumer_key, consumer_secret, access_token_key, access_token_secret = irc.config['plugins']['twitter']['keys']
+
     else:
         return "No 'keys' set for twitter API. Check your config."
 
     if not msg:
-        return "Need a user to search for."
+        return ".twitter <username>"
 
     try:
         request = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret)
@@ -36,5 +37,5 @@ def twitter(irc, nick, chan, msg, args):
             request['id']
         )
 
-    except:
+    except Exception as e:
         return "There was an error in this module."

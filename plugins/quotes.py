@@ -71,6 +71,7 @@ def random_quote(irc, chan):
         index = randrange(0, len(quotes))
         id, chan, by, quote = quotes[index]
         return 'Quote [{}/{}]: {}'.format(index + 1, len(quotes), colour_quote(quote))
+
     except:
         return "No quotes found."
 
@@ -115,6 +116,7 @@ def find_quote(irc, chan, arg, short = True):
                     quote_ids.append(str(real_pos + 1))
 
         return 'Found {}, the first {} are: {}'.format(len(quotes), len(sub_quotes), ','.join(quote_ids))
+
     except Exception as e:
         return 'There was an error searching for that quote: ' + str(e)
 
@@ -126,7 +128,7 @@ def quote(irc, nick, chan, msg, args):
     .quote add <quote>
     .quote get <num>
     .quote del <num>
-    .uote find <terms>
+    .quote find <terms>
     """
     command, *args = msg.split(' ', 1)
 
@@ -138,6 +140,7 @@ def quote(irc, nick, chan, msg, args):
             'find': lambda: find_quote(irc, chan, args[0], False)
         }
         return commands[command]()
+
     except Exception as e:
         # Try and find a quote matching the text.
         if msg:

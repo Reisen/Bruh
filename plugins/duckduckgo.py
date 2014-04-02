@@ -36,9 +36,12 @@ def handle_disambiguation(query):
 
 @command(['ddg'])
 def duckduckgo(irc, nick, chan, msg, args):
-    '''DuckDuckGo Instant API.'''
+    """
+    DuckDuckGo Instant API.
+    .ddg <expression>
+    """
     if not msg:
-        return 'Need something to search for.'
+        return "Syntax: .ddg <expression>"
 
     # Build the request. DuckDuckGo requires an app name parameter for request
     # attribution, so don't remove this.

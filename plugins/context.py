@@ -1,3 +1,8 @@
+"""
+    This module keeps track of recently seen messages, so they can be printed
+    with commands list .last, It's useful for small channels where you are
+    disconnected and want to see a short backlog.
+"""
 from time import sleep
 from plugins import event
 from plugins.commands import command

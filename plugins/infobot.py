@@ -19,12 +19,16 @@ def setup_db(irc):
 def remember(irc, nick, chan, msg, args):
     """
     Adds new facts to the database.
+    .remember <key> <value>
     """
     setup_db(irc)
 
+    if not msg:
+        return "Syntax: .remember <key> <value>"
+
     key, *value = msg.split(' ', 1)
     if not value:
-        return "What..."
+        return "Syntax: .remember <key> <value>"
 
     # See if an object with this key already exists. If it does, overwrite the
     # value instead of creating a new entry.
@@ -51,9 +55,10 @@ def remember(irc, nick, chan, msg, args):
 def forget(irc, nick, chan, msg, args, user):
     """
     Remove facts from the database.
+    .forget <key>
     """
     if not msg:
-        return "Need a key to delete from the facts database."
+        return "Syntax: .forget <key>"
 
     irc.db.execute('DELETE FROM factoids WHERE key = ?', (msg,))
     irc.db.commit()

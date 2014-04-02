@@ -215,10 +215,12 @@ def command_forwarder(irc, prefix, command, args):
 def help(irc, nick, chan, msg, args):
     """
     Get help about a command.
-    .help <command>
-    .help <command> full
-    .help list
+    .help <command>         - Get help about a command.
+    .help <command> detail  - Get the longer, more detailed help text.
+    .help list              - List all registered commands.
     """
+    # If no plugin is given, default to this plugin, and print help about the
+    # help command itself.
     if msg == '':
         msg = 'help'
 

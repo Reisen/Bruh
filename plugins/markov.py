@@ -84,5 +84,6 @@ def markov(irc, nick, chan, msg, args):
     try:
         word_1, word_2, *rest = msg.split(' ', 2)
         return markov_generate((word_1, word_2))
-    except:
+
+    except Exception as e:
         return markov_generate()

@@ -40,9 +40,9 @@ def linode_list(irc, linode_key):
 
         # Remove the comma from the end before returning.
         return linode_list[:-2]
+
     except Exception as e:
-        print(e)
-        return "Shit..."
+        return "Error occured performing API call."
 
 
 @command
@@ -53,6 +53,9 @@ def linode(irc, nick, chan, msg, args, user):
     .linode list
     .linode key <key>
     """
+    if not msg:
+        return "Syntax: .linode <command> [<arg>, <arg>...]"
+
     # Try and setup a Linode Key first, in case the user is attempting to
     # provide that. Otherwise nothing else will work.
     command, *args = msg.split(' ', 1)
@@ -69,5 +72,6 @@ def linode(irc, nick, chan, msg, args, user):
             'list': lambda: linode_list(irc, linode_key)
         }
         return commands[command]()
+
     except KeyError:
         return "Tried to run unknown command '{}'.".format(command)

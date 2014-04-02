@@ -11,9 +11,12 @@ import json
 
 @command(['g'])
 def google(irc, nick, chan, msg, args):
-    '''Google web search'''
+    """
+    Google web search.
+    .g <search terms>
+    """
     if not msg:
-        return 'Need something to search for.'
+        return ".g <search terms>"
 
     # Build the request. The Referer is required because of googles ToS.
     request = Request(
@@ -58,11 +61,14 @@ def google(irc, nick, chan, msg, args):
 
 @command
 def image(irc, nick, chan, msg, args):
-    '''Google image search (returns any of the first 4 results)'''
+    """
+    Google image search (returns any of the first 4 results)
+    .gi <search terms>
+    """
     url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={}&safe=off'
 
     if not msg:
-        return 'Need something to search for.'
+        return "Syntax: .gi <search terms>"
 
     # Searches are returned as JSON so we need to turn that into a dictionary
     query = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))

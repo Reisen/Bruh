@@ -46,11 +46,11 @@ def tell(irc, nick, chan, msg, args):
     """
     # Check the arguments given are actually correct.
     if not msg:
-        return 'I need to know who you want to leave a message for, and what you want me to tell them.'
+        return "Syntax: .tell <nick> <msg>"
 
     msg, *args = msg.split(' ', 1)
     if not args:
-        return 'I still need a message.'
+        return "Syntax: .tell <nick> <msg>"
 
     # Save the message in the database to be sent at a later time.
     irc.db.execute('INSERT INTO tell (nick, chan, message) VALUES (?, ?, ?)', (msg.lower(), chan, 'From {}: {}'.format(nick, args[0])))

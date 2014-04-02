@@ -111,14 +111,26 @@ def _kick(irc, nick, chan, msg, args, user):
 
 @command(['op'])
 @authenticated(['Admin', 'Moderator'])
-def _admin(irc, nick, chan, msg, args, user):
+def _op(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +o {}'.format(chan, msg))
+
+
+@command(['deop'])
+@authenticated(['Admin', 'Moderator'])
+def _deop(irc, nick, chan, msg, args, user):
+    irc.send('MODE {} -o {}'.format(chan, msg))
 
 
 @command(['voice'])
 @authenticated(['Admin', 'Moderator'])
 def _voice(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +v {}'.format(chan, msg))
+
+
+@command(['devoice'])
+@authenticated(['Admin', 'Moderator'])
+def _devoice(irc, nick, chan, msg, args, user):
+    irc.send('MODE {} -v {}'.format(chan, msg))
 
 
 # Preferably, don't use this. Adding it to test things on my own personal IRC

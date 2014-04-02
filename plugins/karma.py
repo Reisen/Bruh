@@ -64,6 +64,7 @@ def karma(irc, nick, chan, msg, args):
         try:
             user_karma = irc.db.execute('SELECT karma FROM karma WHERE username = ? AND channel = ?', (msg, chan)).fetchone()
             return 'Current karma for {} is: {}'.format(msg, user_karma[0])
+
         except Exception as e:
             print(e)
             return 'I haven\'t got any karma records for {}.'.format(msg)

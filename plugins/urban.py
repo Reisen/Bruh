@@ -9,11 +9,14 @@ import json
 
 @command
 def urban(irc, nick, chan, msg, args):
-    '''searches urban dictionary'''
+    """
+    Searches urban dictionary.
+    .urban <terms>
+    """
     url = 'http://api.urbandictionary.com/v0/define?term={}'
 
     if not msg:
-        return "Need something to search for."
+        return "Syntax: .urban <terms>"
 
     try:
         # More json oh my god
@@ -24,5 +27,6 @@ def urban(irc, nick, chan, msg, args):
 
         # It can't be over
         return "{} - {}".format(msg, query)
+
     except:
         return "No definition found."

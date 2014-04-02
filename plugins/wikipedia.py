@@ -49,7 +49,7 @@ def wikipedia(irc, nick, chan, msg, args):
     .wiki search <terms> - Fetch list of closely matching articles.
     '''
     if not msg:
-        return "Need terms to search for, or an exact article title."
+        return "Syntax: .wiki <Article Title>"
 
     try:
         command, *args = msg.split(' ', 1)
