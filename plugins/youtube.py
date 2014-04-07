@@ -6,9 +6,9 @@ from json import loads
 from urllib.error import URLError
 from urllib.request import urlopen
 from urllib.parse import quote_plus
-from plugins import event
-from plugins.commands import command, regex
+from plugins import event, mod
 
+commands = mod.commands
 
 def setup_db(irc):
     irc.db.execute('''
@@ -60,7 +60,7 @@ def fetch_video(query, search = False):
     )
 
 
-@regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
+@commands.regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
 def youtube_match(irc, nick, chan, match, args):
     setup_db(irc)
     try:
@@ -80,7 +80,7 @@ def youtube_toggle(irc, chan, status):
     return 'Auto-Youtube Information: {}'.format(status)
 
 
-@command
+@commands.command
 def youtube(irc, nick, chan, msg, args):
     """
     Search youtube, because you're too lazy to open your browser.

@@ -4,10 +4,11 @@
     disconnected and want to see a short backlog.
 """
 from time import sleep
-from plugins import event
-from plugins.commands import command
+from plugins import event, mod
 from collections import defaultdict
-from plugins.authentication import authenticated
+
+authentication = mod.authentication
+commands       = mod.commands
 
 logs = defaultdict(lambda: [])
 
@@ -37,7 +38,7 @@ def message_tracker(irc, prefix, command, args):
         return
 
 
-@command
+@commands.command
 def last(irc, nick, chan, msg, args):
     """
     Print messages the bot has recently seen.
@@ -102,8 +103,8 @@ def last(irc, nick, chan, msg, args):
         return None
 
 
-@command
-@authenticated
+@commands.command
+@authentication.authenticated
 def repeat(irc, nick, chan, msg, args, user):
     """
     Repeat messages the bot has recently seen. Identical to .last, but per line.

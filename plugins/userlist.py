@@ -4,11 +4,11 @@
     the current state of the user-list, it also provides hooking callbacks for
     when users leave or join.
 """
-from plugins import event
-from plugins.commands import command
+from plugins import event, mod
 from collections import defaultdict
 from functools import wraps
 
+commands = mod.commands
 
 def min_mode(irc, nick, chan, min_mode):
     # Only allow the command to continue if the user executing the command is
@@ -48,7 +48,7 @@ def mode(req_mode):
     return mode_function
 
 
-@command
+@commands.command
 @mode('%')
 def usercount(irc, nick, chan, msg, args):
     return "There are {} users in the channel currently.".format(len(irc.userlist[chan]))

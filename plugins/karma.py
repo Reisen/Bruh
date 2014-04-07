@@ -4,7 +4,9 @@
 """
 from time import time
 from collections import defaultdict
-from plugins.commands import command, regex
+from plugins import mod
+
+commands = mod.commands
 
 karma_timer = defaultdict(lambda: 0)
 
@@ -19,7 +21,7 @@ def setup_db(irc):
     ''')
     irc.db.commit()
 
-@regex(r'^([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
+@commands.regex(r'^([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
 def catch_karma(irc, nick, chan, match, args):
     setup_db(irc)
 
@@ -51,7 +53,7 @@ def catch_karma(irc, nick, chan, match, args):
         return '{}, you lost karma.'.format(target)
 
 
-@command
+@commands.command
 def karma(irc, nick, chan, msg, args):
     """
     Inspect users karma in the current channel.

@@ -1,12 +1,13 @@
 """
   Retreives requested users latest tweet.
 """
-from plugins.commands import command
 from json import loads
 from TwitterAPI import TwitterAPI
+from plugins import mod
 
+commands = mod.commands
 
-@command
+@commands.command
 def twitter(irc, nick, chan, msg, args):
     '''
     Retrieves requested users latest tweet.

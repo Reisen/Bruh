@@ -1,13 +1,14 @@
 """
     Search urban dictionary or some shit I don't even know anymore
 """
-from plugins.commands import command
-
+import json
 from urllib.parse import quote_plus
 from urllib.request import urlopen
-import json
+from plugins import mod
 
-@command
+commands = mod.commands
+
+@commands.command
 def urban(irc, nick, chan, msg, args):
     """
     Searches urban dictionary.

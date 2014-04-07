@@ -1,15 +1,16 @@
 """
     Search google for some useless shit no one cares about
 """
-from plugins.commands import command
+import json
 from random import randint
-
 from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
 from html.parser import HTMLParser
-import json
+from plugins import mod
 
-@command(['g'])
+commands = mod.commands
+
+@commands.command(['g'])
 def google(irc, nick, chan, msg, args):
     """
     Google web search.
@@ -59,7 +60,7 @@ def google(irc, nick, chan, msg, args):
         return 'No results found.'
 
 
-@command
+@commands.command
 def image(irc, nick, chan, msg, args):
     """
     Google image search (returns any of the first 4 results)

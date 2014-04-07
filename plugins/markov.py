@@ -4,9 +4,10 @@
 import os
 import string
 from random import randrange, choice
-from plugins import event
-from plugins.commands import regex, command
-from plugins.authentication import authenticated
+from plugins import event, mod
+
+commands       = mod.commands
+authentication = mod.authentication
 
 # Markov state. All strings generated from these.
 markovc = {}
@@ -45,8 +46,8 @@ def initialize_markov(irc):
     reload_markov()
 
 
-@command
-@authenticated(['Admin', 'Moderator'])
+@commands.command
+@authentication.authenticated(['Admin', 'Moderator'])
 def chain(irc, nick, chan, msg, args, user):
     reload_markov()
     return 'Reloaded markov chain.'
@@ -85,7 +86,7 @@ def markov_generate(seed = None):
     return output + '.'
 
 
-@command
+@commands.command
 def markov(irc, nick, chan, msg, args):
     try:
         word_1, word_2, *rest = msg.split(' ', 2)

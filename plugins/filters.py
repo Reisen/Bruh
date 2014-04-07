@@ -3,7 +3,9 @@
     command that outputs its input.
 """
 import codecs, hashlib, base64
-from plugins.commands import command
+from plugins import mod
+
+commands = mod.commands
 
 rot13 = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm')
 
@@ -16,7 +18,7 @@ def rainbow(msg):
 
     return output
 
-@command
+@commands.command
 def filter(irc, nick, chan, msg, args):
     """
     Provides several text filters: rot13, rot26, lower, upper, reverse, md5 (and others), rainbow, and base64.
@@ -37,13 +39,13 @@ def filter(irc, nick, chan, msg, args):
             'sha384':  lambda: hashlib.sha384(msg.encode('utf-8')).hexdigest(),
             'sha512':  lambda: hashlib.sha512(msg.encode('utf-8')).hexdigest(),
             'rainbow': lambda: rainbow(msg),
-            'base64':  lambda: base64.b64encode(msg.encode('utf-8')).decode('utf-8') 
+            'base64':  lambda: base64.b64encode(msg.encode('utf-8')).decode('utf-8')
         }
         return filters[text_filter]()
     except:
         return "Unknown filter."
 
-@command
+@commands.command
 def echo(irc, nick, chan, msg, args):
     """Eats and shits"""
     return msg

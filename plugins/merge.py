@@ -4,10 +4,11 @@
     channel. Used to spoof identity as the bot.
 """
 from time import sleep
-from plugins import event
-from plugins.commands import command
-from plugins.authentication import authenticated
+from plugins import event, mod
 from collections import defaultdict
+
+commands       = mod.commands
+authentication = mod.authentication
 
 merge_list = defaultdict(lambda:set())
 
@@ -44,8 +45,8 @@ def merge_thru(irc, prefix, command, args):
             irc.say(mergers[0], args[1])
 
 
-@command
-@authenticated(['Admin', 'Moderator'])
+@commands.command
+@authentication.authenticated(['Admin', 'Moderator'])
 def merge(irc, nick, chan, msg, args, user):
     """
     Merge with the bot.

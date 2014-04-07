@@ -3,9 +3,11 @@
 """
 import urllib.request
 from urllib.error import URLError
-from plugins.commands import command
+from plugins import mod
 
-@command
+commands = mod.commands
+
+@commands.command
 def down(irc, nick, chan, msg, args):
     """
     Check if a website is down.

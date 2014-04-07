@@ -5,7 +5,7 @@
 
 import os, sys, signal, argparse, json
 from traceback import print_exc
-from plugins import hooks
+from plugins import hooks, mod
 from irc import *
 
 
@@ -83,6 +83,7 @@ if __name__ == '__main__':
     try:
         with open('config') as f:
             config = json.loads(f.read())
+
     except IOError:
         with open('config', 'w') as f:
             default_config = {
@@ -113,6 +114,7 @@ if __name__ == '__main__':
             print('There was no config file, one has been created.')
             print('Edit it and run the bot again.\n')
             sys.exit(0)
+
     except Exception as e:
         print('Failed to read configuration file:\n    ')
         print(e)
@@ -133,7 +135,7 @@ if __name__ == '__main__':
 
     # Plugins need to be imported before IRC connections are made, as plugins
     # are used to handle core IRC messages.
-    plugins   = {}
+    plugins   = mod.modules
     blacklist = config.get('blacklist', [])
     blacklist.append('__init__.py')
 
@@ -152,7 +154,7 @@ if __name__ == '__main__':
 
         # __import__ uses pythons dot syntax to import, so remove the .py ext.
         name = plugin[:-3]
-        plugins[name] = __import__('plugins.' + name, globals(), locals(), -1)
+        mod.load_module(name)
 
         if config.get('debug', False):
             print('!  Loaded Plugin: {}'.format(name))

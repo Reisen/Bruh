@@ -2,8 +2,9 @@
     This plugin implements the PING response, and any other response that's
     'PING' like, such as version requests and highlights.
 """
-from plugins import event
-from plugins.commands import regex
+from plugins import event, mod
+
+commands = mod.commands
 
 # Handles server PINGS
 @event('PING')
@@ -33,6 +34,6 @@ def ctcps(irc, prefix, command, args):
 
 
 # Users can 'ping' bruh by using 'bruh!' in a message for it to respond to.
-@regex(r'$nick!')
+@commands.regex(r'$nick!')
 def respond(irc, nick, chan, match, args):
     return nick + '!'

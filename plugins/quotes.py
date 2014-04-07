@@ -3,8 +3,10 @@
 import sys
 import re
 from random import choice, randrange, shuffle
-from plugins.commands import command
-from plugins.userlist import min_mode
+from plugins import mod
+
+userlist = mod.userlist
+commands = mod.commands
 
 def setup_db(irc):
     irc.db.execute('''
@@ -33,7 +35,7 @@ def del_quote(irc, nick, chan, quote):
     setup_db(irc)
 
     # Make sure the user is high enough mode to do this.
-    if min_mode(irc, nick, chan, '%'):
+    if userlist.min_mode(irc, nick, chan, '%'):
         irc.db.execute('DELETE FROM quotes WHERE id = ?', (quote,))
         irc.db.commit()
         return "Quote #{} deleted.".format(quote)
@@ -121,7 +123,7 @@ def find_quote(irc, chan, arg, short = True):
         return 'There was an error searching for that quote: ' + str(e)
 
 
-@command
+@commands.command
 def quote(irc, nick, chan, msg, args):
     """
     Manages a quotes database. No arguments fetch random quotes.
