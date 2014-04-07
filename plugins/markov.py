@@ -1,6 +1,7 @@
 """
     Generate markov chains from the text stored in data/markov.txt
 """
+import os
 import string
 from random import randrange, choice
 from plugins import event
@@ -16,22 +17,27 @@ def reload_markov():
     markovc = {}
     markov_keys = []
 
-    with open('data/markov.txt', 'r', encoding='utf-8') as f:
-        punctuation = string.punctuation.replace('\'', '')
-        punctuation = {ord(c): None for c in punctuation}
-        word_1 = ""
-        word_2 = word_1
+    try:
+        with open('data/markov.txt', 'r+', encoding='utf-8') as f:
+            punctuation = string.punctuation.replace('\'', '')
+            punctuation = {ord(c): None for c in punctuation}
+            word_1 = ""
+            word_2 = word_1
 
-        for line in f:
-            for word in line.split():
-                word   = word.translate(punctuation).lower()
-                word_1 = word_1.translate(punctuation).lower()
-                word_2 = word_2.translate(punctuation).lower()
+            for line in f:
+                for word in line.split():
+                    word   = word.translate(punctuation).lower()
+                    word_1 = word_1.translate(punctuation).lower()
+                    word_2 = word_2.translate(punctuation).lower()
 
-                markovc.setdefault((word_1, word_2), []).append(word)
-                word_1, word_2 = word_2, word
+                    markovc.setdefault((word_1, word_2), []).append(word)
+                    word_1, word_2 = word_2, word
 
-        markov_keys = list(markovc.keys())
+            markov_keys = list(markovc.keys())
+
+    except Exception as e:
+        f = open('data/markov.txt', 'w')
+        f.close()
 
 
 @event('BRUH')
