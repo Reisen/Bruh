@@ -1,13 +1,15 @@
+import inspect
 from collections import defaultdict
-
-# Collect Hooks Locally within the Plugins module. Other plugins and the IRC
-# core use this directly.
-hooks = defaultdict(lambda: [])
 
 # Store references to imported plugins. This dictionary acts as a proxy for
 # inter-plugin communication. This is so plugins can be reloaded independently
 # of each other.
-modules = {}
+#
+# Each module entry contains its own hooks key, which is a list of functions
+# that respond to each IRC event. The reason it is stored in the dictonary
+# along with the relevant module is so that module reloading can remove all old
+# hooks easily.
+modules = defaultdict(dict)
 
 # Proxy object generator. This creates an object that when accessed
 # automatically are passed through to the right object.
@@ -16,9 +18,14 @@ class mod_proxy:
         self.modules = modules
 
     def load_module(self, name):
-        print('Loading {}'.format(name))
         if name not in self.modules:
-            self.modules[name] = __import__('plugins.' + name, globals(), locals(), -1)
+            print('Loading Module: {}'.format(name))
+            self.modules[name] = {
+                'module': None,
+                'hooks': defaultdict(list)
+            }
+
+            self.modules[name]['module'] = __import__('plugins.' + name, globals(), locals(), -1)
 
     def __getattr__(self, key):
         # If a module is being accessed that hasn't yet been loaded (such as on
@@ -36,7 +43,7 @@ class mod_proxy:
                 self.key = key
 
             def __getattr__(self, key):
-                return getattr(mod_closure[self.key], key)
+                return getattr(mod_closure[self.key]['module'], key)
 
         return proxy_mod(key)
 
@@ -44,12 +51,17 @@ mod = mod_proxy(modules)
 
 def event(event_name):
     """Plugins decorate functions using this to hook events."""
-    global hooks
+    global modules
+
+    # Find the calling module name for hook storage.
+    stack = inspect.stack()[1]
+    stack = inspect.getmodule(stack[0])
+    stack = stack.__name__.rsplit('.', 1)[1]
 
     def hook(f):
         # Store the event hooked in the function, for access by other plugins.
         f.event = event_name
-        hooks[event_name].append(f)
+        modules[stack]['hooks'][event_name].append(f)
 
         return f
 

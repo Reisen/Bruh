@@ -3,7 +3,7 @@
     plugins were involved in logging as well.
 """
 
-from inspect import stack
+import inspect
 from plugins import event
 
 # Log Levels
@@ -28,7 +28,7 @@ def log(irc, message, severity = WARNING):
     setup_db(irc)
 
     # Find out who called us and from what function.
-    s = stack()[1]
+    s = inspect.stack()[1]
     plugin_name = s[1].rsplit('/', 1)[1].split('.')[0]
 
     irc.db.execute('INSERT INTO logs (plugin, message, severity) VALUES (?,?,?)', (
