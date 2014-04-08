@@ -5,6 +5,7 @@ from sys import getrefcount
 from collections import defaultdict
 
 hook = mod.hook
+auth = mod.auth
 
 @event('RELOAD')
 def handle_reload(irc):
@@ -12,7 +13,12 @@ def handle_reload(irc):
 
 
 @hook.command
-def reload(irc, nick, chan, msg, args):
+@auth.logged_in(['Admin'])
+def reload(irc, nick, chan, msg, args, user):
+    # Make sure the module exists first of all.
+    if msg not in modules:
+        return "The '{}' module doesn't seem to be loaded, so I can't reload it.".format(msg)
+
     # Get old module and statistics.
     current_mod = modules[msg]['module']
     current_ref = getrefcount(current_mod)
