@@ -5,9 +5,9 @@ import urllib.request
 from urllib.error import URLError
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def down(irc, nick, chan, msg, args):
     """
     Check if a website is down.

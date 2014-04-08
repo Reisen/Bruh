@@ -4,7 +4,7 @@
 """
 from plugins import event, mod
 
-commands = mod.commands
+hook = mod.hook
 
 # Handles server PINGS
 @event('PING')
@@ -34,6 +34,6 @@ def ctcps(irc, prefix, command, args):
 
 
 # Users can 'ping' bruh by using 'bruh!' in a message for it to respond to.
-@commands.regex(r'$nick!')
+@hook.regex(r'$nick!')
 def respond(irc, nick, chan, match, args):
     return nick + '!'

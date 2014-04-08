@@ -8,7 +8,7 @@ from plugins import event
 from functools import wraps
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
 def DF(password, salt, c, dkLen):
     def F(password, salt, c, i):
@@ -134,7 +134,7 @@ def do_authenticate(irc, nick, password):
     return DF(password.encode('UTF-8'), salt, 1000, 64) == key
 
 
-@commands.command
+@hook.command
 def logout(irc, nick, chan, msg, args):
     """
     Logout of the bot, ending an authenticated session.
@@ -147,7 +147,7 @@ def logout(irc, nick, chan, msg, args):
     return "You are now logged out."
 
 
-@commands.command
+@hook.command
 def login(irc, nick, chan, msg, args):
     """
     Authenticate with the bot.
@@ -178,7 +178,7 @@ def login(irc, nick, chan, msg, args):
         return "There was an error logging in. This was an error in the bot itself, please report it."
 
 
-@commands.command
+@hook.command
 @authenticated
 def destroy(irc, nick, chan, msg, args, user):
     """
@@ -193,7 +193,7 @@ def destroy(irc, nick, chan, msg, args, user):
     return "Your user has been murdered."
 
 
-@commands.command
+@hook.command
 @authenticated(['Admin'])
 def modify(irc, nick, chan, msg, args, user):
     """
@@ -227,7 +227,7 @@ def modify(irc, nick, chan, msg, args, user):
         return 'Error occured modifying user: {}'.format(str(e))
 
 
-@commands.command
+@hook.command
 @authenticated
 def password(irc, nick, chan, msg, args, user):
     """
@@ -263,7 +263,7 @@ def password(irc, nick, chan, msg, args, user):
     return "Successfully changed password."
 
 
-@commands.command
+@hook.command
 def register(irc, nick, chan, msg, args):
     """
     Register a new user with the bot.

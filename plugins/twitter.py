@@ -5,9 +5,9 @@ from json import loads
 from TwitterAPI import TwitterAPI
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def twitter(irc, nick, chan, msg, args):
     '''
     Retrieves requested users latest tweet.

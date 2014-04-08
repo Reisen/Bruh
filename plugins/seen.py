@@ -5,7 +5,7 @@
 from time import time
 from plugins import event, mod
 
-commands = mod.commands
+hook = mod.hook
 
 distances = (
     (60 * 60 * 24 * 365, 'year'),
@@ -39,7 +39,7 @@ def setup_db(irc):
     irc.db.commit()
 
 
-@commands.command
+@hook.command
 def tell(irc, nick, chan, msg, args):
     """
     Leave a message for when a user is next active.
@@ -59,7 +59,7 @@ def tell(irc, nick, chan, msg, args):
     return 'I will pass that along.'
 
 
-@commands.command
+@hook.command
 def seen(irc, nick, chan, msg, args):
     """
     Check when a user was last seen.

@@ -8,7 +8,7 @@ from plugins import event, mod
 from collections import defaultdict
 from functools import wraps
 
-commands = mod.commands
+hook = mod.hook
 
 def min_mode(irc, nick, chan, min_mode):
     # Only allow the command to continue if the user executing the command is
@@ -48,7 +48,7 @@ def mode(req_mode):
     return mode_function
 
 
-@commands.command
+@hook.command
 @mode('%')
 def usercount(irc, nick, chan, msg, args):
     return "There are {} users in the channel currently.".format(len(irc.userlist[chan]))

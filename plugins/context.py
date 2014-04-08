@@ -8,7 +8,7 @@ from plugins import event, mod
 from collections import defaultdict
 
 authentication = mod.authentication
-commands       = mod.commands
+hook           = mod.hook
 
 logs = defaultdict(lambda: [])
 
@@ -38,7 +38,7 @@ def message_tracker(irc, prefix, command, args):
         return
 
 
-@commands.command
+@hook.command
 def last(irc, nick, chan, msg, args):
     """
     Print messages the bot has recently seen.
@@ -103,7 +103,7 @@ def last(irc, nick, chan, msg, args):
         return None
 
 
-@commands.command
+@hook.command
 @authentication.authenticated
 def repeat(irc, nick, chan, msg, args, user):
     """

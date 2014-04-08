@@ -8,9 +8,9 @@ from urllib.error import URLError
 from urllib.request import urlopen
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.regex(r'reddit\.com/r/([^/]+)/comments/([\w]+)')
+@hook.regex(r'reddit\.com/r/([^/]+)/comments/([\w]+)')
 def reddit_match(irc, nick, chan, match, args):
     # Only bother doing the request if the Youtube plugin exists. Otherwise
     # this whole function is a no-op.

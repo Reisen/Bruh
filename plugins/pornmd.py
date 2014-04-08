@@ -7,9 +7,9 @@ from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def pornmd(irc, nick, chan, msg, args):
     '''Return peoples live searches from PornMD'''
     orientation = 's'

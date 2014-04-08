@@ -6,7 +6,7 @@ from random import choice, randrange, shuffle
 from plugins import mod
 
 userlist = mod.userlist
-commands = mod.commands
+hook     = mod.hook
 
 def setup_db(irc):
     irc.db.execute('''
@@ -123,7 +123,7 @@ def find_quote(irc, chan, arg, short = True):
         return 'There was an error searching for that quote: ' + str(e)
 
 
-@commands.command
+@hook.command
 def quote(irc, nick, chan, msg, args):
     """
     Manages a quotes database. No arguments fetch random quotes.

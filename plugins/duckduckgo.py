@@ -8,7 +8,7 @@ from urllib.request import urlopen, Request
 from plugins import mod
 import json
 
-commands = mod.commands
+hook = mod.hook
 
 def handle_exclusive(query):
     return query['Answer']
@@ -35,7 +35,7 @@ def handle_disambiguation(query):
     return query['RelatedTopics'][0]['Text']
 
 
-@commands.command(['ddg'])
+@hook.command(['ddg'])
 def duckduckgo(irc, nick, chan, msg, args):
     """
     DuckDuckGo Instant API.

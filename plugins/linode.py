@@ -8,7 +8,7 @@ from json import loads
 from urllib.request import urlopen
 from plugins import mod
 
-commands       = mod.commands
+hook           = mod.hook
 authentication = mod.authentication
 
 
@@ -47,7 +47,7 @@ def linode_list(irc, linode_key):
         return "Error occured performing API call."
 
 
-@commands.command
+@hook.command
 @authentication.authenticated
 def linode(irc, nick, chan, msg, args, user):
     """

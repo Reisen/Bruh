@@ -21,6 +21,7 @@ def quit(signal, frame):
         for hook in hooks.get('GETOUT', []):
             hook()
         print('Done')
+
     except Exception as e:
         print('E  An Exception occured trying to shut-down.')
         print(e)

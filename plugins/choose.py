@@ -4,9 +4,9 @@
 import random
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def choose(irc, nick, chan, msg, args):
     """
     Chooses a value for you.

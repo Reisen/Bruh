@@ -7,7 +7,7 @@ from urllib.request import urlopen
 from re import sub
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
 def wikisearch(msg):
     try:
@@ -41,7 +41,7 @@ def wikiget(msg):
         return "No article was found with that title."
 
 
-@commands.command
+@hook.command
 def wikipedia(irc, nick, chan, msg, args):
     '''
     Search and display wikipedia articles.

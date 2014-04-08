@@ -6,9 +6,9 @@ from urllib.parse import quote_plus
 from urllib.request import urlopen
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def urban(irc, nick, chan, msg, args):
     """
     Searches urban dictionary.

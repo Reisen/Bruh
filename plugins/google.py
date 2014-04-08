@@ -8,9 +8,9 @@ from urllib.request import urlopen, Request
 from html.parser import HTMLParser
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command(['g'])
+@hook.command(['g'])
 def google(irc, nick, chan, msg, args):
     """
     Google web search.
@@ -60,7 +60,7 @@ def google(irc, nick, chan, msg, args):
         return 'No results found.'
 
 
-@commands.command
+@hook.command
 def image(irc, nick, chan, msg, args):
     """
     Google image search (returns any of the first 4 results)

@@ -8,9 +8,9 @@ from urllib.parse import quote_plus
 from html.parser import HTMLParser
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
-@commands.command
+@hook.command
 def calculate(irc, nick, chan, msg, args):
     """
     Use Google's Calculator

@@ -7,7 +7,7 @@ from xml.etree import ElementTree
 from time import time
 from plugins import mod
 
-commands = mod.commands
+hook = mod.hook
 
 # Globals here aren't a good idea, should really be caching per channel,
 # however in reality very few people are going to use this module so I'll fix
@@ -77,7 +77,7 @@ def gelbooru_posts(tags):
     )
 
 
-@commands.command
+@hook.command
 def gelbooru(irc, nick, chan, msg, args):
     """
     Query the gelbooru API. No arguments returns a random comment.

@@ -2,7 +2,7 @@
 import random, re
 from plugins import mod
 
-commands       = mod.commands
+hook           = mod.hook
 authentication = mod.authentication
 
 def setup_db(irc):
@@ -16,7 +16,7 @@ def setup_db(irc):
     irc.db.commit()
 
 
-@commands.command
+@hook.command
 def remember(irc, nick, chan, msg, args):
     """
     Adds new facts to the database.
@@ -51,7 +51,7 @@ def remember(irc, nick, chan, msg, args):
     return "I'll remember that."
 
 
-@commands.command
+@hook.command
 @authentication.authenticated
 def forget(irc, nick, chan, msg, args, user):
     """
@@ -66,7 +66,7 @@ def forget(irc, nick, chan, msg, args, user):
     return "I've forgotten about {}.".format(msg)
 
 
-@commands.regex(r'^\?([^\s]+)$')
+@hook.regex(r'^\?([^\s]+)$')
 def get_fact(irc, nick, chan, match, args):
     """
     Parses ?A messages to retrieve facts.

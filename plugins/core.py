@@ -5,7 +5,7 @@
 """
 from plugins import event, mod
 
-commands       = mod.commands
+hook           = mod.hook
 authentication = mod.authentication
 
 def reply(self, message):
@@ -67,21 +67,21 @@ def addCoreFunctionality(irc):
 
 # Implement commands wrapping core functionality of the bot. Allows controlling
 # the bot more easily for regular IRC like behaviour.
-@commands.command(['say'])
+@hook.command(['say'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _say(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     irc.say(target, msg)
 
 
-@commands.command(['notice'])
+@hook.command(['notice'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _notice(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
     irc.notice(target, msg)
 
 
-@commands.command(['action'])
+@hook.command(['action'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _action(irc, nick, chan, msg, args, user):
     target, msg = msg.split(' ', 1)
@@ -89,19 +89,19 @@ def _action(irc, nick, chan, msg, args, user):
     irc.action(target, msg)
 
 
-@commands.command(['join'])
+@hook.command(['join'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _join(irc, nick, chan, msg, args, user):
     irc.join(msg)
 
 
-@commands.command(['part'])
+@hook.command(['part'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _part(irc, nick, chan, msg, args, user):
     irc.part(msg)
 
 
-@commands.command(['kick'])
+@hook.command(['kick'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _kick(irc, nick, chan, msg, args, user):
     target, *msg = msg.split(' ', 1)
@@ -109,25 +109,25 @@ def _kick(irc, nick, chan, msg, args, user):
     irc.send('KICK {} {} :{}'.format(chan, target, msg))
 
 
-@commands.command(['op'])
+@hook.command(['op'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _op(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +o {}'.format(chan, msg))
 
 
-@commands.command(['deop'])
+@hook.command(['deop'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _deop(irc, nick, chan, msg, args, user):
     irc.send('MODE {} -o {}'.format(chan, msg))
 
 
-@commands.command(['voice'])
+@hook.command(['voice'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _voice(irc, nick, chan, msg, args, user):
     irc.send('MODE {} +v {}'.format(chan, msg))
 
 
-@commands.command(['devoice'])
+@hook.command(['devoice'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _devoice(irc, nick, chan, msg, args, user):
     irc.send('MODE {} -v {}'.format(chan, msg))
@@ -135,7 +135,7 @@ def _devoice(irc, nick, chan, msg, args, user):
 
 # Preferably, don't use this. Adding it to test things on my own personal IRC
 # instance. The bot being in oper mode is just bad news.
-@commands.command(['oper'])
+@hook.command(['oper'])
 @authentication.authenticated(['Admin', 'Moderator'])
 def _operator(irc, nick, chan, msg, args, user):
     irc.send('OPER {}'.format(msg))
