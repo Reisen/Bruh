@@ -6,8 +6,8 @@ import string
 from random import randrange, choice
 from plugins import event, mod
 
-hook           = mod.hook
-authentication = mod.authentication
+hook = mod.hook
+auth = mod.auth
 
 # Markov state. All strings generated from these.
 markovc = {}
@@ -47,7 +47,7 @@ def initialize_markov(irc):
 
 
 @hook.command
-@authentication.authenticated(['Admin', 'Moderator'])
+@auth.authenticated(['Admin', 'Moderator'])
 def chain(irc, nick, chan, msg, args, user):
     reload_markov()
     return 'Reloaded markov chain.'

@@ -8,9 +8,8 @@ from json import loads
 from urllib.request import urlopen
 from plugins import mod
 
-hook           = mod.hook
-authentication = mod.authentication
-
+hook = mod.hook
+auth = mod.auth
 
 def validate_key(key):
     if len(key) < 64:
@@ -48,7 +47,7 @@ def linode_list(irc, linode_key):
 
 
 @hook.command
-@authentication.authenticated
+@auth.authenticated
 def linode(irc, nick, chan, msg, args, user):
     """
     Provide access to control and display information about your linodes. Requires authentication.

@@ -2,8 +2,8 @@
 import random, re
 from plugins import mod
 
-hook           = mod.hook
-authentication = mod.authentication
+hook = mod.hook
+auth = mod.auth
 
 def setup_db(irc):
     irc.db.execute('''
@@ -52,7 +52,7 @@ def remember(irc, nick, chan, msg, args):
 
 
 @hook.command
-@authentication.authenticated
+@auth.authenticated
 def forget(irc, nick, chan, msg, args, user):
     """
     Remove facts from the database.

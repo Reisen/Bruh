@@ -7,8 +7,8 @@ from time import sleep
 from plugins import event, mod
 from collections import defaultdict
 
-authentication = mod.authentication
-hook           = mod.hook
+auth = mod.auth
+hook = mod.hook
 
 logs = defaultdict(lambda: [])
 
@@ -104,7 +104,7 @@ def last(irc, nick, chan, msg, args):
 
 
 @hook.command
-@authentication.authenticated
+@auth.authenticated
 def repeat(irc, nick, chan, msg, args, user):
     """
     Repeat messages the bot has recently seen. Identical to .last, but per line.

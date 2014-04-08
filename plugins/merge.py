@@ -7,8 +7,8 @@ from time import sleep
 from plugins import event, mod
 from collections import defaultdict
 
-hook           = mod.hook
-authentication = mod.authentication
+hook = mod.hook
+auth = mod.auth
 
 merge_list = defaultdict(lambda:set())
 
@@ -46,7 +46,7 @@ def merge_thru(irc, prefix, command, args):
 
 
 @hook.command
-@authentication.authenticated(['Admin', 'Moderator'])
+@auth.authenticated(['Admin', 'Moderator'])
 def merge(irc, nick, chan, msg, args, user):
     """
     Merge with the bot.
