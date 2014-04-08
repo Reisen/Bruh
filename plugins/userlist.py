@@ -48,12 +48,6 @@ def mode(req_mode):
     return mode_function
 
 
-@command
-@mode('%')
-def usercount(irc, nick, chan, msg, args):
-    return "There are {} users in the channel currently.".format(len(irc.userlist[chan]))
-
-
 @event('BRUH')
 def prepare_userlist(irc):
     """Load a userlist dict into irc objects."""
