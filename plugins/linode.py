@@ -47,7 +47,7 @@ def linode_list(irc, linode_key):
 
 
 @hook.command
-@auth.authenticated
+@auth.logged_in
 def linode(irc, nick, chan, msg, args, user):
     """
     Provide access to control and display information about your linodes. Requires authentication.

@@ -68,7 +68,7 @@ def setup_db(irc):
     irc.db.commit()
 
 
-def authenticated(auth_arg):
+def logged_in(auth_arg):
     # We wrap the wrapper so that we can manipulate the wrappers arguments with
     # additional information.
     def wrap_wrapper(f):
@@ -179,7 +179,7 @@ def login(irc, nick, chan, msg, args):
 
 
 @hook.command
-@authenticated
+@logged_in
 def destroy(irc, nick, chan, msg, args, user):
     """
     Removes your user from the database and destroys all data associated with it.
@@ -194,7 +194,7 @@ def destroy(irc, nick, chan, msg, args, user):
 
 
 @hook.command
-@authenticated(['Admin'])
+@logged_in(['Admin'])
 def modify(irc, nick, chan, msg, args, user):
     """
     Modify or view state stored about another user. Must be an admin.
@@ -228,7 +228,7 @@ def modify(irc, nick, chan, msg, args, user):
 
 
 @hook.command
-@authenticated
+@logged_in
 def password(irc, nick, chan, msg, args, user):
     """
     Change the password for your current login.

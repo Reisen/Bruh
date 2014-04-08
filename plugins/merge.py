@@ -46,7 +46,7 @@ def merge_thru(irc, prefix, command, args):
 
 
 @hook.command
-@auth.authenticated(['Admin', 'Moderator'])
+@auth.logged_in(['Admin', 'Moderator'])
 def merge(irc, nick, chan, msg, args, user):
     """
     Merge with the bot.

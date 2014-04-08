@@ -104,7 +104,7 @@ def last(irc, nick, chan, msg, args):
 
 
 @hook.command
-@auth.authenticated
+@auth.logged_in
 def repeat(irc, nick, chan, msg, args, user):
     """
     Repeat messages the bot has recently seen. Identical to .last, but per line.

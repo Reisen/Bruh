@@ -47,7 +47,7 @@ def initialize_markov(irc):
 
 
 @hook.command
-@auth.authenticated(['Admin', 'Moderator'])
+@auth.logged_in(['Admin', 'Moderator'])
 def chain(irc, nick, chan, msg, args, user):
     reload_markov()
     return 'Reloaded markov chain.'

@@ -52,7 +52,7 @@ def remember(irc, nick, chan, msg, args):
 
 
 @hook.command
-@auth.authenticated
+@auth.logged_in
 def forget(irc, nick, chan, msg, args, user):
     """
     Remove facts from the database.
