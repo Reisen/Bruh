@@ -30,10 +30,8 @@ def reload(irc, nick, chan, msg, args, user):
     reload_mod  = reload_module(current_mod)
     reload_ref  = getrefcount(reload_mod)
 
-    return 'Reloaded {}, Old Refs: {}, New Refs: {}, ID: {} -> {}'.format(
+    return 'Reloaded {}, Old Refs: {}, New Refs: {}'.format(
         msg,
         current_ref,
-        reload_ref,
-        id(current_mod),
-        id(reload_mod)
+        reload_ref
     )
