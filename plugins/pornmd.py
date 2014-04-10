@@ -7,7 +7,8 @@ from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
 from plugins import mod
 
-hook = mod.hook
+hook  = mod.hook
+stats = mod.stats
 
 @hook.command
 def pornmd(irc, nick, chan, msg, args):
@@ -27,6 +28,7 @@ def pornmd(irc, nick, chan, msg, args):
         query = json.loads(urlopen(request, timeout = 7).read().decode('UTF-8'))
         query = [choice(query)['keyword'] for _ in range(6)]
 
+        stats.record_stat(irc, nick, chan, 'Porn', updater = lambda v: int(v) + 1, default = 0)
         return 'Recent PornMD Searches: {}'.format(', '.join(query))
 
     except Exception as e:

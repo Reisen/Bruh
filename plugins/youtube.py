@@ -8,7 +8,8 @@ from urllib.request import urlopen
 from urllib.parse import quote_plus
 from plugins import event, mod
 
-hook = mod.hook
+hook  = mod.hook
+stats = mod.stats
 
 def setup_db(irc):
     irc.db.execute('''
@@ -66,10 +67,12 @@ def youtube_match(irc, nick, chan, match, args):
     try:
         status = irc.db.execute('SELECT status FROM youtube_optout WHERE channel = ?', (chan,)).fetchone()
         if status is None or status[0] != 0:
+            stats.record_stat(irc, nick, chan, 'Youtube', updater = lambda v: int(v) + 1, default = 0)
             return fetch_video(match.group(1))
 
     except Exception as e:
         # No row for records just means opt-in by default I guess.
+        stats.record_stat(irc, nick, chan, 'Youtube', updater = lambda v: int(v) + 1, default = 0)
         return fetch_video(match.group(1))
 
 

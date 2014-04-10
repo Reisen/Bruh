@@ -63,7 +63,7 @@ def message_stats(irc, prefix, command, args):
         # Count highlights for any highlight in the message.
         for username in irc.userlist[chan]:
             highlight = r'\b{}\b'.format(re.escape(username))
-            if re.search(highlight, mesg):
+            if re.search(highlight, mesg, re.I):
                 record_stat(irc, username, chan, 'Highlight', updater = increment, default = 0)
 
         # Count questions asked.

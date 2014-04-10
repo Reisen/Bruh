@@ -8,7 +8,8 @@ from urllib.request import urlopen, Request
 from html.parser import HTMLParser
 from plugins import mod
 
-hook = mod.hook
+hook  = mod.hook
+stats = mod.stats
 
 @hook.command(['g'])
 def google(irc, nick, chan, msg, args):
@@ -47,6 +48,8 @@ def google(irc, nick, chan, msg, args):
             query['title'],
             query['content']
         )
+
+        stats.record_stat(irc, nick, chan, 'Googles', updater = lambda v: int(v) + 1, default = 0)
 
         # Strip anything useless, replace HTML entities, and output.
         return HTMLParser().unescape(
