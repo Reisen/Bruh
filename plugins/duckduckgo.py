@@ -5,9 +5,10 @@
 """
 from urllib.parse import quote_plus, unquote_plus, urlencode
 from urllib.request import urlopen, Request
-from plugins.commands import command
+from plugins import mod
 import json
 
+hook = mod.hook
 
 def handle_exclusive(query):
     return query['Answer']
@@ -34,7 +35,7 @@ def handle_disambiguation(query):
     return query['RelatedTopics'][0]['Text']
 
 
-@command(['ddg'])
+@hook.command(['ddg'])
 def duckduckgo(irc, nick, chan, msg, args):
     """
     DuckDuckGo Instant API.

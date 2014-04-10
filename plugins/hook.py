@@ -33,22 +33,22 @@ from traceback import print_exc
 
 # Stored commands. Command names mapped to function objects.
 commandlist = {}
-patternlist = []
+patternlist = {}
 
 def command(f):
     """This decorator creates new command entry."""
     # If the argument to the function is a list, then the decorator has
-    # been called witha list like so:
+    # been called with a list of alternative command names like so:
     #
     #   @command(['g', 'gog'])
     #
     # This list is a list of commands that must also explicitly match the
-    # command. This helps resolve naming conflicts, for example. The github
+    # command. This helps resolve naming conflicts, for example: the github
     # plugin registers .github, and the google plugin registers .google -
     # however 99% of the time someone doing .g will want to google, but because
     # of Bruh's matching, this will conflict and the bot will ask which plugin
     # the user wanted. Providing an explicit short name to the google plugin
-    # with `@command(['g'])` can solve this.
+    # with `@command(['g'])` solves this.
     if isinstance(f, list):
         def shortname_wrapper(g):
             for shortname in f:
@@ -68,7 +68,7 @@ def command(f):
 def regex(pattern):
     """This decorator creates a new pattern matching entry."""
     def wrapper(f):
-        patternlist.append((pattern, f))
+        patternlist[pattern] = f
         return f
 
     return wrapper
@@ -103,7 +103,7 @@ def commands(irc, prefix, command, args):
     # that match and pass control to them.
     command_prefix = irc.config.get('prefix', '.')
     if args[1][0] != command_prefix:
-        for pattern, callback in patternlist:
+        for pattern, callback in patternlist.items():
             # Replace matching configuration options.
             for item in irc.server:
                 pattern = pattern.replace('$' + item, str(irc.server[item]))

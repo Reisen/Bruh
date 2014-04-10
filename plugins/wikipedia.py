@@ -1,13 +1,13 @@
 """
     Search and display Wikipedia articles
 """
-
-from plugins.commands import command
-
+import json
 from urllib.parse import quote_plus
 from urllib.request import urlopen
 from re import sub
-import json
+from plugins import mod
+
+hook = mod.hook
 
 def wikisearch(msg):
     try:
@@ -41,7 +41,7 @@ def wikiget(msg):
         return "No article was found with that title."
 
 
-@command
+@hook.command
 def wikipedia(irc, nick, chan, msg, args):
     '''
     Search and display wikipedia articles.

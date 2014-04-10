@@ -2,9 +2,11 @@
     Help choose a value for people who aren't able to make their own decisions
 """
 import random
-from plugins.commands import command
+from plugins import mod
 
-@command
+hook = mod.hook
+
+@hook.command
 def choose(irc, nick, chan, msg, args):
     """
     Chooses a value for you.

@@ -4,11 +4,11 @@
     the current state of the user-list, it also provides hooking callbacks for
     when users leave or join.
 """
-from plugins import event
-from plugins.commands import command
+from plugins import event, mod
 from collections import defaultdict
 from functools import wraps
 
+hook = mod.hook
 
 def min_mode(irc, nick, chan, min_mode):
     # Only allow the command to continue if the user executing the command is

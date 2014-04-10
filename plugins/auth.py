@@ -6,7 +6,9 @@
 import hmac, struct, hashlib, os, base64
 from plugins import event
 from functools import wraps
-from plugins.commands import command
+from plugins import mod
+
+hook = mod.hook
 
 def DF(password, salt, c, dkLen):
     def F(password, salt, c, i):
@@ -66,7 +68,7 @@ def setup_db(irc):
     irc.db.commit()
 
 
-def authenticated(auth_arg):
+def logged_in(auth_arg):
     # We wrap the wrapper so that we can manipulate the wrappers arguments with
     # additional information.
     def wrap_wrapper(f):
@@ -132,7 +134,7 @@ def do_authenticate(irc, nick, password):
     return DF(password.encode('UTF-8'), salt, 1000, 64) == key
 
 
-@command
+@hook.command
 def logout(irc, nick, chan, msg, args):
     """
     Logout of the bot, ending an authenticated session.
@@ -145,7 +147,7 @@ def logout(irc, nick, chan, msg, args):
     return "You are now logged out."
 
 
-@command
+@hook.command
 def login(irc, nick, chan, msg, args):
     """
     Authenticate with the bot.
@@ -176,8 +178,8 @@ def login(irc, nick, chan, msg, args):
         return "There was an error logging in. This was an error in the bot itself, please report it."
 
 
-@command
-@authenticated
+@hook.command
+@logged_in
 def destroy(irc, nick, chan, msg, args, user):
     """
     Removes your user from the database and destroys all data associated with it.
@@ -191,8 +193,8 @@ def destroy(irc, nick, chan, msg, args, user):
     return "Your user has been murdered."
 
 
-@command
-@authenticated(['Admin'])
+@hook.command
+@logged_in(['Admin'])
 def modify(irc, nick, chan, msg, args, user):
     """
     Modify or view state stored about another user. Must be an admin.
@@ -225,8 +227,8 @@ def modify(irc, nick, chan, msg, args, user):
         return 'Error occured modifying user: {}'.format(str(e))
 
 
-@command
-@authenticated
+@hook.command
+@logged_in
 def password(irc, nick, chan, msg, args, user):
     """
     Change the password for your current login.
@@ -261,7 +263,7 @@ def password(irc, nick, chan, msg, args, user):
     return "Successfully changed password."
 
 
-@command
+@hook.command
 def register(irc, nick, chan, msg, args):
     """
     Register a new user with the bot.

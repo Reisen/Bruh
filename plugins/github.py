@@ -3,9 +3,10 @@
     info too. Channels can have these announced if they so wish to.
 """
 from json import loads
-from plugins import event
+from plugins import event, mod
 from bottle import route, request, post
-from plugins.commands import command
+
+hook = mod.hook
 
 # Dirty solution to route requests lacking context. Keep a list of all IRC
 # objects and iterate through them on web-requests. This is akin to having a
@@ -87,7 +88,7 @@ def github_list(irc, chan):
     return "Tracked repositories: {}".format(', '.join(map(lambda v: v[0], repos)))
 
 
-@command
+@hook.command
 def github(irc, nick, chan, msg, args):
     """
     Manage tracked Github projects.

@@ -1,14 +1,15 @@
 """
     Return live search results from PornMD.
 """
-from plugins.commands import command
+import json
 from random import choice
-
 from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
-import json
+from plugins import mod
 
-@command
+hook = mod.hook
+
+@hook.command
 def pornmd(irc, nick, chan, msg, args):
     '''Return peoples live searches from PornMD'''
     orientation = 's'

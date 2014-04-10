@@ -1,11 +1,13 @@
 """
     A plugin to query the Gelbooru API. The comments are horrifying.
 """
-from plugins.commands import command
 from urllib.error import URLError
 from urllib.request import urlopen
 from xml.etree import ElementTree
 from time import time
+from plugins import mod
+
+hook = mod.hook
 
 # Globals here aren't a good idea, should really be caching per channel,
 # however in reality very few people are going to use this module so I'll fix
@@ -75,7 +77,7 @@ def gelbooru_posts(tags):
     )
 
 
-@command
+@hook.command
 def gelbooru(irc, nick, chan, msg, args):
     """
     Query the gelbooru API. No arguments returns a random comment.

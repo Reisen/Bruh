@@ -5,7 +5,7 @@
 
 import os, sys, signal, argparse, json
 from traceback import print_exc
-from plugins import hooks
+from plugins import mod, modules
 from irc import *
 
 
@@ -18,12 +18,14 @@ servers = []
 def quit(signal, frame):
     try:
         print('\n!  Sending shutdown warning to plugins...')
-        for hook in hooks.get('GETOUT', []):
-            hook()
+        for module in modules.values():
+            for hook in module['hooks'].get('GETOUT', []):
+                hook()
         print('Done')
+
     except Exception as e:
         print('E  An Exception occured trying to shut-down.')
-        print(e)
+        print_exc()
 
     sys.exit(0)
 
@@ -39,22 +41,21 @@ def loopDefault(server):
     # pre-parsed into (prefix, command, args) as in the RFC.
     try:
         for prefix, command, args in server():
-            # If no plugins have registered for this messages event event type, it
-            # is not in the hooks dictionary and the message can just be ignored.
-            if command not in hooks:
-                continue
+            # The hooks dictionary contains a list of functions that have
+            # registered for an event.
+            for module in modules.values():
+                if command not in module['hooks']:
+                    continue
 
-            # Otherwise, the hooks dictionary contains a list of functions that
-            # have registered for that event.
-            for hook in hooks[command]:
-                if server.config.get('debug', False):
-                    print('!  {} Triggering {}'.format(command, str(hook)))
+                for hook in module['hooks'][command]:
+                    if server.config.get('debug', False):
+                        print('!  {} Triggering {}'.format(command, str(hook)))
 
-                # The last message is also stored in the server itself.  This state
-                # is useful when inspecting the server during messages. It's not
-                # necessarily useful for plugins themselves.
-                server.parsed_message = (prefix, command, args)
-                hook(server, *server.parsed_message)
+                    # The last message is also stored in the server itself.  This state
+                    # is useful when inspecting the server during messages. It's not
+                    # necessarily useful for plugins themselves.
+                    server.parsed_message = (prefix, command, args)
+                    hook(server, *server.parsed_message)
 
     except (ValueError, OSError) as e:
         # This will normally happen if for some reason the connection has been
@@ -83,6 +84,7 @@ if __name__ == '__main__':
     try:
         with open('config') as f:
             config = json.loads(f.read())
+
     except IOError:
         with open('config', 'w') as f:
             default_config = {
@@ -113,6 +115,7 @@ if __name__ == '__main__':
             print('There was no config file, one has been created.')
             print('Edit it and run the bot again.\n')
             sys.exit(0)
+
     except Exception as e:
         print('Failed to read configuration file:\n    ')
         print(e)
@@ -133,7 +136,7 @@ if __name__ == '__main__':
 
     # Plugins need to be imported before IRC connections are made, as plugins
     # are used to handle core IRC messages.
-    plugins   = {}
+    plugins   = mod.modules
     blacklist = config.get('blacklist', [])
     blacklist.append('__init__.py')
 
@@ -152,7 +155,7 @@ if __name__ == '__main__':
 
         # __import__ uses pythons dot syntax to import, so remove the .py ext.
         name = plugin[:-3]
-        plugins[name] = __import__('plugins.' + name, globals(), locals(), -1)
+        mod.load_module(name)
 
         if config.get('debug', False):
             print('!  Loaded Plugin: {}'.format(name))
@@ -187,8 +190,9 @@ if __name__ == '__main__':
         # to allow plugins to do any pre-server handling configuration. No
         # plugins are guaranteed to have been loaded at this point, don't use
         # this event for any inter-plugin operations (NO DATABASES).
-        for hook in hooks.get('BRUH', []):
-            hook(connection)
+        for module in modules.values():
+            for hook in module['hooks'].get('BRUH', []):
+                hook(connection)
 
         # Save the server and finish joining channels.
         servers.append(connection)

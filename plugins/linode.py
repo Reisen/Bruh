@@ -6,9 +6,10 @@
 from base64 import b64decode
 from json import loads
 from urllib.request import urlopen
-from plugins.commands import command
-from plugins.authentication import authenticated
+from plugins import mod
 
+hook = mod.hook
+auth = mod.auth
 
 def validate_key(key):
     if len(key) < 64:
@@ -45,8 +46,8 @@ def linode_list(irc, linode_key):
         return "Error occured performing API call."
 
 
-@command
-@authenticated
+@hook.command
+@auth.logged_in
 def linode(irc, nick, chan, msg, args, user):
     """
     Provide access to control and display information about your linodes. Requires authentication.

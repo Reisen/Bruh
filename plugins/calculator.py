@@ -3,12 +3,14 @@
 """
 import re
 from json import loads
-from plugins.commands import command
 from urllib.request import urlopen, Request
 from urllib.parse import quote_plus
 from html.parser import HTMLParser
+from plugins import mod
 
-@command
+hook = mod.hook
+
+@hook.command
 def calculate(irc, nick, chan, msg, args):
     """
     Use Google's Calculator

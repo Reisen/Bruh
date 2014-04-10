@@ -1,8 +1,9 @@
 """This plugin implements a lot of functionality of infobot."""
 import random, re
-from plugins.commands import regex, command
-from plugins.database import *
-from plugins.authentication import authenticated
+from plugins import mod
+
+hook = mod.hook
+auth = mod.auth
 
 def setup_db(irc):
     irc.db.execute('''
@@ -15,7 +16,7 @@ def setup_db(irc):
     irc.db.commit()
 
 
-@command
+@hook.command
 def remember(irc, nick, chan, msg, args):
     """
     Adds new facts to the database.
@@ -50,8 +51,8 @@ def remember(irc, nick, chan, msg, args):
     return "I'll remember that."
 
 
-@command
-@authenticated
+@hook.command
+@auth.logged_in
 def forget(irc, nick, chan, msg, args, user):
     """
     Remove facts from the database.
@@ -65,7 +66,7 @@ def forget(irc, nick, chan, msg, args, user):
     return "I've forgotten about {}.".format(msg)
 
 
-@regex(r'^\?([^\s]+)$')
+@hook.regex(r'^\?([^\s]+)$')
 def get_fact(irc, nick, chan, match, args):
     """
     Parses ?A messages to retrieve facts.
