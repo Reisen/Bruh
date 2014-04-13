@@ -213,7 +213,13 @@ def modify(irc, nick, chan, msg, args, user):
         # Attempt to fetch current key value, or update key value to the new
         # value provided by the user.
         if value:
-            irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (userid, key, value[0]))
+            # If the user is modifying themself, then we should modify them through
+            # the user argument, not through IRC.
+            if target == nick:
+                user[key] = value[0]
+            else:
+                irc.db.execute('INSERT OR REPLACE INTO user_properties VALUES (?, ?, ?)', (userid, key, value[0]))
+
             return 'Key Changed: {} = {} for {}'.format(key, value[0], target)
 
         value = irc.db.execute('SELECT * FROM user_properties WHERE user_id = ? AND key = ?', (userid, key)).fetchone()
