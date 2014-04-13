@@ -39,58 +39,83 @@ def record_stat(irc, nick, chan, stat, value = None, updater = None, default = N
 
 @event('PRIVMSG')
 def message_stats(irc, prefix, command, args):
-    if args[0][0] == '#':
-        setup_db(irc)
+    try:
+        if args[0][0] == '#':
+            setup_db(irc)
 
-        # Extract important information from the IRC args. The args argument is
-        # the raw IRC message information so we have to get this out ourselves.
-        nick = prefix.split('!')[0]
-        chan = args[0]
-        mesg = args[1]
+            # Extract important information from the IRC args. The args argument is
+            # the raw IRC message information so we have to get this out ourselves.
+            nick = prefix.split('!')[0]
+            chan = args[0]
+            mesg = args[1]
 
-        # Count total number of lines a user has said.
-        def increment(old_value):
-            return int(old_value) + 1
+            # Count total number of lines a user has said.
+            def increment(old_value):
+                return int(old_value) + 1
 
-        record_stat(irc, nick, chan, 'Messages', updater = increment, default = 0)
+            record_stat(irc, nick, chan, 'Messages', updater = increment, default = 0)
 
-        # Count total number of words a user has said.
-        def count_words(old_value):
-            return len(mesg.split()) + int(old_value)
+            # Count total number of words a user has said.
+            def count_words(old_value):
+                return len(mesg.split()) + int(old_value)
 
-        record_stat(irc, nick, chan, 'Words', updater = count_words, default = 0)
+            record_stat(irc, nick, chan, 'Words', updater = count_words, default = 0)
 
-        # Count highlights for any highlight in the message.
-        for username in irc.userlist[chan]:
-            highlight = r'\b{}\b'.format(re.escape(username))
-            if re.search(highlight, mesg, re.I):
-                record_stat(irc, username, chan, 'Highlight', updater = increment, default = 0)
+            # Count highlights for any highlight in the message.
+            for username in irc.userlist[chan]:
+                highlight = r'\b{}\b'.format(re.escape(username))
+                if re.search(highlight, mesg, re.I):
+                    record_stat(irc, username, chan, 'Highlight', updater = increment, default = 0)
 
-        # Count questions asked.
-        if mesg.endswith('?'):
-            record_stat(irc, nick, chan, 'Questions', updater = increment, default = 0)
+            # Count questions asked.
+            if mesg.endswith('?'):
+                record_stat(irc, nick, chan, 'Questions', updater = increment, default = 0)
 
-        # Count exclamations made.
-        if mesg.endswith('!'):
-            record_stat(irc, nick, chan, 'Yells', updater = increment, default = 0)
+            # Count exclamations made.
+            if mesg.endswith('!'):
+                record_stat(irc, nick, chan, 'Yells', updater = increment, default = 0)
 
-        # Count all uppercase messages.
-        if mesg.upper() == mesg:
-            record_stat(irc, nick, chan, 'Uppercase', updater = increment, default = 0)
+            # Count all uppercase messages.
+            if mesg.upper() == mesg:
+                record_stat(irc, nick, chan, 'Uppercase', updater = increment, default = 0)
 
-        # TODO: Find emoticons used.
+            # Find racist users.
+            slurs = [
+                'nigger', 'negroid', 'nignog', 'nigga', 'honky', 'chink', 'kike',
+                'cholo', 'abo', 'gringo', 'honkey', 'paki', 'sambo',
+                'spearchucker', 'wetback'
+            ]
+            for slur in slurs:
+                if re.search(r'\b{}'.format(re.escape(slur)), mesg, re.I):
+                    record_stat(irc, nick, chan, 'Racist', updater = increment, default = 0)
+                    break
 
-        # Calculate average line length.
-        def calculate_average(old_average):
-            # Calculate the cumulative moving average, but only if we have a
-            # line count.
-            line_count = irc.db.execute('SELECT value FROM stats WHERE stat = ? AND nick = ? AND chan = ?', ('Messages', nick, chan)).fetchone()
-            if not line_count:
-                return old_average
+            # Find gay users.
+            slurs = [
+                'gay', 'faggot'
+            ]
+            for slur in slurs:
+                if re.search(r'\b{}'.format(re.escape(slur)), mesg, re.I):
+                    record_stat(irc, nick, chan, 'Gay', updater = increment, default = 0)
+                    break
 
-            i        = int(line_count[0])
-            ca_last  = len(mesg) + i * float(old_average)
-            ca_last /= i + 1
-            return ca_last
+            # TODO: Find emoticons used.
+            print('Recording Stat')
 
-        record_stat(irc, nick, chan, 'Average', updater = calculate_average, default = 0.0)
+            # Calculate average line length.
+            def calculate_average(old_average):
+                # Calculate the cumulative moving average, but only if we have a
+                # line count.
+                line_count = irc.db.execute('SELECT value FROM stats WHERE stat = ? AND nick = ? AND chan = ?', ('Messages', nick, chan)).fetchone()
+                if not line_count:
+                    return old_average
+
+                i        = int(line_count[0])
+                ca_last  = len(mesg) + i * float(old_average)
+                ca_last /= i + 1
+                return ca_last
+
+            record_stat(irc, nick, chan, 'Average', updater = calculate_average, default = 0.0)
+
+    except Exception as e:
+        print(str(e))

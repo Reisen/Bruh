@@ -216,7 +216,7 @@ def command_forwarder(irc, prefix, command, args):
 @command
 def help(irc, nick, chan, msg, args):
     """
-    Get help about a command.
+    Get help about a command. See http://morphism.org/walnut/ for a command list and more info.
     .help <command>         - Get help about a command.
     .help <command> detail  - Get the longer, more detailed help text.
     .help list              - List all registered commands.
@@ -246,7 +246,7 @@ def help(irc, nick, chan, msg, args):
 
         # If the user supplied 'full' to their help, we should notice them
         # instead as the help could be long from long help messages.
-        if len(cmd) > 1 and cmd[1] == 'full' or cmd[0] == 'help':
+        if len(cmd) > 1 and cmd[1] == 'full':
             for line in info:
                 irc.notice(nick, line.strip())
                 time.sleep(0.1)
