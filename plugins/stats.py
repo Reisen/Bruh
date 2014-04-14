@@ -100,7 +100,6 @@ def message_stats(irc, prefix, command, args):
                     break
 
             # TODO: Find emoticons used.
-            print('Recording Stat')
 
             # Calculate average line length.
             def calculate_average(old_average):
