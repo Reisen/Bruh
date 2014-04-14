@@ -15,6 +15,9 @@ def handle_reload(irc):
 @hook.command
 @auth.logged_in(['Admin'])
 def reload(irc, nick, chan, msg, args, user):
+    if not msg:
+        return "Syntax: .reload <module>"
+
     try:
         # Make sure the module exists first of all.
         if msg not in modules:
@@ -39,3 +42,19 @@ def reload(irc, nick, chan, msg, args, user):
 
     except Exception as e:
         return str(e)
+
+
+@hook.command
+@auth.logged_in(['Admin'])
+def load(irc, nick, chan, msg, args, user):
+    if not msg:
+        return "Syntax: .load <module>"
+
+    try:
+        # Try and actually load the module. Assuming no exception is thrown
+        # we're all good.
+        mod.load_module(msg)
+        return "Loaded module '{}'.".format(msg)
+
+    except Exception as e:
+        return "Error occured while loading '{}': {}".format(msg, str(e))

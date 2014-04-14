@@ -69,6 +69,12 @@ def loopDefault(server):
             # for some reason. This is fatal, disable the server.
             server.disable()
 
+    except RuntimeError as e:
+        # This is raised by a changing plugin structure. In this case, the
+        # safest thing to do is allow plugin processing to crash and burn and
+        # then continue again.
+        return
+
     except Exception as e:
         # At this point, something has gone really, really wrong. Dump
         # everything and just kill the bot.
