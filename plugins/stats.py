@@ -86,7 +86,7 @@ def message_stats(irc, prefix, command, args):
                 'spearchucker', 'wetback'
             ]
             for slur in slurs:
-                if re.search(r'\b{}'.format(re.escape(slur)), mesg, re.I):
+                if re.search(r'\b{}\b'.format(re.escape(slur)), mesg, re.I):
                     record_stat(irc, nick, chan, 'Racist', updater = increment, default = 0)
                     break
 

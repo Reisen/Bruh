@@ -38,3 +38,17 @@ def profile(irc, nick, chan, msg, args, user):
         return "Updated {} to {}".format(key, user[key])
 
     return "You cannot modify or access the {} property.".format(key)
+
+
+@hook.command
+@auth.logged_in
+def avatar(irc, nick, chan, msg, args, user):
+    """
+    Change your profile avatar. Use .profile for more customization.
+    .avatar <image url>
+    """
+    if not msg:
+        return "Syntax: .avatar <image url>"
+
+    user['Avatar'] = msg
+    return "Avatar changed to {}".format(msg)

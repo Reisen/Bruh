@@ -68,7 +68,16 @@ def command(f):
 def regex(pattern):
     """This decorator creates a new pattern matching entry."""
     def wrapper(f):
-        patternlist[pattern] = f
+        patternlist[pattern] = (f,)
+        return f
+
+    return wrapper
+
+
+def iregex(pattern):
+    """This decorator creates a case insensitive pattern matching entry."""
+    def wrapper(f):
+        patternlist[pattern] = (f, re.I)
         return f
 
     return wrapper
@@ -104,6 +113,8 @@ def commands(irc, prefix, command, args):
     command_prefix = irc.config.get('prefix', '.')
     if args[1][0] != command_prefix:
         for pattern, callback in patternlist.items():
+            callback, *flags = callback
+
             # Replace matching configuration options.
             for item in irc.server:
                 pattern = pattern.replace('$' + item, str(irc.server[item]))
@@ -111,7 +122,7 @@ def commands(irc, prefix, command, args):
             # Try and match the newly substituted pattern. For example, the
             # pattern '$nick!' after previous replacement may now be 'bruh!'
             # which is used against the message.
-            match = re.search(pattern, args[1])
+            match = re.search(pattern, args[1], *flags)
             if match is not None:
                 return callback(irc, nick, chan, match, args)
 
