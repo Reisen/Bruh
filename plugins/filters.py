@@ -18,6 +18,7 @@ def rainbow(msg):
 
     return output
 
+
 @hook.command
 def filter(irc, nick, chan, msg, args):
     """
@@ -26,6 +27,9 @@ def filter(irc, nick, chan, msg, args):
     """
     try:
         text_filter, msg = msg.split(' ', 1)
+
+        if not msg:
+            return "No input to apply the filter to."
 
         filters = {
             'rot13':   lambda: msg.translate(rot13),
@@ -42,8 +46,10 @@ def filter(irc, nick, chan, msg, args):
             'base64':  lambda: base64.b64encode(msg.encode('utf-8')).decode('utf-8')
         }
         return filters[text_filter]()
-    except:
+
+    except Exception as e:
         return "Unknown filter."
+
 
 @hook.command
 def echo(irc, nick, chan, msg, args):
