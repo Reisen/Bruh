@@ -33,7 +33,6 @@ try:
             message = message['data']
             for irc in servers:
                 if channel.startswith(irc.server['address']):
-                    print('Nice')
                     network, channel = irc, channel.split(':', 1)[1]
 
             if channel in hooks:

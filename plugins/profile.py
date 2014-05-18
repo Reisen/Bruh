@@ -3,6 +3,7 @@
     Avatars, etc. This can be used to generate, well, profiles for users.
 """
 from plugins import mod
+from uuid import uuid4
 
 auth = mod.auth
 hook = mod.hook
@@ -14,15 +15,22 @@ def profile(irc, nick, chan, msg, args, user):
     Change properties that effect your user profile.
     .profile <property> <value>
     """
-    if not msg:
-        return "Syntax: .profile <property> <value>"
-
     # Properties that the user is actually allowed to edit, otherwise they
     # could change their rank or something.
     allowed_properties = [
         'avatar',
         'quote',
+        'api'
     ]
+
+    if not msg:
+        # Get all the users current properties and list them.
+        for p in allowed_properties:
+            p = p.capitalize()
+            irc.notice(nick, '{}: {}'.format(p, user.get(p, None)))
+
+        irc.notice(nick, "Syntax: .profile <property> <value>")
+        return
 
     command, *args = msg.split(' ', 1)
 
@@ -52,3 +60,14 @@ def avatar(irc, nick, chan, msg, args, user):
 
     user['Avatar'] = msg
     return "Avatar changed to {}".format(msg)
+
+
+@hook.command
+@auth.logged_in
+def api(irc, nick, chan, msg, args, user):
+    # Generate a new API key if one didn't already exist.
+    if 'Api' not in user or msg == 'new':
+        user['Api'] = uuid4().hex
+        return "Generated new API Key: {}".format(msg)
+
+    return "Your API Key: {}  --  Use '.api new' to generate a new key.".format(user['Api'])
