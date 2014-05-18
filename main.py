@@ -20,7 +20,9 @@ def quit(signal, frame):
         print('\n!  Sending shutdown warning to plugins...')
         for module in modules.values():
             for hook in module['hooks'].get('GETOUT', []):
-                hook()
+                for server in servers:
+                    hook(server)
+
         print('Done')
 
     except Exception as e:

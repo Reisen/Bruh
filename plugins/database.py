@@ -17,7 +17,6 @@ def setup_db(irc):
 
 
 @event('GETOUT')
-def shutdown_db():
-    for connection in connections:
-        connection.commit()
-        connection.close()
+def shutdown_db(irc):
+    irc.db.commit()
+    irc.db.close()

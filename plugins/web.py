@@ -44,7 +44,7 @@ def initialze_web(irc):
 
 
 @event('GETOUT')
-def shutdown_web():
+def shutdown_web(irc):
     # Sadly, even though I've made the switch to use bottle.py as the web
     # framework for the bot, by default it uses WSGIServer, which is a subclass
     # of HTTPServer, so we get to deal with the same retarded ass fucking
@@ -52,10 +52,11 @@ def shutdown_web():
     # request.
     #
     # TODO: Hire a genius to make this not shit.
-    run_server.running = False
-    try:
-        urlopen('http://localhost:{}/'.format(port), timeout = 7).read()
-    except:
-        # Again, fuck HTTPServer, we're expecting an error here no matter what,
-        # so lets just quit this shit. Fuck HTTPServer.
-        WThread.join()
+    if run_server.running:
+        run_server.running = False
+        try:
+            urlopen('http://localhost:{}/'.format(port), timeout = 7).read()
+        except:
+            # Again, fuck HTTPServer, we're expecting an error here no matter what,
+            # so lets just quit this shit. Fuck HTTPServer.
+            WThread.join()
