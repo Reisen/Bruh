@@ -168,6 +168,10 @@ if __name__ == '__main__':
         if config.get('debug', False):
             print('!  Loaded Plugin: {}'.format(name))
 
+    # Initialize all the modules. This isn't called per IRC object.
+    for hook in modules['hooks'].get('INIT', []):
+        hook()
+
     # Connect to all servers provided in the configuration. Plugins have a lot
     # of access to the bot core, and could potentially add more servers to this
     # list so don't rely on equivelence to the config.
