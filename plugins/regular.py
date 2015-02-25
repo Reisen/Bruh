@@ -28,6 +28,18 @@ def del_expression(irc, arg):
     return "No expressions matched this string."
 
 
+def debug_expression(irc, arg):
+    matcher, process, result = try_expression(
+        '{}:{}:regular'.format(irc.network, irc.channel),
+        arg
+    )
+
+    if matcher:
+        return "The expression that matched: {}".format(process)
+
+    return "No expressions matched this string."
+
+
 def try_expression(key, message):
     for matchpair in r.hscan_iter(key):
         result  = matchpair[1].decode('UTF-8')
@@ -81,8 +93,9 @@ def regular(irc):
     try:
         cmd, *args = irc.message.split(' ', 1)
         return {
-            "add": add_expression,
-            "del": del_expression
+            "add":   add_expression,
+            "del":   del_expression,
+            "debug": debug_expression
         }[cmd](irc, *args)
 
     except KeyError:

@@ -4,6 +4,20 @@ of plugins for the [Walnut] IRC router. This repository comes with two plugins: 
 itself and an optional web server that presents the bots database showing several items
 like statistics, channel quotes, and general help information.
 
+# Requirements
+The old bot with no dependencies can still be found under the 'old-base' git branch on
+this repository. This bot now needs a whole bunch of shit to get setup, so if you want
+a simple bot, use old bruh or another bot. Sorry.
+
+Required:
+* [Walnut]
+* Redis
+* pyzmq
+
+Optional:
+* Hyphentator (for the buttify plugin)
+* Flask (for the web.py plugin)
+
 # How Plugins Work
 Although Bruh is itself a plugin, plugins can be written for Bruh which are capable of
 implementing commands or matching regular expressions. Writing plugins for bruh itself
