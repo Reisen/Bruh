@@ -5,30 +5,30 @@ from plugins.userlist import userlist
 from drivers.walnut import Walnut
 
 
-def add_prefix(irc, arg):
+def add_expression(irc, arg):
     try:
         matcher, result = arg.split('<=>')
         r.hset(irc.key + ':regular', matcher.strip(), result.strip())
-        return "Prefix successfully added."
+        return "Expression successfully added."
 
     except Exception as e:
-        return "Provide a proper translation. Syntax: from <=> to"
+        return "Provide a proper expression. Syntax: expression <=> replacement"
 
 
-def del_prefix(irc, arg):
-    matcher, process, result = try_prefix(
+def del_expression(irc, arg):
+    matcher, process, result = try_expression(
         '{}:{}:regular'.format(irc.network, irc.channel),
         arg
     )
 
     if matcher:
         r.hdel(irc.key + ':regular', process)
-        return "The matcher matching your message has been deleted."
+        return "The expression matching your message has been deleted."
 
-    return "No matchers matched this string."
+    return "No expressions matched this string."
 
 
-def try_prefix(key, message):
+def try_expression(key, message):
     for matchpair in r.hscan_iter(key):
         result  = matchpair[1].decode('UTF-8')
         process = matchpair[0].decode('UTF-8')
@@ -45,7 +45,7 @@ def handle_regulars(message):
     channel = message.args[0]
     nick    = message.prefix.split('!')[0]
 
-    matcher, process, result = try_prefix(
+    matcher, process, result = try_expression(
         '{}:{}:regular'.format(network, channel),
         message.args[-1]
     )
@@ -81,8 +81,8 @@ def regular(irc):
     try:
         cmd, *args = irc.message.split(' ', 1)
         return {
-            "add": add_prefix,
-            "del": del_prefix
+            "add": add_expression,
+            "del": del_expression
         }[cmd](irc, *args)
 
     except KeyError:
