@@ -1,30 +1,23 @@
-"""
-    Search google for some useless shit no one cares about
-"""
 import json
+from bruh import command
 from random import randint
 from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
 from html.parser import HTMLParser
-from plugins import mod
+from drivers.walnut import Walnut
 
-hook  = mod.hook
-stats = mod.stats
 
-@hook.command(['g'])
-def google(irc, nick, chan, msg, args):
-    """
-    Google web search.
-    .g <search terms>
-    """
-    if not msg:
+@command('google')
+@command('g')
+def google(irc):
+    if not irc.message:
         return ".g <search terms>"
 
     # Build the request. The Referer is required because of googles ToS.
     request = Request(
-        'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&q={}'.format(quote_plus(msg)),
+        'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&q={}'.format(quote_plus(irc.message)),
         headers = {
-            'Referer': 'http://github.com/Reisen/Bruh',
+            'Referer': 'http://github.com/Reisen/Walnut',
             'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'
         }
     )
@@ -49,8 +42,6 @@ def google(irc, nick, chan, msg, args):
             query['content']
         )
 
-        stats.record_stat(irc, nick, chan, 'Googles', updater = lambda v: int(v) + 1, default = 0)
-
         # Strip anything useless, replace HTML entities, and output.
         return HTMLParser().unescape(
             out.replace('<b>', '')
@@ -63,19 +54,18 @@ def google(irc, nick, chan, msg, args):
         return 'No results found.'
 
 
-@hook.command
-def image(irc, nick, chan, msg, args):
-    """
-    Google image search (returns any of the first 4 results)
-    .gi <search terms>
-    """
+@command('image')
+@command('im')
+@command('i')
+def image(irc):
+    if not irc.message:
+        return "Syntax: .image <search terms>"
+
     url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={}&safe=off'
 
-    if not msg:
-        return "Syntax: .gi <search terms>"
-
     # Searches are returned as JSON so we need to turn that into a dictionary
-    query = json.loads(urlopen(url.format(quote_plus(msg)), timeout = 7).read().decode('UTF-8'))
+    query = json.loads(urlopen(url.format(quote_plus(irc.message)), timeout = 7).read().decode('UTF-8'))
+
     if query['responseStatus'] != 200:
         return query['responseStatus']
 
@@ -83,7 +73,7 @@ def image(irc, nick, chan, msg, args):
     # first 4 image results
     try:
         query = query['responseData']['results'][randint(0,3)]['url']
-
         return unquote_plus( query, encoding='utf-8', errors='replace' )
+
     except:
         return 'No results found'
