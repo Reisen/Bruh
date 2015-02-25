@@ -13,20 +13,22 @@ def user_check(message):
     if message.args[0] not in userlist[message.parent.frm]:
         return 'NAMES {}'.format(message.args[0])
 
-    if message.prefix.split('!')[0].lower() not in userlist[message.parent.frm][message.args[0]]:
+    if message.prefix.split('!')[0] not in userlist[message.parent.frm][message.args[0]]:
         return 'NAMES {}'.format(message.args[0])
 
 
 @Walnut.hook('353')
 def user_join_rply(message):
+    network = message.parent.frm
+    channel = message.args[2]
     for user in message.args[3].split():
         name, modes = map(lambda v: ''.join(v(lambda u: u in '~&@%+', user)), (dropwhile, takewhile))
-        userlist[message.parent.frm][message.args[2]].add(name.lower())
+        userlist[network][channel].add(name)
 
 
 @Walnut.hook('JOIN')
 def user_join(message):
-    name    = message.prefix.split('!')[0].lower()
+    name    = message.prefix.split('!')[0]
     network = message.parent.frm
     channel = message.args[0]
     userlist[network][channel].add(name)
@@ -36,7 +38,7 @@ def user_join(message):
 
 @Walnut.hook('PART')
 def user_part(message):
-    name = message.prefix.split('!')[0].lower()
+    name = message.prefix.split('!')[0]
     network = message.parent.frm
     channel = message.args[0]
     if name in userlist[network][channel]:
@@ -45,7 +47,7 @@ def user_part(message):
 
 @Walnut.hook('KICK')
 def user_kick(message):
-    name    = message.args[1].lower()
+    name    = message.args[1]
     network = message.parent.frm
     channel = message.args[0]
     if name in userlist[network][channel]:
@@ -54,7 +56,7 @@ def user_kick(message):
 
 @Walnut.hook('QUIT')
 def user_quit(message):
-    name    = message.prefix.split('!')[0].lower()
+    name    = message.prefix.split('!')[0]
     network = message.parent.frm
     for channel in userlist[network]:
         if name in userlist[network][channel]:

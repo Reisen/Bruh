@@ -23,6 +23,7 @@ def handle_command(message):
         else:
             class IRC: pass
             env         = IRC()
+            env.key     = db_key
             env.nick    = message.args[-1]
             env.channel = message.args[-2]
             env.network = message.args[-3]
@@ -48,7 +49,7 @@ def handle_command(message):
                 message.args[-1],
             )
 
-        else:
+        elif result:
             Walnut.ipc(
                 'proxy',
                 message.args[-3],
