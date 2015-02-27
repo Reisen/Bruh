@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" type="text/css" href="http://localhost:8080/static/css/main.css"/>
         <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
+        <script src="/static/js/bruh.js"></script>
     </head>
     <body>
         <div id="bar" class="bar-header">
@@ -40,6 +41,65 @@
                 insanely bloated with hundreds of features, this website is one
                 of those features, being served by the bot itself.
             </p>
+
+            <hr/>
+
+            <span class="title">Channel Activity</span>
+            <p>
+                These statistics may not be accurate, and are collected daily.
+                The bot might be kicked, or not in a channel over periods of
+                time so not all statistics are necessarily accurate down to the
+                letter.
+            </p>
+
+            <div id="monthstat" class="statbars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
+            <script>
+                var bars = document.getElementsByClassName('bar');
+                for(var i = 0; i < bars.length; ++i) {
+                    var item   = bars.item(i);
+                    var height = Math.floor(Math.random() * 20);
+                    var cname  = height.toString(16);
+
+                    cname = cname.length > 1 ? cname : "0" + cname;
+                    item.className += (" bar" + cname.toUpperCase());
+                }
+            </script>
         </div>
+
+        {% include "view/commands.html" %}
+        {% include "view/statistics.html" %}
     </body>
 </html>

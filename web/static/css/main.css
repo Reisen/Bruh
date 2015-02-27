@@ -1,0 +1,52 @@
+.statbars {
+    border: 5px solid #1C1C26;
+    background-color: #15151C;
+    height: 160px;
+    overflow: hidden;
+}
+
+    .statbars .bar {
+        width: 10px;
+        background-color: #335577;
+        height: 100%;
+        float: left;
+        margin-left: 9px;
+    }
+
+    .statbars .bar:hover {
+        background-color: #5599CC;
+        cursor: pointer;
+    }
+
+    .statbars .bar:first-of-type {
+        margin-left: 5px;
+    }
+
+    .statbars .bar00 { margin-top: 5px; }
+    .statbars .bar01 { margin-top: 10px; }
+    .statbars .bar02 { margin-top: 15px; }
+    .statbars .bar03 { margin-top: 20px; }
+    .statbars .bar04 { margin-top: 25px; }
+    .statbars .bar05 { margin-top: 30px; }
+    .statbars .bar06 { margin-top: 35px; }
+    .statbars .bar07 { margin-top: 40px; }
+    .statbars .bar08 { margin-top: 45px; }
+    .statbars .bar09 { margin-top: 50px; }
+    .statbars .bar0A { margin-top: 55px; }
+    .statbars .bar0B { margin-top: 60px; }
+    .statbars .bar0C { margin-top: 65px; }
+    .statbars .bar0D { margin-top: 70px; }
+    .statbars .bar0F { margin-top: 75px; }
+    .statbars .bar10 { margin-top: 80px; }
+    .statbars .bar11 { margin-top: 85px; }
+    .statbars .bar12 { margin-top: 90px; }
+    .statbars .bar13 { margin-top: 100px; }
+    .statbars .bar14 { margin-top: 105px; }
+    .statbars .bar15 { margin-top: 110px; }
+    .statbars .bar16 { margin-top: 115px; }
+    .statbars .bar17 { margin-top: 120px; }
+    .statbars .bar18 { margin-top: 125px; }
+    .statbars .bar19 { margin-top: 130px; }
+    .statbars .bar1A { margin-top: 135px; }
+    .statbars .bar1B { margin-top: 140px; }
+    .statbars .bar1C { margin-top: 145px; }

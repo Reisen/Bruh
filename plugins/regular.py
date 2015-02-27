@@ -15,14 +15,25 @@ def add_expression(irc, arg):
         return "Provide a proper expression. Syntax: expression <=> replacement"
 
 
+def global_expression(irc, arg):
+    try:
+        matcher, result = arg.split('<=>')
+        r.hset(irc.network + ':regular', matcher.strip(), result.strip())
+        return "Expression successfully added."
+
+    except Exception as e:
+        return "Provide a proper expression. Syntax: expression <=> replacement"
+
+
 def del_expression(irc, arg):
     matcher, process, result = try_expression(
-        '{}:{}:regular'.format(irc.network, irc.channel),
+        ['{}:{}:regular'.format(irc.network, irc.channel), irc.network + ':regular'],
         arg
     )
 
     if matcher:
         r.hdel(irc.key + ':regular', process)
+        r.hdel(irc.network + ':regular', process)
         return "The expression matching your message has been deleted."
 
     return "No expressions matched this string."
@@ -30,7 +41,7 @@ def del_expression(irc, arg):
 
 def debug_expression(irc, arg):
     matcher, process, result = try_expression(
-        '{}:{}:regular'.format(irc.network, irc.channel),
+        ['{}:{}:regular'.format(irc.network, irc.channel), irc.network + ':regular'],
         arg
     )
 
@@ -40,13 +51,14 @@ def debug_expression(irc, arg):
     return "No expressions matched this string."
 
 
-def try_expression(key, message):
-    for matchpair in r.hscan_iter(key):
-        result  = matchpair[1].decode('UTF-8')
-        process = matchpair[0].decode('UTF-8')
-        matcher = re.match(process, message, re.I)
-        if matcher:
-            return (matcher, process, result)
+def try_expression(keys, message):
+    for key in keys:
+        for matchpair in r.hscan_iter(key):
+            result  = matchpair[1].decode('UTF-8')
+            process = matchpair[0].decode('UTF-8')
+            matcher = re.match(process, message, re.I)
+            if matcher:
+                return (matcher, process, result)
 
     return (None, None, None)
 
@@ -58,7 +70,7 @@ def handle_regulars(message):
     nick    = message.prefix.split('!')[0]
 
     matcher, process, result = try_expression(
-        '{}:{}:regular'.format(network, channel),
+        ['{}:{}:regular'.format(network, channel), network + ':regular'],
         message.args[-1]
     )
 
@@ -93,9 +105,10 @@ def regular(irc):
     try:
         cmd, *args = irc.message.split(' ', 1)
         return {
-            "add":   add_expression,
-            "del":   del_expression,
-            "debug": debug_expression
+            'add':    add_expression,
+            'del':    del_expression,
+            'global': global_expression,
+            'debug':  debug_expression
         }[cmd](irc, *args)
 
     except KeyError:
