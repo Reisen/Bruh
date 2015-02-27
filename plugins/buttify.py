@@ -12,6 +12,7 @@ def buttify_word(word, meme):
     try:
         # Find a buttable word and piece to work with.
         pieces = split.syllables(word)
+        print(pieces)
         if not pieces:
             return word
 
@@ -41,6 +42,12 @@ def buttify_word(word, meme):
         if pieces[syllable].upper() == pieces[syllable]:
             meme = meme.upper()
 
+        # Sometimes, the hyphenator will return weird words. Such as the line
+        # 'McDonalds.com' which returns as ['McDon', 'ald', 's.', 'com'], if
+        # 's.' is chosen, the rules above will generate the empty word '' and
+        # has weird behaviour with replace. I could detect this, on the other
+        # hand this is really funny so I won't. The note is here to warn that
+        # butt_target can potentially be '' however.
         return word.replace(butt_target, meme)
 
     except:
