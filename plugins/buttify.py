@@ -8,11 +8,16 @@ split = Hyphenator('en_GB')
 memes = defaultdict(lambda: 'butt')
 prob  = 0.001
 
+@Walnut.hook('')
+def handle_all(message):
+    print(str(message))
+    return None
+
+
 def buttify_word(word, meme):
     try:
         # Find a buttable word and piece to work with.
         pieces = split.syllables(word)
-        print(pieces)
         if not pieces:
             return word
 
@@ -55,7 +60,7 @@ def buttify_word(word, meme):
 
 
 stopwords = []
-with open('stopwords') as f:
+with open('data/stopwords') as f:
     for word in f.read().split('\n'):
         stopwords.append(word.strip())
 
@@ -127,6 +132,8 @@ def keybutt(irc):
 
 
 @command('buttify')
+@command('butt')
+@command('bu')
 @command('b')
 def buttify(irc):
     if not irc.message:
