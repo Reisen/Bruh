@@ -8,7 +8,7 @@ def handle_command(message):
     if message.to in commands:
         db_key = '{}:{}'.format(message.args[-3], message.args[-2])
         prefix = r.get('{}:prefix'.format(db_key))
-        prefix = prefix.decode('UTF-8') if prefix else '!'
+        prefix = prefix.decode('UTF-8') if prefix else '.'
 
         # Extract and execute the command in question.
         msg      = message.payload.decode('UTF-8')
