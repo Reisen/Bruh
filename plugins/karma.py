@@ -1,6 +1,6 @@
 import re
 from bruh import command, r
-from plugins.userlist import userlist
+from plugins.userlist import userlist, current
 from drivers.walnut import Walnut
 
 
@@ -14,8 +14,15 @@ def karma(irc):
     for k in r.hscan_iter(irc.key + ':karma'):
         karma.append(k)
 
-    karma = sorted(karma, key = lambda v: v[1], reverse = True)
-    return 'Top Karma: ' + ', '.join(map(lambda v: b': '.join(v).decode('UTF-8'), karma))
+    karma = sorted(karma, key = lambda v: int(v[1]), reverse = True)
+
+    karmees = []
+    for karmee in karma[:5]:
+        nick   = current(irc.network, karmee[0].decode('UTF-8'))
+        amount = karmee[1].decode('UTF-8')
+        karmees.append((nick, amount))
+
+    return 'Top Karma: ' + ', '.join(map(lambda v: ': '.join(v), karmees))
 
 
 @Walnut.hook('PRIVMSG')
@@ -29,14 +36,14 @@ def match_karma(message):
     # Increment Karma through karma whoring means. Restricting this to every 30
     # minutes doesn't seem to stop people whoring, but It's here anyway.
     if match and match.group(1) in userlist[network][channel]:
-        success = r.setnx(db_key + ':karma:{}'.format(nick), '')
+        success = r.setnx(db_key + ':karma:{}'.format(nick.lower()), '')
 
         if success:
-            r.expire(db_key + ':karma:{}'.format(match.group(1)), 1800)
-            r.hincrby(db_key + ':karma', match.group(1), 1)
+            r.expire(db_key + ':karma:{}'.format(match.group(1).lower()), 1800)
+            r.hincrby(db_key + ':karma', match.group(1).lower(), 1)
             output = '{0} gained karma. {0} now has {1}'.format(
                 match.group(1),
-                r.hget(db_key + ':karma', match.group(1)).decode('UTF-8')
+                r.hget(db_key + ':karma', match.group(1).lower()).decode('UTF-8')
             )
 
         else:
@@ -51,10 +58,10 @@ def match_karma(message):
     match = re.match(r'^thanks?(:?\syou)?(\s.+)?$', message.args[-1], re.I)
     if match:
         target  = match.group(2) if match.group(2) else last_sender.get(channel, 'DekuNut')
-        success = r.setnx(db_key + ':thank:{}'.format(target.strip()), '')
+        success = r.setnx(db_key + ':thank:{}'.format(target.strip().lower()), '')
 
         if success:
-            r.expire(db_key + ':thank:{}'.format(target), 60)
+            r.expire(db_key + ':thank:{}'.format(target.strip().lower()), 60)
             r.hincrby(db_key + ':karma', target, 1)
             return None
 

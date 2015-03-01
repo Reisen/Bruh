@@ -6,6 +6,11 @@ from itertools import dropwhile, takewhile
 
 
 userlist = defaultdict(lambda: defaultdict(set))
+usermap  = defaultdict(dict)
+
+
+def current(network, nick):
+    return usermap[network].get(nick.lower(), nick)
 
 
 @Walnut.hook('PRIVMSG')
@@ -24,6 +29,7 @@ def user_join_rply(message):
     for user in message.args[3].split():
         name, modes = map(lambda v: ''.join(v(lambda u: u in '~&@%+', user)), (dropwhile, takewhile))
         userlist[network][channel].add(name)
+        usermap[network][name.lower()] = name
 
 
 @Walnut.hook('JOIN')
@@ -32,8 +38,7 @@ def user_join(message):
     network = message.parent.frm
     channel = message.args[0]
     userlist[network][channel].add(name)
-    if name in userlist[network][channel]:
-        userlist[network][channel].remove(name)
+    usermap[network][name.lower()] = name
 
 
 @Walnut.hook('PART')
@@ -43,6 +48,7 @@ def user_part(message):
     channel = message.args[0]
     if name in userlist[network][channel]:
         userlist[network][channel].remove(name)
+        del usermap[network][name.lower()]
 
 
 @Walnut.hook('KICK')
@@ -52,6 +58,7 @@ def user_kick(message):
     channel = message.args[0]
     if name in userlist[network][channel]:
         userlist[network][channel].remove(name)
+        del usermap[network][name.lower()]
 
 
 @Walnut.hook('QUIT')
@@ -61,6 +68,7 @@ def user_quit(message):
     for channel in userlist[network]:
         if name in userlist[network][channel]:
             userlist[network][channel].remove(name)
+            del usermap[network][name.lower()]
 
 
 @command('users')

@@ -43,7 +43,7 @@ def search_quote(irc, quote):
             filtered = []
             for target in r.lrange(irc.key + ':quotes', 0, -1):
                 target = target.decode('UTF-8')
-                if pieces[len(pieces) - 1] in target.lower():
+                if pieces[len(pieces) - 1].lower() in target.lower():
                     filtered.append(target)
 
             count = len(filtered)
