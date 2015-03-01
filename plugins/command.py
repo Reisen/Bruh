@@ -65,7 +65,7 @@ def handle_command(message):
 def command_dispatcher(message):
     msg    = message.args[-1]
     prefix = r.get('{}:{}:prefix'.format(message.parent.frm, message.args[0]))
-    prefix = prefix.decode('UTF-8') if prefix else '!'
+    prefix = prefix.decode('UTF-8') if prefix else '.'
 
     # Escape early for messages that only consist of the command character or
     # are not commands at all.
