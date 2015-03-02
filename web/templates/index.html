@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>Bruh</title>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-        <link rel="stylesheet" type="text/css" href="http://localhost:8080/static/css/main.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/morphism.css"/>
         <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
         <script src="/static/js/bruh.js"></script>
     </head>
@@ -32,19 +32,19 @@
             </div>
         </div>
 
-        <div id="container">
+        <div id="container" class="cf">
             <span class="title">Walnut</span>
             <p>
-                This is the home-page of the most over-engineered IRC bot ever
-                made. Walnut is an IRC bot that runs on Rizon mainly created to
-                compile and execute several languages, but over time has become
-                insanely bloated with hundreds of features, this website is one
-                of those features, being served by the bot itself.
+                This is the home page for Walnut, an IRC bot running on Rizon
+                who's main purpose is to compile and execute code in
+                programming channels. Walnut can do more than that however, and
+                information about those features can be found here. Walnut will
+                join your channel on invite.
             </p>
 
             <hr/>
 
-            <span class="title">Channel Activity</span>
+            <span class="title">Network Activity</span>
             <p>
                 These statistics may not be accurate, and are collected daily.
                 The bot might be kicked, or not in a channel over periods of
@@ -84,6 +84,29 @@
                 <div class="bar"></div>
                 <div class="bar"></div>
                 <div class="bar"></div>
+            </div>
+
+            <p></p>
+            <div class="cf">
+                <div class="llist">
+                    {% for chan, stat in chans %}
+                        {% if chan.startswith('#') %}
+                            <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
+                            <span class="value">{{ stat }} Lines</span><br/>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="rlist">
+                    {% set counter = 0 %}
+                    {% for chan, stat in chans %}
+                        {% if counter < 25 and not chan.startswith('#') %}
+                            {% set counter = counter + 1 %}
+                            <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
+                            <span class="value">{{ stat }} Lines</span><br/>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
 
             <script>

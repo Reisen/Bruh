@@ -1,0 +1,249 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Open+Sans+Condensed:300|Droid+Sans+Mono);
+* {
+  box-sizing: border-box;
+}
+.cf {
+  *zoom: 1;
+}
+.cf:before,
+.cf:after {
+  content: " ";
+  display: table;
+}
+.cf:after {
+  clear: both;
+}
+body,
+html {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  background-color: #0d0d12;
+  color: #999;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+}
+/* Used to Center Anything. */
+.wrapper {
+  position: relative;
+  width: 600px;
+  margin: 0 auto;
+  padding: 0px;
+}
+/* Styles the Bar Component. */
+#bar {
+  color: white;
+  background-image: url('http://morphism.org/img/bg.png');
+  position: absolute;
+  width: 100%;
+  box-shadow: 0px 0px 0px 4px #010101;
+  z-index: 1;
+  transition: height 0.5s, line-height 0.5s, top 0.5s, background-position 0.5s;
+}
+#bar > div {
+  transition: background-color 0.5s;
+  background-color: rgba(0, 0, 0, 0);
+  height: 100%;
+}
+#bar a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  text-transform: uppercase;
+  margin-left: 30px;
+}
+#bar a:first-of-type {
+  margin-left: 80px;
+}
+/* These are Substyles for the Bar component. The transition property nicely
+ * animates between these for a nice experience. */
+.bar-header {
+  top: 80px;
+  line-height: 60px;
+  height: 60px;
+  background-position: center 730px;
+}
+.bar-header > div {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  height: 100%;
+}
+.bar-header #logo {
+  width: 40px;
+  height: 40px;
+  border: 2px solid white;
+  line-height: 36px;
+  text-align: center;
+  font-size: 32px;
+  font-family: 'Open Sans Condensed';
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  margin: auto;
+}
+.bar-entry {
+  top: 280px;
+  height: 200px;
+  background-position: center 250px;
+  text-align: center;
+}
+.bar-entry div,
+.bar-entry div .wrapper {
+  position: relative;
+  height: 100%;
+}
+.bar-entry:hover {
+  height: 600px;
+  top: 80px;
+  background-position: center 1050px;
+}
+.bar-entry:hover a {
+  display: inline-block;
+  margin: 0px !important;
+  padding: 10px !important;
+  background-color: rgba(0, 0, 0, 0.2);
+  margin-top: 190px !important;
+}
+.bar-entry:hover > div {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.bar-entry #logo {
+  width: 100px;
+  cursor: pointer;
+  height: 100px;
+  border: 4px solid white;
+  line-height: 90px;
+  text-align: center;
+  font-size: 64px;
+  font-family: 'Open Sans Condensed';
+  position: absolute;
+  margin: auto !important;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+}
+.bar-entry #logo:after {
+  content: 'MORPHISM';
+  font-size: 20px;
+  width: 100%;
+  position: absolute;
+  font-weight: normal;
+  text-align: center;
+  left: 0px;
+  bottom: -65px;
+}
+.bar-entry a {
+  display: none;
+}
+/* Main Container. This contains every single template style. */
+#container {
+  position: relative;
+  width: 600px;
+  margin: 0 auto;
+  padding: 0px;
+  min-height: 100%;
+  padding-top: 170px;
+  margin-bottom: 40px;
+  /* Misc styles used in all subtemplates. */
+}
+#container span.title {
+  font-size: 28px;
+  font-family: 'Open Sans Condensed';
+  color: white;
+}
+#container p {
+  text-align: justify;
+  font-size: 15px;
+  line-height: 26px;
+}
+#container hr {
+  border: 0px;
+  border-top: 1px solid #444;
+  padding: 0px;
+  margin: 15px 0px;
+}
+#container .subnav a {
+  text-transform: uppercase;
+  margin-right: 20px;
+  cursor: pointer;
+  color: white;
+}
+#container .subnav a:hover {
+  color: #336699;
+}
+#container .subnav a.active {
+  color: #88AAFF;
+}
+#container #Contact i {
+  display: inline-block;
+  width: 20px;
+  color: white;
+}
+#container #Contact a {
+  text-decoration: none;
+  color: #445566;
+}
+#container #Contact a:hover {
+  color: white;
+}
+#container #Contact table {
+  width: 100%;
+}
+#container #Contact table th {
+  text-align: left;
+  font-weight: normal;
+  color: #4499FF;
+}
+#container #Personal #streaks div.banner {
+  height: 150px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+#container #Personal #streaks div.banner img {
+  width: 100%;
+}
+#container #Personal #streaks .streak {
+  background-color: #13131b;
+  margin-bottom: 20px;
+  /* TODO: Use elsewhere. */
+}
+#container #Personal #streaks .streak .title {
+  display: block;
+  text-align: center;
+  width: 100%;
+  font-size: 20px;
+  padding: 3px;
+  color: #5599FF;
+}
+#container #Personal #streaks .streak .title i {
+  color: white;
+  width: 30px;
+}
+#container #Personal #streaks .streak table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#container #Personal #streaks .streak table td {
+  text-align: center;
+  border-spacing: 0px;
+  border-top: 2px solid #070709;
+  border-right: 2px solid #070709;
+  width: 33%;
+  padding: 20px;
+}
+#container #Personal #streaks .streak table td span:first-of-type {
+  font-family: monospace;
+  font-size: 12px;
+  color: #777;
+}
+#container #Personal #streaks .streak table td span:last-of-type {
+  font-size: 18px;
+  color: white;
+}
+#container #Personal #streaks .streak table td:last-of-type {
+  border-right: 0px;
+}
+#container #Personal #travel #world_map {
+  height: 300px;
+}

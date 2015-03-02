@@ -1,3 +1,35 @@
+#container i.fa {
+    display: inline-block;
+    width: 24px;
+}
+
+#container {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+#container a {
+    color: #334477;
+    text-decoration: none;
+}
+
+#container a:hover {
+    color: #4499CC;
+}
+
+#container span.value {
+    float: right;
+}
+
+#container .llist {
+    float: left;
+    width: 45%;
+}
+
+#container .rlist {
+    margin-left: 55%;
+}
+
 .statbars {
     border: 5px solid #1C1C26;
     background-color: #15151C;
