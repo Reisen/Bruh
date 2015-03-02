@@ -57,13 +57,12 @@ def match_karma(message):
     # Catch passive thanks and increment karma from it.
     match = re.match(r'^thanks?(:?\syou)?(\s.+)?$', message.args[-1], re.I)
     if match:
-        target  = match.group(2) if match.group(2) else last_sender.get(channel, 'DekuNut')
-        success = r.setnx(db_key + ':thank:{}'.format(target.strip().lower()), '')
-
-        if success:
-            r.expire(db_key + ':thank:{}'.format(target.strip().lower()), 60)
-            r.hincrby(db_key + ':karma', target, 1)
-            return None
+        target = match.group(2) if match.group(2) else last_sender.get(channel, 'DekuNut')
+        if target in userlist[network][channel]:
+            if r.setnx(db_key + ':thank:{}'.format(target.strip().lower()), ''):
+                r.expire(db_key + ':thank:{}'.format(target.strip().lower()), 60)
+                r.hincrby(db_key + ':karma', target, 1)
+                return None
 
     # Store the last sender if no karma-whoring was done. This is so when users
     # thank without specifying a name, we can just grant the thanks to who we
