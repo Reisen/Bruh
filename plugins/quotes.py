@@ -38,10 +38,12 @@ def search_quote(irc, quote):
             count = r.llen(irc.key + ':quotes')
             index = int(pieces[0]) - 1
             quote = r.lindex(irc.key + ':quotes', index).decode('UTF-8')
+            reali = ''
 
         else:
             filtered = []
-            for target in r.lrange(irc.key + ':quotes', 0, -1):
+            unfiltered = r.lrange(irc.key + ':quotes', 0, -1)
+            for target in unfiltered:
                 target = target.decode('UTF-8')
                 if pieces[len(pieces) - 1].lower() in target.lower():
                     filtered.append(target)
@@ -49,15 +51,17 @@ def search_quote(irc, quote):
             count = len(filtered)
             index = int(pieces[0]) - 1 if pieces[0].isdigit() else random.randint(0, count - 1)
             quote = filtered[index]
+            reali = ' ({})'.format(unfiltered.index(quote.encode('UTF-8')) + 1)
 
-        return 'Quote [{}/{}]: {}'.format(
+        return 'Quote [{}/{}]{}: {}'.format(
             index + 1,
             count,
+            reali,
             quote
         )
 
-    except:
-        return 'Could not find that quote.'
+    except Exception as e:
+        return 'Could not find that quote.' + str(e)
 
 
 @command('quote')
