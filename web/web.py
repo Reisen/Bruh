@@ -57,5 +57,15 @@ def index():
         'chans': sorted([(k,cached[k]['messages']) for k in cached], key = lambda v: int(v[1]), reverse = True)
     })
 
+
+@app.route('/channel/<string:channel>/')
+def view_channel(channel):
+    generate()
+    return render_template('channel.html', **{
+        'stats': cached,
+        'users': [(k,cached[k]) for k in cached if k.startswith('#')],
+        'channel': channel
+    })
+
 if __name__ == '__main__':
-    app.run(host = '127.0.0.1', port = 5002, debug = True)
+    app.run(host = '0.0.0.0', port = 27015, debug = True)

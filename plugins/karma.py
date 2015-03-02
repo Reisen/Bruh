@@ -40,7 +40,7 @@ def match_karma(message):
 
         if success:
             direction = 1 if match.group(2) == '++' else -1
-            r.expire(db_key + ':karma:{}'.format(match.group(1).lower()), 1800)
+            r.expire(db_key + ':karma:{}'.format(nick.lower()), 1800)
             r.hincrby(db_key + ':karma', match.group(1).lower(), direction)
             output = '{0} {1} karma. {0} now has {2}.'.format(
                 match.group(1),

@@ -1,128 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Bruh</title>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-        <link rel="stylesheet" type="text/css" href="/static/css/morphism.css"/>
-        <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
-        <script src="/static/js/bruh.js"></script>
-    </head>
-    <body>
-        <div id="bar" class="bar-header">
-            <div>
-                <div class="wrapper">
-                    <div id="logo">
-                        W
-                    </div>
+{% extends "__base.html" %}
 
-                    <a href="#/">
-                        <i class="fa fa-home"></i>
-                        Home
-                    </a>
-                    <a href="#/texts/">
-                        <i class="fa fa-comment"></i>
-                        Commands
-                    </a>
-                    <a href="#/project/">
-                        <i class="fa fa-tasks"></i>
-                        Statistics
-                    </a>
-                </div>
-            </div>
+{% block content %}
+    <span class="title">Walnut</span>
+    <p>
+        This is the home page for Walnut, an IRC bot running on Rizon
+        whos main purpose is to compile and execute code in programming
+        channels. Walnut can do more than that however, and information
+        about those features can be found here. Walnut will join your
+        channel on invite.
+    </p>
+
+    <hr/>
+
+    <span class="title">Network Activity</span>
+    <p>
+        These statistics may not be accurate, and are collected daily. The bot
+        may have been kicked or might not always be present in a channel over
+        certain periods of time, so not all statistics are necessarily accurate
+        down to the letter.
+    </p>
+
+    <div id="monthstat" class="statbars">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <p></p>
+    <div class="cf">
+        <div class="llist">
+            {% for chan, stat in chans %}
+                {% if chan.startswith('#') %}
+                    <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
+                    <span class="value">{{ stat }} Lines</span><br/>
+                {% endif %}
+            {% endfor %}
         </div>
 
-        <div id="container" class="cf">
-            <span class="title">Walnut</span>
-            <p>
-                This is the home page for Walnut, an IRC bot running on Rizon
-                who's main purpose is to compile and execute code in
-                programming channels. Walnut can do more than that however, and
-                information about those features can be found here. Walnut will
-                join your channel on invite.
-            </p>
-
-            <hr/>
-
-            <span class="title">Network Activity</span>
-            <p>
-                These statistics may not be accurate, and are collected daily.
-                The bot might be kicked, or not in a channel over periods of
-                time so not all statistics are necessarily accurate down to the
-                letter.
-            </p>
-
-            <div id="monthstat" class="statbars">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </div>
-
-            <p></p>
-            <div class="cf">
-                <div class="llist">
-                    {% for chan, stat in chans %}
-                        {% if chan.startswith('#') %}
-                            <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
-                            <span class="value">{{ stat }} Lines</span><br/>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                <div class="rlist">
-                    {% set counter = 0 %}
-                    {% for chan, stat in chans %}
-                        {% if counter < 25 and not chan.startswith('#') %}
-                            {% set counter = counter + 1 %}
-                            <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
-                            <span class="value">{{ stat }} Lines</span><br/>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-
-            <script>
-                var bars = document.getElementsByClassName('bar');
-                for(var i = 0; i < bars.length; ++i) {
-                    var item   = bars.item(i);
-                    var height = Math.floor(Math.random() * 20);
-                    var cname  = height.toString(16);
-
-                    cname = cname.length > 1 ? cname : "0" + cname;
-                    item.className += (" bar" + cname.toUpperCase());
-                }
-            </script>
+        <div class="rlist">
+            {% set counter = 0 %}
+            {% for chan, stat in chans %}
+                {% if counter < 25 and not chan.startswith('#') %}
+                    {% set counter = counter + 1 %}
+                    <i class="fa fa-user"></i><a href="">{{ chan }}</a>
+                    <span class="value">{{ stat }} Lines</span><br/>
+                {% endif %}
+            {% endfor %}
         </div>
+    </div>
 
-        {% include "view/commands.html" %}
-        {% include "view/statistics.html" %}
-    </body>
-</html>
+    <script>
+        var bars = document.getElementsByClassName('bar');
+        for(var i = 0; i < bars.length; ++i) {
+            var item   = bars.item(i);
+            var height = Math.floor(Math.random() * 20);
+            var cname  = height.toString(16);
+
+            cname = cname.length > 1 ? cname : "0" + cname;
+            item.className += (" bar" + cname.toUpperCase());
+        }
+    </script>
+{% endblock %}

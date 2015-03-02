@@ -67,7 +67,7 @@ def seen(irc):
         current_distance = (time() - float(timedist)) // distance[0]
         if current_distance:
             return '{} was last seen {} {} ago saying: {}'.format(
-                msg,
+                irc.message,
                 int(current_distance),
                 distance[1] + (['', 's'][current_distance > 1]),
                 message

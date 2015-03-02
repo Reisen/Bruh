@@ -8,6 +8,11 @@
     margin-bottom: 20px;
 }
 
+#container b {
+    color: white;
+    font-weight: normal;
+}
+
 #container a {
     color: #334477;
     text-decoration: none;
