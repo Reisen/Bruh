@@ -73,8 +73,8 @@ def quote(irc):
     try:
         cmd, *args = irc.message.split(' ', 1)
         return {
-            'add':    add_quote,
-            'del':    del_quote,
+            'add': add_quote,
+            'del': del_quote,
         }[cmd](irc, *args)
 
     except KeyError:
