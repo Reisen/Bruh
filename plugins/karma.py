@@ -1,5 +1,5 @@
 import re
-from bruh import command, r
+from bruh import command, regex, sink, r
 from plugins.userlist import userlist, current
 from drivers.walnut import Walnut
 

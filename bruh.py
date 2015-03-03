@@ -9,18 +9,29 @@ from redis import StrictRedis
 
 r = StrictRedis(db=4)
 c = {}
+e = {}
+s = []
 
 
 def command(name):
     def register_command(f):
-        @functools.wraps(f)
-        def handler(*args, **kwargs):
-            return f(*args, **kwargs)
-
-        c[name] = handler
-        return handler
+        c[name] = f
+        return f
 
     return register_command
+
+
+def regex(pattern):
+    def register_command(f):
+        e[pattern] = f
+        return f
+
+    return register_command
+
+
+def sink(f):
+    s.append(f)
+    return f
 
 
 if __name__ == '__main__':
