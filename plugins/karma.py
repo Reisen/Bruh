@@ -63,7 +63,7 @@ def match_karma(message):
         if target in userlist[network][channel]:
             if r.setnx(db_key + ':thank:{}'.format(target.strip().lower()), ''):
                 r.expire(db_key + ':thank:{}'.format(target.strip().lower()), 60)
-                r.hincrby(db_key + ':karma', target, 1)
+                r.hincrby(db_key + ':karma', target.strip().lower(), 1)
                 return None
 
     # Store the last sender if no karma-whoring was done. This is so when users
