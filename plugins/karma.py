@@ -25,48 +25,21 @@ def karma(irc):
     return 'Top Karma: ' + ', '.join(map(lambda v: ': '.join(v), karmees))
 
 
-@Walnut.hook('PRIVMSG')
-def match_karma(message):
-    db_key  = '{}:{}'.format(message.parent.frm, message.args[0])
-    nick    = message.prefix.split('!')[0]
-    network = message.parent.frm
-    channel = message.args[0]
-    match   = re.match(r'([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)', message.args[-1])
+@regex(r'([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
+def match_karma(irc, match):
+    if match.group(1) not in userlist[irc.network][irc.channel]:
+        return None
 
-    # Increment Karma through karma whoring means. Restricting this to every 30
-    # minutes doesn't seem to stop people whoring, but It's here anyway.
-    if match and match.group(1) in userlist[network][channel]:
-        success = r.setnx(db_key + ':karma:{}'.format(nick.lower()), '')
+    timeout = r.setnx(irc.key + ':karma:' + irc.nick.lower(), '')
+    if not timeout:
+        return 'You meddled with karma too recently to affect {}.'.format(match.group(1))
 
-        if success:
-            direction = 1 if match.group(2) == '++' else -1
-            r.expire(db_key + ':karma:{}'.format(nick.lower()), 1800)
-            r.hincrby(db_key + ':karma', match.group(1).lower(), direction)
-            output = '{0} {1} karma. {0} now has {2}.'.format(
-                match.group(1),
-                'gained' if direction == 1 else 'lost',
-                r.hget(db_key + ':karma', match.group(1).lower()).decode('UTF-8')
-            )
+    direction   = 1 if match.group(2) == '++' else -1
+    incremented = r.hincrby(irc.key + ':karma', match.group(1).lower(), direction)
+    r.expire(irc.key + ':karma:' + irc.nick.lower(), 1800)
 
-        else:
-            output = 'You manipulated the waves too recently to affect {}\'s karma.'.format(match.group(1))
-
-        return 'PRIVMSG {} :{}'.format(
-            channel,
-            output
-        )
-
-    # Catch passive thanks and increment karma from it.
-    match = re.match(r'^thanks?(:?\syou)?(\s.+)?$', message.args[-1], re.I)
-    if match:
-        target = match.group(2) if match.group(2) else last_sender.get(channel, 'DekuNut')
-        if target in userlist[network][channel]:
-            if r.setnx(db_key + ':thank:{}'.format(target.strip().lower()), ''):
-                r.expire(db_key + ':thank:{}'.format(target.strip().lower()), 60)
-                r.hincrby(db_key + ':karma', target.strip().lower(), 1)
-                return None
-
-    # Store the last sender if no karma-whoring was done. This is so when users
-    # thank without specifying a name, we can just grant the thanks to who we
-    # are assuming the thankee is.
-    last_sender[channel] = nick
+    return '{0} {1} karma. {0} now has {2}.'.format(
+        match.group(1),
+        'gained' if direction == 1 else 'lost',
+        incremented
+    )

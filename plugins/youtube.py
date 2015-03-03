@@ -7,7 +7,7 @@ from json import loads
 from urllib.error import URLError
 from urllib.request import urlopen
 from urllib.parse import quote_plus
-from bruh import command
+from bruh import command, regex
 from plugins import stats
 from drivers.walnut import Walnut
 
@@ -53,21 +53,10 @@ def fetch_video(query, search = False):
     )
 
 
-@Walnut.hook('PRIVMSG')
-def youtube_match(message):
-    network = message.parent.frm
-    channel = message.args[0]
-    nick    = message.prefix.split('!')[0]
-    match   = re.search(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))', message.args[-1])
-
-    if not match:
-        return None
-
-    stats.incr('youtube', 1, network, channel, nick)
-    return 'PRIVMSG {} :{}'.format(
-        channel,
-        fetch_video(match.group(1))
-    )
+@regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
+def youtube_match(irc, match):
+    stats.incr('youtube', 1, irc.network, irc.channel, irc.nick)
+    return fetch_video(match.group(1))
 
 
 @command('youtube')

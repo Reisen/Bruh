@@ -63,38 +63,35 @@ def try_expression(keys, message):
     return (None, None, None)
 
 
-@Walnut.hook('PRIVMSG')
-def handle_regulars(message):
+@sink
+def handle_regulars(irc):
     network = message.parent.frm
     channel = message.args[0]
     nick    = message.prefix.split('!')[0]
 
     matcher, process, result = try_expression(
-        ['{}:{}:regular'.format(network, channel), network + ':regular'],
-        message.args[-1]
+        ['{}:{}:regular'.format(irc.network, irc.channel), irc.network + ':regular'],
+        irc.message
     )
 
     if matcher:
         keyspace = {"\\" + str(k + 1): v for k, v in enumerate(matcher.groups())}
         keyspace = dict(keyspace.items() | {
-            "channel": channel,
-            "nick": nick,
-            "rand1": lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand2": lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand3": lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand4": lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand5": lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand6": lambda: random.sample(userlist[network][channel], 1)[0]
+            "channel": irc.channel,
+            "nick":    irc.nick,
+            "rand1":   lambda: random.sample(userlist[network][channel], 1)[0],
+            "rand2":   lambda: random.sample(userlist[network][channel], 1)[0],
+            "rand3":   lambda: random.sample(userlist[network][channel], 1)[0],
+            "rand4":   lambda: random.sample(userlist[network][channel], 1)[0],
+            "rand5":   lambda: random.sample(userlist[network][channel], 1)[0],
+            "rand6":   lambda: random.sample(userlist[network][channel], 1)[0]
         }.items())
 
         for k, v in keyspace.items():
             if callable(v):
                 keyspace[k] = keyspace[k]()
 
-        return "PRIVMSG {} :{}".format(
-            channel,
-            result.format(**keyspace)
-        )
+        return result.format(**keyspace)
 
 
 @command('re')

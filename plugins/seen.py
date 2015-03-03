@@ -1,5 +1,5 @@
 from time import time
-from bruh import command, r
+from bruh import command, sink, r
 from drivers.walnut import Walnut
 
 distances = (
@@ -83,33 +83,26 @@ def seen(irc):
 @command('last')
 def seen(irc):
     if not irc.message:
-        return r.lindex(irc.key + ':last', -1).decode('UTF-8')
+        return r.lindex(irc.key + ':last', 0).decode('UTF-8')
 
     count = int(irc.message)
     return b' '.join(r.lrange(irc.key + ':last', 0, count - 1)).decode('UTF-8')
 
 
-@Walnut.hook('PRIVMSG')
-def watch_channel(message):
-    if message.args[0][0] == '#':
-        # Get relevant information to track when seeing users say things.
-        nick = message.prefix.split('!')[0]
-        chan = message.args[0]
-        key  = message.parent.frm + ':' + chan
-        msg  = message.args[-1]
-        r.hset(key + ':seen', nick.lower(), '{}|{}'.format(time(), msg))
-        r.lpush(key + ':last', '<{}> {}'.format(nick, msg))
-        r.ltrim(key + ':last', 0, 10)
+@sink
+def watch_channel(irc):
+    if irc.channel[0] != '#':
+        return None
 
-        # Check if any messages need to be passed on.
-        if r.llen(key + ':{}:tell'.format(nick.lower())) > 0:
-            return 'NOTICE {} :{}'.format(
-                nick,
-                r.lpop(key + ':{}:tell'.format(nick.lower())).decode('UTF-8')
-            )
-        #messages = irc.db.execute('SELECT * FROM tell WHERE nick = ? and chan = ?', (nick.lower(), chan)).fetchall()
-        #for message in messages:
-        #    irc.notice(nick, message[3])
-        #    irc.db.execute('DELETE FROM tell WHERE id = ?', (message[0],))
+    r.hset(irc.key + ':seen', irc.nick.lower(), '{}|{}'.format(time(), irc.message))
+    r.lpush(irc.key + ':last', '<{}> {}'.format(irc.nick, irc.message))
+    r.ltrim(irc.key + ':last', 0, 10)
 
+    # Check if any messages need to be passed on.
+    tell_key = irc.key + ':{}:tell'.format(irc.nick.lower())
+    if r.llen(tell_key) > 0:
+        return 'NOTICE {} :{}'.format(
+            irc.nick,
+            r.lpop(tell_key).decode('UTF-8')
+        )
 

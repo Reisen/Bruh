@@ -1,4 +1,4 @@
-from bruh import command
+from bruh import command, regex
 from drivers.walnut import Walnut
 
 

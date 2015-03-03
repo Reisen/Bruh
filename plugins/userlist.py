@@ -71,6 +71,19 @@ def user_quit(message):
             del usermap[network][name.lower()]
 
 
+@Walnut.hook('NICK')
+def user_nick(message):
+    name     = message.prefix.split('!')[0]
+    network  = message.parent.frm
+    new_name = message.args[0]
+    for channel in userlist[network]:
+        if name in userlist[network][channel]:
+            userlist[network][channel].remove(name)
+            userlist[network][channel].add(new_name)
+            usermap[network][name.lower()] = name
+            del usermap[network][name.lower()]
+
+
 @command('users')
 def print_userlist(irc):
     return str(userlist[irc.network][irc.channel])

@@ -76,6 +76,25 @@ def handle_command(message):
 def privmsg_handler(message):
     irc = IRCMessage(message)
 
+    # Prefixed Commands
+    # --------------------------------------------------------------------------
+    prefix = r.get(irc.key + ':prefix')
+    prefix = prefix.decode('UTF-8') if prefix else '.'
+    if irc.message.startswith(prefix) and len(irc.message) >= 2:
+        pieces = re.findall(r'\{0}(.*?)(?:\|\s*(?=\{0})|$)'.format(prefix), irc.message)
+        Walnut.ipc(
+            'command',
+            pieces[0].split(' ', 1)[0],
+            'command',
+            irc.message,
+            irc.network,
+            irc.channel,
+            irc.nick
+        )
+
+        # We return here to halt processing of this message by regex and sinks.
+        return None
+
     # Sinks
     # --------------------------------------------------------------------------
     for callback in sinks:
@@ -100,21 +119,3 @@ def privmsg_handler(message):
                 result
             )
 
-    # Prefixed Commands
-    # --------------------------------------------------------------------------
-    prefix = r.get(irc.key + ':prefix')
-    prefix = prefix.decode('UTF-8') if prefix else '.'
-    if not irc.message.startswith(prefix) or len(irc.message) < 2:
-        return None
-
-    pieces = re.findall(r'\{0}(.*?)(?:\|\s*(?=\{0})|$)'.format(prefix), irc.message)
-
-    Walnut.ipc(
-        'command',
-        pieces[0].split(' ', 1)[0],
-        'command',
-        irc.message,
-        irc.network,
-        irc.channel,
-        irc.nick
-    )

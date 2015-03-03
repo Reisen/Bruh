@@ -1,4 +1,4 @@
-from bruh import command
+from bruh import command, sink
 from drivers.walnut import Walnut
 from hyphen import Hyphenator
 from collections import defaultdict
@@ -7,12 +7,6 @@ from random import random, choice, randrange
 split = Hyphenator('en_GB')
 memes = defaultdict(lambda: 'butt')
 prob  = 0.001
-
-@Walnut.hook('')
-def handle_all(message):
-    print(str(message))
-    return None
-
 
 def buttify_word(word, meme):
     try:
@@ -100,19 +94,15 @@ def buttify_line(message, meme):
     return output
 
 
-@Walnut.hook('PRIVMSG')
-def buttchance(message):
+@sink
+def buttchance(irc):
     if random() > prob:
         return None
 
-    channel = message.args[0]
     for attempt in range(5):
-        buttified = buttify_line(message.args[-1], memes[channel])
+        buttified = buttify_line(irc.message, memes[irc.channel])
         if 'butt' in buttified:
-            return "PRIVMSG {} :{}".format(
-                channel,
-                buttified
-            )
+            return buttified
 
 
 @command('chance')
