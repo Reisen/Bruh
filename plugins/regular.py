@@ -1,6 +1,6 @@
 import re
 import random
-from bruh import command, r
+from bruh import command, r, sink
 from plugins.userlist import userlist
 from drivers.walnut import Walnut
 
@@ -65,10 +65,6 @@ def try_expression(keys, message):
 
 @sink
 def handle_regulars(irc):
-    network = message.parent.frm
-    channel = message.args[0]
-    nick    = message.prefix.split('!')[0]
-
     matcher, process, result = try_expression(
         ['{}:{}:regular'.format(irc.network, irc.channel), irc.network + ':regular'],
         irc.message
@@ -79,12 +75,12 @@ def handle_regulars(irc):
         keyspace = dict(keyspace.items() | {
             "channel": irc.channel,
             "nick":    irc.nick,
-            "rand1":   lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand2":   lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand3":   lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand4":   lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand5":   lambda: random.sample(userlist[network][channel], 1)[0],
-            "rand6":   lambda: random.sample(userlist[network][channel], 1)[0]
+            "rand1":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
+            "rand2":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
+            "rand3":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
+            "rand4":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
+            "rand5":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
+            "rand6":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0]
         }.items())
 
         for k, v in keyspace.items():

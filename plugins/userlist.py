@@ -15,6 +15,9 @@ def current(network, nick):
 
 @Walnut.hook('PRIVMSG')
 def user_check(message):
+    if not message.args[0].startswith('#'):
+        return None
+
     if message.args[0] not in userlist[message.parent.frm]:
         return 'NAMES {}'.format(message.args[0])
 

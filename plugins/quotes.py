@@ -61,7 +61,7 @@ def search_quote(irc, quote):
         )
 
     except Exception as e:
-        return 'Could not find that quote.' + str(e)
+        return 'Could not find that quote.'
 
 
 @command('quote')
