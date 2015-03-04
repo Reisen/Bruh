@@ -4,12 +4,21 @@ from bruh import r, c as commands, e as expressions, s as sinks
 
 
 class IRCMessage:
-    def __init__(self, message):
-        self.nick    = message.prefix.split('!')[0]
-        self.channel = message.args[0] if message.args[0].startswith('#') else self.nick
-        self.network = message.parent.frm
-        self.message = message.args[-1]
-        self.key     = '{}:{}'.format(self.network, self.channel)
+    def __init__(self, message = None):
+        if message:
+            self.nick    = message.prefix.split('!')[0]
+            self.channel = message.args[0] if message.args[0].startswith('#') else self.nick
+            self.network = message.parent.frm
+            self.message = message.args[-1]
+            self.key     = '{}:{}'.format(self.network, self.channel)
+
+    def raw(self, message):
+        Walnut.ipc(
+            'proxy',
+            self.network,
+            'forward',
+            message
+        )
 
 
 @Walnut.method('command')
@@ -32,8 +41,7 @@ def handle_command(message):
         result = 'The {} command has been blacklisted in this channel.'.format(c)
 
     else:
-        class IRC: pass
-        env         = IRC()
+        env         = IRCMessage()
         env.key     = db_key
         env.nick    = message.args[-1]
         env.channel = message.args[-2]

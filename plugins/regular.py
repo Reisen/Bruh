@@ -1,7 +1,7 @@
 import re
 import random
 from bruh import command, r, sink
-from plugins.userlist import userlist
+from plugins.userlist import networks
 from drivers.walnut import Walnut
 
 
@@ -75,12 +75,12 @@ def handle_regulars(irc):
         keyspace = dict(keyspace.items() | {
             "channel": irc.channel,
             "nick":    irc.nick,
-            "rand1":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
-            "rand2":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
-            "rand3":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
-            "rand4":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
-            "rand5":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0],
-            "rand6":   lambda: random.sample(userlist[irc.network][irc.channel], 1)[0]
+            "rand1":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0],
+            "rand2":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0],
+            "rand3":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0],
+            "rand4":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0],
+            "rand5":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0],
+            "rand6":   lambda: random.sample(networks[irc.network][irc.channel].users, 1)[0]
         }.items())
 
         for k, v in keyspace.items():

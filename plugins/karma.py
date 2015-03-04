@@ -1,6 +1,6 @@
 import re
 from bruh import command, regex, sink, r
-from plugins.userlist import userlist, current
+from plugins.userlist import networks, current
 from drivers.walnut import Walnut
 
 
@@ -27,7 +27,7 @@ def karma(irc):
 
 @regex(r'([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
 def match_karma(irc, match):
-    if match.group(1) not in userlist[irc.network][irc.channel]:
+    if match.group(1) not in networks[irc.network][irc.channel].users:
         return None
 
     timeout = r.setnx(irc.key + ':karma:' + irc.nick.lower(), '')
