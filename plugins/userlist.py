@@ -50,12 +50,6 @@ def current(network, nick):
     return lownicks[network].get(nick.lower(), User(nick)).nick
 
 
-@command('testauth')
-@auth
-def testauth(irc):
-    return 'Auth Command Invoked!'
-
-
 @Walnut.hook('PRIVMSG')
 def user_check(message):
     network = message.parent.frm
