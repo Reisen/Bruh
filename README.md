@@ -7,7 +7,7 @@ like statistics, channel quotes, and general help information.
 # Requirements
 The old bot with no dependencies can still be found under the 'old-base' git branch on
 this repository. This bot now needs a whole bunch of shit to get setup, so if you want
-a simple bot, use old bruh or another bot. Sorry.
+a simple bot, use old bruh or another bot.
 
 Required:
 * [Walnut]
@@ -27,5 +27,6 @@ The main instance of Walnut, running on Rizon, uses a seperate plugin for dealin
 code compilation for example. It is possible to write plugins that run entirely within
 containers or other VM's that simply plug into the ZMQ ports provided by [Walnut]. All
 information on this can be found on the project wiki.
+
 
 [Walnut]: https://github.com/Reisen/Walnut
