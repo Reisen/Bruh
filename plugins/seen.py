@@ -86,7 +86,7 @@ def seen(irc):
         return r.lindex(irc.key + ':last', 0).decode('UTF-8')
 
     count = int(irc.message)
-    return b' '.join(r.lrange(irc.key + ':last', 0, count - 1)).decode('UTF-8')
+    return b' '.join(reversed(r.lrange(irc.key + ':last', 0, count - 1))).decode('UTF-8')
 
 
 @sink

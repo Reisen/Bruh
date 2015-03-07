@@ -93,6 +93,10 @@ def user_part(message):
     channel = message.args[0]
     if name in networks[network][channel].users:
         networks[network][channel].users.remove(name)
+        for channel in networks[network]:
+            if name in networks[network][channel].users:
+                return None
+
         del lownicks[network][name.lower()]
 
 
@@ -103,6 +107,10 @@ def user_kick(message):
     channel = message.args[0]
     if name in networks[network][channel].users:
         networks[network][channel].users.remove(name)
+        for channel in networks[network]:
+            if name in networks[network][channel].users:
+                return None
+
         del lownicks[network][name.lower()]
 
 
@@ -113,6 +121,10 @@ def user_quit(message):
     for channel in networks[network]:
         if name in networks[network][channel].users:
             networks[network][channel].users.remove(name)
+            for channel in networks[network]:
+                if name in networks[network][channel].users:
+                    return None
+
             del lownicks[network][name.lower()]
 
 
