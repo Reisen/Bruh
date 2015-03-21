@@ -59,7 +59,7 @@
         <div class="llist">
             {% for chan, stat in chans %}
                 {% if chan.startswith('#') %}
-                    <i class="fa fa-comment"></i><a href="">{{ chan }}</a>
+                    <i class="fa fa-comment"></i><a href="/channel/{{ chan[1:] }}/">{{ chan }}</a>
                     <span class="value">{{ stat }} Lines</span><br/>
                 {% endif %}
             {% endfor %}

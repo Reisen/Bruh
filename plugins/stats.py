@@ -12,6 +12,14 @@ def stat_handler(irc):
     incr('messages', 1, irc.network, irc.channel, irc.nick)
     incr('words', len(irc.message.split()), irc.network, irc.channel, irc.nick)
 
+    # Generate Word Cloud
+    words = irc.message.split()
+    pipe  = r.pipeline()
+    for word in words:
+        pipe.hincrby(irc.key + ':cloud', word, 1)
+
+    pipe.execute()
+
 
 @command('stat')
 def get_stat(irc):

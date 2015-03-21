@@ -131,8 +131,10 @@ def user_quit(message):
 @Walnut.hook('NICK')
 def user_nick(message):
     name     = message.prefix.split('!')[0]
+    nameC    = message.prefix.split('!')[0]
     network  = message.parent.frm
     new_name = message.args[0]
+    print('From: {} -> To: {} ({})'.format(name, new_name, nameC))
     for channel in networks[network]:
         if name in networks[network][channel].users:
             user = User(new_name)

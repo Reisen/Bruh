@@ -84,6 +84,8 @@ def handle_command(message):
 def privmsg_handler(message):
     irc = IRCMessage(message)
 
+    outputs = []
+
     # Prefixed Commands
     # --------------------------------------------------------------------------
     prefix = r.get(irc.key + ':prefix')
@@ -100,18 +102,15 @@ def privmsg_handler(message):
             irc.nick
         )
 
-        # We return here to halt processing of this message by regex and sinks.
-        return None
-
     # Sinks
     # --------------------------------------------------------------------------
     for callback in sinks:
         result = callback(irc)
         if result:
-            return 'PRIVMSG {} :{}'.format(
+            outputs.append('PRIVMSG {} :{}'.format(
                 irc.channel,
                 result
-            )
+            ))
 
     # Regular Expressions
     # --------------------------------------------------------------------------
@@ -122,8 +121,9 @@ def privmsg_handler(message):
 
         result = callback(irc, result)
         if result:
-            return 'PRIVMSG {} :{}'.format(
+            outputs.append('PRIVMSG {} :{}'.format(
                 irc.channel,
                 result
-            )
+            ))
 
+    return outputs

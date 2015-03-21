@@ -1,6 +1,21 @@
+noscript div {
+    position: fixed;
+    padding: 15px;
+    border-bottom: 3px solid #555;
+    width: 100%;
+    text-align: center;
+    background-color: #222;
+    color: #FF8888;
+}
+
 #container i.fa {
     display: inline-block;
-    width: 24px;
+    width: 16px;
+    color: white;
+}
+
+#container .darkurza {
+    color: #FF9955 !important;
 }
 
 #container {
@@ -14,12 +29,38 @@
 }
 
 #container a {
-    color: #334477;
+    color: #4477CC;
     text-decoration: none;
 }
 
 #container a:hover {
-    color: #4499CC;
+    color: white;
+    cursor: pointer;
+}
+
+#container .rank {
+    display: inline-block;
+    width: 25px;
+    font-size: 12px;
+    text-align: center;
+    color: #666;
+    font-family: 'Droid Sans Mono';
+}
+
+#container .llist .rank,
+#container .rlist .rank {
+    position: absolute;
+    display: block;
+    width: 25px;
+    text-align: center;
+}
+
+#container .llist .rank {
+    left: -35px;
+}
+
+#container .rlist .rank {
+    right: -35px;
 }
 
 #container span.value {
@@ -29,10 +70,12 @@
 #container .llist {
     float: left;
     width: 45%;
+    position: relative;
 }
 
 #container .rlist {
     margin-left: 55%;
+    position: relative;
 }
 
 .statbars {
@@ -87,3 +130,27 @@
     .statbars .bar1A { margin-top: 135px; }
     .statbars .bar1B { margin-top: 140px; }
     .statbars .bar1C { margin-top: 145px; }
+
+#container ul.nav {
+    padding: 0px;
+    margin: 0px;
+    list-style: none;
+    margin-bottom: 15px;
+}
+    #container ul.nav li {
+        float: left;
+        margin-right: 20px;
+    }
+
+#container div[id^=page-]:nth-of-type(n+2) {
+    display: none;
+}
+
+#container .quote {
+    padding: 15px;
+    background-color: #1E1E22;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    font-family: 'Droid Sans Mono', monospace;
+    font-size: 11px;
+}
