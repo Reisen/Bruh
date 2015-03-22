@@ -1,5 +1,5 @@
 import re
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 from bruh import r, c as commands, e as expressions, s as sinks
 
 

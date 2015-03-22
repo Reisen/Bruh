@@ -1,0 +1,3 @@
+[submodule "walnut"]
+	path = walnut
+	url = https://github.com/Reisen/Walnut.git

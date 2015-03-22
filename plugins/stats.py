@@ -1,5 +1,5 @@
 from bruh import command, sink, r
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 def stat(name, value, *key): r.hset('{}:stats'.format(':'.join(key).lower()), name, value)

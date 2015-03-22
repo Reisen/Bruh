@@ -1,5 +1,5 @@
 from bruh import command
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 from redis import StrictRedis
 from collections import defaultdict
 from itertools import dropwhile, takewhile

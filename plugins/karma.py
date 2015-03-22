@@ -1,7 +1,7 @@
 import re
 from bruh import command, regex, sink, r
 from plugins.userlist import networks, current
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 last_sender = {}

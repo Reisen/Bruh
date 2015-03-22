@@ -4,7 +4,7 @@ from random import randint
 from urllib.parse import quote_plus, unquote_plus
 from urllib.request import urlopen, Request
 from html.parser import HTMLParser
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 @command('google')

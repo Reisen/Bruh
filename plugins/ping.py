@@ -1,5 +1,5 @@
 from bruh import command, regex
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 @command('echo')

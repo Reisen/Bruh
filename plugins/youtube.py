@@ -9,7 +9,7 @@ from urllib.request import urlopen
 from urllib.parse import quote_plus
 from bruh import command, regex
 from plugins import stats
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 def calculate_length(seconds):

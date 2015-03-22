@@ -3,7 +3,7 @@ import re
 import queue
 import collections
 import functools
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 from redis import StrictRedis
 
 

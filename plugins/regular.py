@@ -2,7 +2,7 @@ import re
 import random
 from bruh import command, r, sink
 from plugins.userlist import networks
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 
 def add_expression(irc, arg):

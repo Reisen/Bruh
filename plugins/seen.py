@@ -1,6 +1,6 @@
 from time import time
 from bruh import command, sink, r
-from drivers.walnut import Walnut
+from walnut.drivers import Walnut
 
 distances = (
     (60 * 60 * 24 * 365, 'year'),
