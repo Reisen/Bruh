@@ -31,6 +31,10 @@ Build Walnut:
     cd walnut
     ./Setup.hs build
 
+Install Python Dependencies:
+
+    pip install -r requirements.txt
+
 Make sure Redis is running. Then simply run `python bruh.py` to start bruh, then next
 run Walnut to start the connections to IRC. Modifications can be made to bruh and the
 python can be killed and restarted without issue, Walnut will maintain the connection
