@@ -1,13 +1,14 @@
 # README
-Bruh is an IRC bot written in Python 3. Originally standalone; Bruh is now a collection
-of plugins for the [Walnut] IRC router. This repository comes with two plugins: the bot
-itself and an optional web server that presents the bots database showing several items
-like statistics, channel quotes, and general help information.
+Bruh is an IRC plugin for [Walnut] written in Python 3. It implements most plugins from
+the [old standalone] IRC bot. It was created just to run mostly as a code execution bot
+on Rizon's #c++ channel. I use it to play with libraries so It's not the easiest bot to
+setup. If you definitely want to run it however check the requirements below and follow
+the instructions.
 
 # Requirements
-The old bot with no dependencies can still be found under the 'old-base' git branch on
-this repository. This bot now needs a whole bunch of shit to get setup, so if you want
-a simple bot, use old bruh or another bot.
+*Note: The old bot can still be found [here.][old standalone]*
+To run the bot, the following are required. Walnut should automatically be cloned along
+with this repository so as long as you have GHC, it should build with the setup script.
 
 Required:
 * [Walnut]
@@ -18,15 +19,22 @@ Optional:
 * Hyphentator (for the buttify plugin)
 * Flask (for the web.py plugin)
 
-# How Plugins Work
-Although Bruh is itself a plugin, plugins can be written for Bruh which are capable of
-implementing commands or matching regular expressions. Writing plugins for bruh itself
-allows command-like plugins to all be grouped under this one plugin. For a plugin that
-does something a little more specialist, write a plugin for [Walnut] directly instead.
-The main instance of Walnut, running on Rizon, uses a seperate plugin for dealing with
-code compilation for example. It is possible to write plugins that run entirely within
-containers or other VM's that simply plug into the ZMQ ports provided by [Walnut]. All
-information on this can be found on the project wiki.
+# Setup
+Clone this repository with the --recursive flag to automatically clone and prepare the
+submodules, you need to do this even if you cloned Walnut seperately as the driver for
+python Walnut plugins needs to be within Bruh's source tree.
 
+    git clone --recursive https://github.com/Reisen/Bruh.git
+
+Build Walnut:
+
+    cd walnut
+    ./Setup.hs build
+
+Make sure Redis is running. Then simply run `python bruh.py` to start bruh, then next
+run Walnut to start the connections to IRC. Modifications can be made to bruh and the
+python can be killed and restarted without issue, Walnut will maintain the connection
+to IRC at all times.
 
 [Walnut]: https://github.com/Reisen/Walnut
+[old standalone]: https://github.com/Reisen/Bruh/tree/old-base
