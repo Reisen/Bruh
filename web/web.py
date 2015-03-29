@@ -58,6 +58,18 @@ def index():
     })
 
 
+@app.route('/commands/')
+def guide():
+    return render_template('commands.html', **{
+    })
+
+
+@app.route('/guide/')
+def commands():
+    return render_template('guide.html', **{
+    })
+
+
 @app.route('/channel/<string:channel>/')
 def view_channel(channel):
     from string import punctuation

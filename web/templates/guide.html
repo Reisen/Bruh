@@ -1,0 +1,72 @@
+{% extends "__base.html" %}
+
+{% block content %}
+    <span class="title">Guide</span>
+    <p>
+        This guide covers as much as possible, but may not cover every single
+        feature. The <a href="https://github.com/Reisen/Bruh">source code</a>
+        is available if needed.
+    </p>
+
+    <hr>
+
+    <span class="title">Contents</span>
+    <ul>
+        <li><a href="#code_execution">Code Execution</a></li>
+        <li><a href="#channel_management">Channel Management</a></li>
+        <li><a href="#stop_annoying">Stop Walnut being Annoying</a></li>
+    </ul>
+
+    <hr>
+
+    <span class="title">Code Execution</span>
+    <p>
+        Walnut can execute code in several languages. The general syntax for
+        running a snippet of code is written <code>[lang], [code]</code>. For
+        example, running a snippet of haskell can be written <code>h, 1 +
+        1</code>. Currently the following languages should work:
+    </p>
+    <ul>
+        <li><code>c, [code]</code>Clang C++</li>
+        <li><code>w, [code]</code>GCC C++</li>
+        <li><code>h, [code]</code>Haskell</li>
+        <li><code>s, [code]</code>Scala</li>
+        <li><code>r, [code]</code>Rust</li>
+        <li><code>j, [code]</code>Javascript</li>
+    </ul>
+
+    <hr>
+
+    <span class="title">Channel Management</span>
+    <p>
+        TODO
+    </p>
+
+    <hr>
+
+    <span class="title">Stop Walnut Being Annoying</span>
+    <p>
+        If you have at least half-op in the channel in question, you can toggle
+        commands on and off completely in the channel using
+        <code>.enable</code> and <code>.disable</code> commands. Entire plugins
+        can be disabled for the channel using the <code>.toggle</code> command.
+    </p>
+
+    <p>
+        If you aren't a channel admin, you can still exclude yourself from
+        certain behaviours that walnut performs. Walnut runs regular
+        expressions and sinks on every message it sees. You can exclude
+        yourself from these by running <code>.exclude [exclusion]</code>. The
+        following exclusions are possible:
+    </p>
+
+    <ul>
+        <li><code>butt_sink</code> Your messages won't trigger random buttifications.</li>
+        <li><code>stat_sink</code> Your messages aren't counted for statistics.</li>
+        <li><code>regular_sink</code> Your messages won't trigger regular expressions.</li>
+        <li><code>recall_match</code> Your messages starting with ? won't lookup factoids.</li>
+        <li><code>karma_match</code> Your messages won't be parsed for karma.</li>
+        <li><code>youtube_match</code> Youtube links you send won't have their information printed.</li>
+    </ul>
+
+{% endblock %}

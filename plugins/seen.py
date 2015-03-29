@@ -90,7 +90,7 @@ def seen(irc):
 
 
 @sink
-def watch_channel(irc):
+def seen_sink(irc):
     if irc.channel[0] != '#':
         return None
 
@@ -101,8 +101,4 @@ def watch_channel(irc):
     # Check if any messages need to be passed on.
     tell_key = irc.key + ':{}:tell'.format(irc.nick.lower())
     if r.llen(tell_key) > 0:
-        return 'NOTICE {} :{}'.format(
-            irc.nick,
-            r.lpop(tell_key).decode('UTF-8')
-        )
-
+        return lambda: 'NOTICE {} :{}'.format(irc.nick, r.lpop(tell_key).decode('UTF-8'))

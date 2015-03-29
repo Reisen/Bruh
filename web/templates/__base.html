@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bruh</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/morphism.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
+        <script src="/static/js/bruh.js"></script>
+
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        <noscript>
+            <div>
+                Javascript is used on this page for WordCloud generation, data
+                presentation and tabbing on some pages. If you don't want to
+                use JavaScript, too bad, this site needs it.
+            </div>
+        </noscript>
+        {% include "__header.html" %}
+
+        <div id="container" class="cf">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        {% include "__footer.html" %}
+    </body>
+</html>

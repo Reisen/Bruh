@@ -96,7 +96,7 @@ try:
 
 
     @sink
-    def buttchance(irc):
+    def butt_sink(irc):
         if random() > prob:
             return None
 

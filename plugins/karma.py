@@ -26,9 +26,18 @@ def karma(irc):
 
 
 @regex(r'([\w\[\]\\`_\^\{\}\|-]+)(\+\+|--)')
-def match_karma(irc, match):
+def karma_match(irc, match):
     if match.group(1) not in networks[irc.network][irc.channel].users:
         return None
+
+    if match.group(1) == 'Warpten':
+        return None
+
+    if match.group(1) == 'Moto-chan' and match.group(2) == '--':
+        return 'WAI!? How could you!? :<'
+
+    if match.group(1) == 'hreb' and match.group(2) == '++':
+        return 'There is no redemption for hreb, there can be no return from the path to karma hell.'
 
     timeout = r.setnx(irc.key + ':karma:' + irc.nick.lower(), '')
     if not timeout:

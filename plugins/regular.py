@@ -64,7 +64,7 @@ def try_expression(keys, message):
 
 
 @sink
-def handle_regulars(irc):
+def regular_sink(irc):
     matcher, process, result = try_expression(
         ['{}:{}:regular'.format(irc.network, irc.channel), irc.network + ':regular'],
         irc.message

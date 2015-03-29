@@ -7,7 +7,7 @@ def incr(name, count, *key): r.hincrby('{}:stats'.format(':'.join(key).lower()),
 
 
 @sink
-def stat_handler(irc):
+def stat_sink(irc):
     incr('messages', 1, irc.network, irc.channel)
     incr('messages', 1, irc.network, irc.channel, irc.nick)
     incr('words', len(irc.message.split()), irc.network, irc.channel, irc.nick)

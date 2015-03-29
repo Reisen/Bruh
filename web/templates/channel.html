@@ -1,0 +1,120 @@
+{% extends "__base.html" %}
+
+{% block content %}
+    <ul id="stat_tabs" class="nav cf">
+        <li><a>Brief Stats</a></li>
+        <li><a>User List</a></li>
+        <li><a>Karma Leaderboard</a></li>
+        <li><a>Quotes</a></li>
+    </ul>
+
+    <div id="page-1">
+        <span class="title">Brief Stats</span>
+        <p>
+            Since arriving in {{ channel }}, I have seen <b>{{ user_count }}</b>
+            different nicks and witnessed over <b>{{ messages }}</b> messages sent
+            between users. Some of the most common words used in this channel are:
+        </p>
+
+        <p></p>
+        <canvas width="600" height="400" id="wordcloud">
+        </canvas>
+
+        <p>
+            Word clouds are really bad for drawing any <i>real</i> conclusions
+            from. This is just for fun, so don't take it too seriously, it doesn't
+            mean anything.
+        </p>
+    </div>
+
+    <div id="page-2">
+        <span class="title">Top 100 Users (Out Of {{ user_count }}) </span>
+        <p></p>
+        <div class="cf">
+            {% set split = (users|length / 2)|int %}
+            <div class="llist">
+                {% for user in users[:split] %}
+                    <span class="rank">{{ loop.index }}</span>
+
+                    {% if user[0] == 'darkurza' %}
+                    <i class="fa fa-wheelchair darkurza"></i>
+                    {% else %}
+                    <i class="fa fa-user"></i>
+                    {% endif %}
+
+                    <a href="">{{ user[0] }}</a>
+                    <span class="value">{{ user[1]['messages'] }} Lines</span><br/>
+                {% endfor %}
+            </div>
+
+            <div class="rlist">
+                {% for user in users[split:] %}
+                    <span class="rank">{{ 50 + loop.index }}</span>
+
+                    {% if user[0] == 'darkurza' %}
+                    <i class="fa fa-wheelchair darkurza"></i>
+                    {% else %}
+                    <i class="fa fa-user"></i>
+                    {% endif %}
+
+                    <a href="">{{ user[0] }}</a>
+                    <span class="value">{{ user[1]['messages'] }} Lines</span><br/>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div id="page-3">
+        <span class="title">Karma Leaderboard</span>
+    </div>
+
+    <div id="page-4">
+        <span class="title">Quotes</span>
+        <br/>
+        {% for quote in quotes %}
+        <div class="quote">
+            {{ quote }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        /* Setup Pages. */
+        (function() {
+            var tabs  = $('#stat_tabs li a');
+            var panes = $('[id^=page]');
+
+            tabs.each(function(k, v) {
+                var tab = $(v);
+                tab.on('click', function() {
+                    panes.css({'display': 'none'});
+                    $(panes.get(k)).css({'display': 'block'});
+                });
+            });
+
+            $(tabs.get(0)).addClass('active');
+        })();
+
+        /* Setup Wordcloud. */
+        WordCloud(document.getElementById('wordcloud'), {
+            fontFamily: 'Open Sans',
+            fontWeight: 'bold',
+            color: 'random-light',
+            //weightFactor: function(size) { return size * $('#wordcloud').width() / 500; },
+            backgroundColor: '#0D0D12',
+            shape: 'diamond',
+            gridSize: Math.round(1 * $('#wordcloud').width() / 500),
+            rotateRatio: 0.8,
+            list: [
+                {% for word in words %}
+                ["{{ word[0] }}", {{ word[1] }}],
+                {% endfor %}
+            ]
+        });
+    </script>
+{% endblock %}
+
+{% block head %}
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="/static/js/wordcloud2.js"></script>
+{% endblock %}

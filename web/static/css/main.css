@@ -23,6 +23,28 @@ noscript div {
     margin-bottom: 20px;
 }
 
+#container code {
+    font-size: 11px;
+    background-color: #030309;
+    color: white;
+    border: 1px solid #222;
+    padding: 4px;
+    color: #BBDDFF;
+}
+
+#container ul {
+    list-style: none;
+    padding: 0px;
+}
+
+    #container ul li code {
+        display: inline-block;
+        margin-right: 10px;
+        width: 150px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
 #container b {
     color: white;
     font-weight: normal;

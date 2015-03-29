@@ -28,7 +28,7 @@ def remember(irc):
 
 
 @regex(r'^\?([^\s]+)$')
-def recall(irc, match):
+def recall_match(irc, match):
     if match.group(1) == 'rand':
         maximum = r.hlen(irc.key + ':remember')
         index   = randint(0, maximum)

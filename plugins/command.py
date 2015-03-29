@@ -13,12 +13,7 @@ class IRCMessage:
             self.key     = '{}:{}'.format(self.network, self.channel)
 
     def raw(self, message):
-        Walnut.ipc(
-            'proxy',
-            self.network,
-            'forward',
-            message
-        )
+        Walnut.ipc('proxy', self.network, 'forward', message)
 
 
 @Walnut.method('command')
@@ -105,12 +100,13 @@ def privmsg_handler(message):
     # Sinks
     # --------------------------------------------------------------------------
     for callback in sinks:
+        print(callback.__name__)
         result = callback(irc)
         if result:
             outputs.append('PRIVMSG {} :{}'.format(
                 irc.channel,
                 result
-            ))
+            ) if isinstance(result, str) else result())
 
     # Regular Expressions
     # --------------------------------------------------------------------------
@@ -124,6 +120,6 @@ def privmsg_handler(message):
             outputs.append('PRIVMSG {} :{}'.format(
                 irc.channel,
                 result
-            ))
+            ) if isinstance(result, str) else result())
 
     return outputs
