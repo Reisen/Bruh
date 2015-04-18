@@ -66,6 +66,7 @@ def search_quote(irc, quote):
 
 @command('quote')
 @command('q')
+@command('qu')
 def quote(irc):
     if not irc.message:
         return random_quote(irc)
