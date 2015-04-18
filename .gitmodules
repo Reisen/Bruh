@@ -1,4 +1,0 @@
-[submodule "walnut"]
-	path = walnut
-	url = http://github.com/Reisen/Walnut.git
-	branch = master
