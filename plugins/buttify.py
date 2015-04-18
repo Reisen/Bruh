@@ -7,7 +7,7 @@ try:
 
     split = Hyphenator('en_GB')
     memes = defaultdict(lambda: 'butt')
-    prob  = 0.001
+    prob  = 0.0005
 
     def buttify_word(word, meme):
         try:

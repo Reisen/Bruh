@@ -75,9 +75,22 @@ def handle_command(message):
         )
 
 
+@Walnut.hook('NOTICE')
+def notice_handler(message):
+    irc = IRCMessage(message)
+    outputs = []
+
+    print('Message:', irc.message)
+    print('Channel:', irc.channel)
+    print('Nick:', irc.nick)
+    return None
+
+
 @Walnut.hook('PRIVMSG')
+@Walnut.hook('NOTICE')
 def privmsg_handler(message):
     irc = IRCMessage(message)
+    print(message.parent.payload)
 
     outputs = []
 
@@ -97,10 +110,14 @@ def privmsg_handler(message):
             irc.nick
         )
 
+        # Eat commands so sinks/regular expression don't run.
+        # TODO: Don't eat commands, but find a way to still exclude commands
+        # from being consumed by plugins like stats and .last
+        return None
+
     # Sinks
     # --------------------------------------------------------------------------
     for callback in sinks:
-        print(callback.__name__)
         result = callback(irc)
         if result:
             outputs.append('PRIVMSG {} :{}'.format(
