@@ -4,10 +4,10 @@ import queue
 import collections
 import functools
 from walnut.drivers import Walnut
-from redis import StrictRedis
+from redislite import StrictRedis
 
 
-r = StrictRedis(db=4)
+r = StrictRedis('data.rdb', db=4)
 c = {}
 e = {}
 s = []
