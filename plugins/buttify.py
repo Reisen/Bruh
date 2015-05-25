@@ -1,9 +1,13 @@
 try:
-    from hyphen import Hyphenator
+    from hyphen import Hyphenator, dictools
     from bruh import command, sink
     from walnut.drivers import Walnut
     from collections import defaultdict
     from random import random, choice, randrange
+
+    for lang in ['de_GB']:
+        if not dictools.is_installed(lang):
+            dictools.install(lang)
 
     split = Hyphenator('en_US')
     memes = defaultdict(lambda: 'butt')

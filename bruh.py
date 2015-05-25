@@ -1,13 +1,29 @@
 import os
 import re
+import sys
 import queue
 import collections
 import functools
+import argparse
 from walnut.drivers import Walnut
 from redislite import StrictRedis
 
 
-r = StrictRedis('data.rdb', db=4)
+def parse():
+    parser = argparse.ArgumentParser(description = 'A Python3 IRC bot written for Walnut.')
+
+    parser.add_argument(
+        '-c',
+        dest = 'config',
+        action = 'store',
+        help = 'location of the database file'
+    )
+
+    return parser.parse_args()
+
+
+p = parse()
+r = StrictRedis(p.config or 'data.rdb', db=4)
 c = {}
 e = {}
 s = []
