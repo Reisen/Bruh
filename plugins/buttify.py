@@ -5,7 +5,7 @@ try:
     from collections import defaultdict
     from random import random, choice, randrange
 
-    split = Hyphenator('en_GB')
+    split = Hyphenator('en_US')
     memes = defaultdict(lambda: 'butt')
     prob  = 0.0005
 
@@ -139,3 +139,6 @@ try:
 
 except ImportError:
     print('No Hyphenator library found. Ignoring buttify plugin.')
+
+except OSError:
+    print('Hyphenator dictionary missing. en_US expected.')
