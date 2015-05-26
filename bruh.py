@@ -13,8 +13,8 @@ def parse():
     parser = argparse.ArgumentParser(description = 'A Python3 IRC bot written for Walnut.')
 
     parser.add_argument(
-        '-c',
-        dest = 'config',
+        '-d',
+        dest = 'data',
         action = 'store',
         help = 'location of the database file'
     )
@@ -23,7 +23,7 @@ def parse():
 
 
 p = parse()
-r = StrictRedis(p.config or 'data.rdb', db=4)
+r = StrictRedis(p.data or 'data.rdb', db=4)
 c = {}
 e = {}
 s = []

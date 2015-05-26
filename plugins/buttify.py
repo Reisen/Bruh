@@ -5,7 +5,7 @@ try:
     from collections import defaultdict
     from random import random, choice, randrange
 
-    for lang in ['de_GB']:
+    for lang in ['en_US']:
         if not dictools.is_installed(lang):
             dictools.install(lang)
 
