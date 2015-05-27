@@ -1,4 +1,4 @@
-from bruh import command
+from bruh import command, r
 from walnut.drivers import Walnut
 from redis import StrictRedis
 from collections import defaultdict
@@ -36,10 +36,14 @@ lownicks = defaultdict(lambda: defaultdict(User))
 def auth(f):
     @wraps(f)
     def check_auth(irc, *args, **kwargs):
-        print(irc.nick, lownicks[irc.network][irc.nick.lower()].auth)
-        if not lownicks[irc.network][irc.nick.lower()].auth:
+        if not lownicks[irc.network].setdefault(irc.nick.lower(), User(irc.nick)).auth:
             irc.raw('WHOIS {}'.format(irc.nick))
-            return 'You triggered an auth check. Try again.'
+            return 'You are not logged in, attempting to identify you...'
+
+        # TODO: Seriously... this is bad. I mean technically not abusable, but
+        # bad. Fix to use Redis. don't be lazy.
+        if irc.nick not in ['DekuNut', 'Reisen']:
+            return 'You are not authorized to use authed commands.'
 
         return f(irc, *args, **kwargs)
 
@@ -184,6 +188,6 @@ def parse_whois_auth(message):
         nick    = message.args[1]
         lownicks[network][nick.lower()].auth = True
 
-        return 'NOTICE {} :You have been authorized by the bot.'.format(
+        return 'NOTICE {} :You have been logged in, try again.'.format(
             message.args[1]
         )

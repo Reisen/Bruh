@@ -51,9 +51,11 @@ def sink(f):
 
 
 if __name__ == '__main__':
+    print('Loading Plugins...')
     for plugin in os.listdir('plugins'):
         if plugin.endswith('.py'):
             name   = plugin[:-3]
             plugin = __import__('plugins.' + name, globals(), locals(), -1)
 
+    print('Running')
     Walnut.run('bruh')
