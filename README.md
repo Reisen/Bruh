@@ -20,11 +20,11 @@ Optional:
 * Flask (for the web.py plugin)
 
 # Setup
-Clone this repository with the --recursive flag to automatically clone and prepare the
-submodules, you need to do this even if you cloned Walnut seperately as the driver for
-python Walnut plugins needs to be within Bruh's source tree.
+Clone this repository, followed by the walnut repository for the drivers required. These are part of the Walnut project and doesn't include the drivers, this will change:
 
-    git clone --recursive https://github.com/Reisen/Bruh.git
+    git clone https://github.com/Reisen/Bruh.git
+    cd Bruh
+    git clone https://github.com/Reisen/Walnut.git
 
 Build Walnut:
 
@@ -33,6 +33,7 @@ Build Walnut:
 
 Install Python Dependencies:
 
+    cd ../
     pip install -r requirements.txt
 
 Make sure Redis is running. Then simply run `python bruh.py` to start bruh, then next
