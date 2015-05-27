@@ -38,12 +38,12 @@ def auth(f):
     def check_auth(irc, *args, **kwargs):
         if not lownicks[irc.network].setdefault(irc.nick.lower(), User(irc.nick)).auth:
             irc.raw('WHOIS {}'.format(irc.nick))
-            return 'You are not logged in, attempting to identify you...'
+            return 'Authing...'
 
         # TODO: Seriously... this is bad. I mean technically not abusable, but
         # bad. Fix to use Redis. don't be lazy.
-        if irc.nick not in ['DekuNut', 'Reisen']:
-            return 'You are not authorized to use authed commands.'
+        if irc.nick not in ['DekuNut', 'Reisen', 'cn28h']:
+            return 'You cannot run this command.'
 
         return f(irc, *args, **kwargs)
 
