@@ -4,27 +4,32 @@
 
 set -e
 
-# Get and build walnut
+# Get walnut
 git clone https://github.com/reisen/walnut.git /walnut
-cd /walnut
-cabal sandbox init
-cabal update
-cabal install --only-dependencies
+mv /walnut/config /config
 ln -s /config/config /walnut
-ln -s /walnut/drivers /bruh
-
-# Install bruh deps
-cd /bruh
-virtualenv env
-(. env/bin/activate && pip install -r requirements.txt &&
-                       pip install pyhyphen)
+ln -s /walnut /bruh
 
 # Add bruh user
 useradd bruh --home=/bruh --shell=/bin/bash
 echo bruh:bruh | chpasswd
 chown -R bruh:bruh /bruh /walnut
 
-# Generate host keys
-ssh-keygen -N '' -t dsa -f /etc/ssh/ssh_host_dsa_key
-ssh-keygen -N '' -t rsa -f /etc/ssh/ssh_host_rsa_key
-sed -i /etc/ssh/sshd_config -e 's/^UsePAM .*/UsePAM no/'
+# Build
+# We use an older version of pip because pyhyphen relies on
+# behavior of it.
+su -c 'bash -' bruh <<EOF
+set -e
+# Install bruh deps
+cd /bruh
+virtualenv env
+(. env/bin/activate &&
+   pip install pip==6.0.8 &&
+   pip install -r requirements.txt &&
+   python -c "from hyphen.dictools import install; install('en_US'); install('en_GB')")
+
+cd /walnut
+cabal sandbox init
+cabal update
+cabal install --only-dependencies
+EOF
