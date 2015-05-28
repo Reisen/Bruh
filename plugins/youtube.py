@@ -50,7 +50,7 @@ def search_video(query):
     return video['items'][0]['id']['videoId']
 
 
-@regex(r'(?:youtube\..*?\?.*?v=([-_a-zA-Z0-9]+))')
+@regex(r'(?:youtube\..*?\?.*?v=|youtu\.be/)([-_a-zA-Z0-9]+)')
 def youtube_match(irc, match):
     stats.incr('youtube', 1, irc.network, irc.channel, irc.nick)
     return fetch_video(match.group(1))
