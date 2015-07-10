@@ -1,1 +1,1 @@
-*.enc.* filter=shade
+*_enc.* filter=shade
