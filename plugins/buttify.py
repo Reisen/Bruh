@@ -4,6 +4,7 @@ try:
     from walnut.drivers import Walnut
     from collections import defaultdict
     from random import random, choice, randrange
+    from plugins.userlist import auth
 
     for lang in ['en_US']:
         if not dictools.is_installed(lang):
@@ -111,6 +112,7 @@ try:
 
 
     @command('chance')
+    @auth
     def chancebutt(irc):
         global prob
         prob = float(irc.message)

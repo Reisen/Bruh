@@ -1,11 +1,15 @@
 from random import randint
 from bruh import command, regex, r
+from plugins.userlist import auth
 
 @command('remember')
 @command('r')
 def remember(irc):
     if not irc.message:
         return "Syntax .remember <key> <value>"
+
+    if 'Might' in irc.nick:
+        return 'Fuck you Paul'
 
     key, *value = irc.message.split(' ', 1)
     if not value:
@@ -25,6 +29,16 @@ def remember(irc):
 
     r.hset(irc.key + ':remember', key, facts + ', ' + value[0])
     return "Got it."
+
+
+@command('forget')
+@auth
+def forget(irc):
+    if not irc.message:
+        return "Syntax .forget <key>"
+
+    r.hdel(irc.key + ':remember', irc.message)
+    return "It is forgotten."
 
 
 @regex(r'^\?([^\s]+)$')
