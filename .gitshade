@@ -1,3 +1,3 @@
 [filter "shade"]
-	smudge = openssl enc -d -aes-128-ctr -salt -pass "file:.shade"
-	clean  = openssl enc -e -aes-128-ctr -salt -pass "file:.shade"
+	smudge = openssl enc -d -aes-128-ctr -a -salt -pass "file:.shade"
+	clean  = openssl enc -e -aes-128-ctr -a -salt -pass "file:.shade"
