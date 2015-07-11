@@ -23,9 +23,7 @@ def parse():
     parser.add_argument(
         '-a',
         dest = 'aof',
-        action = 'store_const',
-        const = True,
-        default = False,
+        action = 'store',
         help = 'enable redis aof (will erase db)'
     )
 
@@ -52,7 +50,7 @@ else:
     print('Opening Database...')
     r = StrictRedis(p.data or 'data.rdb', db=4, serverconfig={
         'appendonly': 'yes' if p.aof else 'no',
-        'appendfilename': 'data.aof',
+        'appendfilename': p.aof or 'data.aof',
         'appendfsync': 'everysec'
     })
 
