@@ -8,13 +8,12 @@ the instructions.
 # Requirements
 *Note: The old bot can still be found [here.][old standalone]*
 To run the bot, the following dependencies are needed, though these instructions should
-set them up for you, GHC, libzmq, and pip should be all you need to have installed.
+set them up for you. GHC, libzmq, and pip should be all you need to have installed.
 
 Required:
 * [Walnut]
 * GHC
 * libzmq
-* Flask (for the web.py plugin)
 
 # Setup
 Clone this repository, followed by the walnut repository which will include the drivers
