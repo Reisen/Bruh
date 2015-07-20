@@ -7,24 +7,22 @@ the instructions.
 
 # Requirements
 *Note: The old bot can still be found [here.][old standalone]*
-To run the bot, the following are required. Walnut should automatically be cloned along
-with this repository so as long as you have GHC, it should build with the setup script.
+To run the bot, the following dependencies are needed, though these instructions should
+set them up for you, GHC, libzmq, and pip should be all you need to have installed.
 
 Required:
 * [Walnut]
-* Redis
-* pyzmq
-
-Optional:
-* Hyphentator (for the buttify plugin)
+* GHC
+* libzmq
 * Flask (for the web.py plugin)
 
 # Setup
-Clone this repository, followed by the walnut repository for the drivers required. These are part of the Walnut project and doesn't include the drivers, this will change:
+Clone this repository, followed by the walnut repository which will include the drivers
+Bruh needs to run behind Walnut:
 
     git clone https://github.com/Reisen/Bruh.git
     cd Bruh
-    git clone https://github.com/Reisen/Walnut.git
+    git clone https://github.com/Reisen/Walnut.git walnut
 
 Build Walnut:
 
@@ -36,10 +34,10 @@ Install Python Dependencies:
     cd ../
     pip install -r requirements.txt
 
-Make sure Redis is running. Then simply run `python bruh.py` to start bruh, then next
-run Walnut to start the connections to IRC. Modifications can be made to bruh and the
-python can be killed and restarted without issue, Walnut will maintain the connection
-to IRC at all times.
+Edit `walnut/config` to setup the IRC networks Walnut should connect to, then start it
+to connect. Once connected, run `python bruh.py` to run Bruh. You can background both
+processes, bruh can be killed safely at any time and Walnut will continue to run, this
+makes testing changes pretty smooth.
 
 [Walnut]: https://github.com/Reisen/Walnut
 [old standalone]: https://github.com/Reisen/Bruh/tree/old-base
