@@ -96,21 +96,21 @@
         })();
 
         /* Setup Wordcloud. */
-        WordCloud(document.getElementById('wordcloud'), {
-            fontFamily: 'Open Sans',
-            fontWeight: 'bold',
-            color: 'random-light',
-            //weightFactor: function(size) { return size * $('#wordcloud').width() / 500; },
-            backgroundColor: '#0D0D12',
-            shape: 'diamond',
-            gridSize: Math.round(1 * $('#wordcloud').width() / 500),
-            rotateRatio: 0.8,
-            list: [
-                {% for word in words %}
-                ["{{ word[0] }}", {{ word[1] }}],
-                {% endfor %}
-            ]
-        });
+        //WordCloud(document.getElementById('wordcloud'), {
+        //    fontFamily: 'Open Sans',
+        //    fontWeight: 'bold',
+        //    color: 'random-light',
+        //    //weightFactor: function(size) { return size * $('#wordcloud').width() / 500; },
+        //    backgroundColor: '#0D0D12',
+        //    shape: 'diamond',
+        //    gridSize: Math.round(1 * $('#wordcloud').width() / 500),
+        //    rotateRatio: 0.8,
+        //    list: [
+        //        {% for word in words %}
+        //        ["{{ word[0] }}", {{ word[1] }}],
+        //        {% endfor %}
+        //    ]
+        //});
     </script>
 {% endblock %}
 
