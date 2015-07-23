@@ -61,6 +61,6 @@ def youtube_match(irc, match):
 @command('y')
 def youtube(irc):
     if not irc.message:
-        return "Syntax: .youtube <search terms>"
+        return None
 
     return fetch_video(search_video(irc.message))

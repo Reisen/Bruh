@@ -9,10 +9,11 @@ from bruh import command
 @command('po')
 @command('p')
 def pornmd(irc):
-    '''Return peoples live searches from PornMD'''
-    orientation = 's'
-    if irc.message and irc.message[0] in 'gts':
-        orientation = irc.message[0]
+    """Return peoples live searches from PornMD"""
+    if not irc.message:
+        return None
+
+    orientation = irc.message[0] if irc.message and irc.message[0] in 'gts' else 's'
 
     request = Request(
         'http://www.pornmd.com/getliveterms?orientation={}'.format(orientation),
@@ -21,10 +22,6 @@ def pornmd(irc):
         }
     )
 
-    try:
-        query = json.loads(urlopen(request, timeout = 7).read().decode('UTF-8'))
-        query = [choice(query)['keyword'] for _ in range(6)]
-        return 'Recent PornMD Searches: {}'.format(', '.join(query))
-
-    except Exception as e:
-        return str(e)
+    query = json.loads(urlopen(request, timeout = 7).read().decode('UTF-8'))
+    query = [choice(query)['keyword'] for _ in range(6)]
+    return 'Recent PornMD Searches: {}'.format(', '.join(query))

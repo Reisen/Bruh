@@ -7,7 +7,7 @@ from bruh import command
 def down(irc):
     try:
         if not irc.message:
-            return "Syntax: .down <url>"
+            return None
 
         if not irc.message.startswith('http://'):
             irc.message = 'http://' + irc.message

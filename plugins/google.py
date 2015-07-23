@@ -11,7 +11,7 @@ from walnut.drivers import Walnut
 @command('g')
 def google(irc):
     if not irc.message:
-        return ".g <search terms>"
+        return None
 
     # Build the request. The Referer is required because of googles ToS.
     request = Request(
@@ -59,7 +59,7 @@ def google(irc):
 @command('i')
 def image(irc):
     if not irc.message:
-        return "Syntax: .image <search terms>"
+        return None
 
     url = 'https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={}&safe=off'
 
