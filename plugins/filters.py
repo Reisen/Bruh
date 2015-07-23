@@ -43,4 +43,4 @@ def filter(irc):
         return filters[text_filter]()
 
     except Exception as e:
-        return "Unknown filter."
+        return None

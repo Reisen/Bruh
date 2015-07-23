@@ -6,7 +6,7 @@ from plugins.userlist import auth
 @command('r')
 def remember(irc):
     if not irc.message:
-        return "Syntax .remember <key> <value>"
+        return None
 
     if 'Might' in irc.nick:
         return 'Fuck you Paul'
@@ -35,7 +35,7 @@ def remember(irc):
 @auth
 def forget(irc):
     if not irc.message:
-        return "Syntax .forget <key>"
+        return None
 
     r.hdel(irc.key + ':remember', irc.message)
     return "It is forgotten."

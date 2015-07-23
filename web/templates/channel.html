@@ -13,10 +13,10 @@
         <p>
             Since arriving in {{ channel }}, I have seen <b>{{ user_count }}</b>
             different nicks and witnessed over <b>{{ messages }}</b> messages sent
-            between users. Some of the most common words used in this channel are:
+            between users.
         </p>
 
-        <p></p>
+        <!--<p></p>
         <canvas width="600" height="400" id="wordcloud">
         </canvas>
 
@@ -24,7 +24,7 @@
             Word clouds are really bad for drawing any <i>real</i> conclusions
             from. This is just for fun, so don't take it too seriously, it doesn't
             mean anything.
-        </p>
+        </p>-->
     </div>
 
     <div id="page-2">
@@ -96,21 +96,21 @@
         })();
 
         /* Setup Wordcloud. */
-        WordCloud(document.getElementById('wordcloud'), {
-            fontFamily: 'Open Sans',
-            fontWeight: 'bold',
-            color: 'random-light',
-            //weightFactor: function(size) { return size * $('#wordcloud').width() / 500; },
-            backgroundColor: '#0D0D12',
-            shape: 'diamond',
-            gridSize: Math.round(1 * $('#wordcloud').width() / 500),
-            rotateRatio: 0.8,
-            list: [
-                {% for word in words %}
-                ["{{ word[0] }}", {{ word[1] }}],
-                {% endfor %}
-            ]
-        });
+        //WordCloud(document.getElementById('wordcloud'), {
+        //    fontFamily: 'Open Sans',
+        //    fontWeight: 'bold',
+        //    color: 'random-light',
+        //    //weightFactor: function(size) { return size * $('#wordcloud').width() / 500; },
+        //    backgroundColor: '#0D0D12',
+        //    shape: 'diamond',
+        //    gridSize: Math.round(1 * $('#wordcloud').width() / 500),
+        //    rotateRatio: 0.8,
+        //    list: [
+        //        {% for word in words %}
+        //        ["{{ word[0] }}", {{ word[1] }}],
+        //        {% endfor %}
+        //    ]
+        //});
     </script>
 {% endblock %}
 

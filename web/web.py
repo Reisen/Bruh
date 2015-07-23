@@ -1,12 +1,16 @@
 from time import time
 from collections import defaultdict
-from redis import StrictRedis
+from redislite import StrictRedis
 from flask import Flask, render_template
 
-red     = StrictRedis(db = 4)
 app     = Flask(__name__)
 cached  = None
 timeout = 0
+r       = StrictRedis('data.rdb', db = 4, serverconfig = {
+    'appendonly': 'no',
+    'appendfilename': 'data.aof',
+    'appendfsync': 'everysec'
+})
 
 
 def generate():
@@ -19,12 +23,12 @@ def generate():
 
     # Parse the stats into our cacheable python dictionary which has a slightly
     # easier format to work with.
-    for stat in red.scan_iter(match = 'irc.rizon.net:#*:stats'):
+    for stat in r.scan_iter(match = 'irc.rizon.net:#*:stats'):
         _, chan, *parts = stat.decode('UTF-8').rsplit(':', 3)
         if parts[0] == 'stats': target = statistics[chan]
         else:                   target = statistics[chan].setdefault(parts[0], {})
 
-        for k, v in red.hscan_iter(stat):
+        for k, v in r.hscan_iter(stat):
             target[k.decode('UTF-8')] = v.decode('UTF-8')
 
         cached = statistics
@@ -78,12 +82,12 @@ def view_channel(channel):
     generate()
 
     channel   = '#' + channel
-    quotes    = map(lambda v: v.decode('UTF-8'), red.lrange('irc.rizon.net:{}:quotes'.format(channel), 0, -1))
+    quotes    = map(lambda v: v.decode('UTF-8'), r.lrange('irc.rizon.net:{}:quotes'.format(channel), 0, -1))
     users     = sorted([(k, cached[channel][k]) for k in cached[channel] if isinstance(cached[channel][k], dict)], key = lambda v: int(v[1].get('messages', 0)), reverse = True)
     words     = []
     stopwords = ['i','me','my','myself','we','us','our','ours','ourselves','you','your','yours','yourself','yourselves','he','him','his','himself','she','her','hers','herself','it','its','itself','they','them','their','theirs','themselves','what','which','who','whom','whose','this','that','these','those','am','is','are','was','were','be','been','being','have','has','had','having','do','does','did','doing','will','would','should','can','could','ought','i\'m','you\'re','he\'s','she\'s','it\'s','we\'re','they\'re','i\'ve','you\'ve','we\'ve','they\'ve','i\'d','you\'d','he\'d','she\'d','we\'d','they\'d','i\'ll','you\'ll','he\'ll','she\'ll','we\'ll','they\'ll','isn\'t','aren\'t','wasn\'t','weren\'t','hasn\'t','haven\'t','hadn\'t','doesn\'t','don\'t','didn\'t','won\'t','wouldn\'t','shan\'t','shouldn\'t','can\'t','cannot','couldn\'t','mustn\'t','let\'s','that\'s','who\'s','what\'s','here\'s','there\'s','when\'s','where\'s','why\'s','how\'s','a','an','the','and','but','if','or','because','as','until','while','of','at','by','for','with','about','against','between','into','through','during','before','after','above','below','to','from','up','upon','down','in','out','on','off','over','under','again','further','then','once','here','there','when','where','why','how','all','any','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','say','says','said','shall']
 
-    for (k, v) in sorted(red.hgetall('irc.rizon.net:{}:cloud'.format(channel)).items(), key = lambda v: int(v[1].decode('UTF-8')), reverse = True):
+    for (k, v) in sorted(r.hgetall('irc.rizon.net:{}:cloud'.format(channel)).items(), key = lambda v: int(v[1].decode('UTF-8')), reverse = True):
         word = k.decode('UTF-8')
 
         if word in stopwords:

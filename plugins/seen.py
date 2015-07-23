@@ -38,7 +38,7 @@ def setup_db(irc):
 def tell(irc):
     # Check the arguments given are actually correct.
     if not irc.message:
-        return "Syntax: .tell <nick> <msg>"
+        return None
 
     msg, *args = irc.message.split(' ', 1)
     if not args:
@@ -52,7 +52,7 @@ def tell(irc):
 @command('seen')
 def seen(irc):
     if not irc.message:
-        return 'Who am I looking for?'
+        return None
 
     # Try and see if we've even seen the person.
     user = r.hget(irc.key + ':seen', irc.message.lower())

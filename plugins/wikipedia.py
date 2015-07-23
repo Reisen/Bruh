@@ -40,7 +40,7 @@ def wikiget(irc, msg):
 @command('w')
 def wikipedia(irc):
     if not irc.message:
-        return "Syntax: .wiki <Article Title>"
+        return None
 
     try:
         cmd, *args = irc.message.split(' ', 1)
