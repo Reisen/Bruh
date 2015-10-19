@@ -17,7 +17,7 @@ def calculate_length(length):
     return ' '.join(pieces)
 
 
-def fetch_video(query):
+def fetch_video(query, include_url = True):
     # https://developers.google.com/youtube/v3/docs/videos/list
     ytapi = r.get('keys:youtube').decode('UTF-8')
     query = quote_plus(query)
@@ -37,7 +37,7 @@ def fetch_video(query):
         likes + dislikes,
         video['statistics'].get('viewCount', 0),
         video['snippet']['channelTitle'],
-        '(https://www.youtube.com/watch?v={})'.format(video['id'])
+        '(https://www.youtube.com/watch?v={})'.format(video['id']) if include_url else ''
     )
 
 
@@ -53,7 +53,7 @@ def search_video(query):
 @regex(r'(?:youtube\..*?\?.*?v=|youtu\.be/)([-_a-zA-Z0-9]+)')
 def youtube_match(irc, match):
     stats.incr('youtube', 1, irc.network, irc.channel, irc.nick)
-    return fetch_video(match.group(1))
+    return fetch_video(match.group(1), False)
 
 
 @command('youtube')
