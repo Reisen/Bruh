@@ -1,7 +1,9 @@
 import re
+import collections
 from walnut.drivers import Walnut
 from bruh import r, c as commands, e as expressions, s as sinks
 
+rates = collections.deque(maxlen = 5)
 
 class IRCMessage:
     def __init__(self, message = None):
@@ -138,5 +140,10 @@ def privmsg_handler(message):
                 irc.channel,
                 result
             ) if isinstance(result, str) else result())
+
+    if (irc.message, outputs) in rates:
+        return []
+
+    rates.append((irc.message, outputs))
 
     return outputs
