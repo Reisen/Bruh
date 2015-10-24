@@ -41,8 +41,9 @@ def auth(f):
             return 'Authing...'
 
         # TODO: Seriously... this is bad. I mean technically not abusable, but
-        # bad. Fix to use Redis. don't be lazy.
-        if irc.nick not in ['DekuNut', 'Reisen', 'cn28h']:
+        # bad. Fix to use Redis. don't be lazy. I can't believe I still have
+        # not fixed this. Godamn.
+        if irc.nick not in ['DekuNut', 'Reisen', 'cn28h', 'TRON']:
             return 'You cannot run this command.'
 
         return f(irc, *args, **kwargs)
