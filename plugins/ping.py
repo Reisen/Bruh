@@ -9,7 +9,8 @@ def echo(irc):
 
 @Walnut.hook('INVITE')
 def join_inviter(message):
-    return 'JOIN {}'.format(message.args[1])
+    # Oh my god fix this, don't do this, this is so bad, please.
+    return ['PRIVMSG {} :A request to join {} was sent to walnut.'.format(nick, message.args[1]) for nick in ['TRON', 'cn28h', 'DekuNut']]
 
 
 @Walnut.hook('PRIVMSG')
