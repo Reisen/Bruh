@@ -13,7 +13,7 @@ func down(msg Message) []string {
         pre := "http"
         var url string
 
-        if !strings.HasPrefix(tmp, pre) {
+        if !strings.HasPrefix(msg.line, pre) {
                 url = pre + "://"
         }
 
