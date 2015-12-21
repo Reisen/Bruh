@@ -6,14 +6,14 @@ import (
 	"encoding/json"
 )
 
-type Document struct {
+type document struct {
 
 	Tags []string
 	Result_type string
-	List []Def
+	List []def
 }
 
-type Def struct {
+type def struct {
 
 	Defid int
 	Word string
@@ -27,7 +27,7 @@ type Def struct {
 }
 
 
-func urban(msg Message) []string {
+func Urban(msg Message) []string {
 
 	res, _ := http.Get("http://api.urbandictionary.com/v0/define?term=" + msg.line)
 	defer res.Body.Close()
@@ -36,7 +36,7 @@ func urban(msg Message) []string {
 	content, _ := ioutil.ReadAll(res.Body)
 
 
-	var parse  Document
+	var parse  document
 	json.Unmarshal(content, &parse)
 	
 	return []string{msg.line + " - " + parse.List[0].Definition}

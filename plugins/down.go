@@ -7,7 +7,7 @@ import (
         "time"
 )
 
-func down(msg Message) []string {
+func Down(msg Message) []string {
 
         //only checking http so we don't have to explicitly check for https
         pre := "http"

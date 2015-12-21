@@ -6,7 +6,7 @@ import (
         "strings"
 )
 
-func choose(msg Message) []string {
+func Choose(msg Message) []string {
 
         tmp := strings.Split(msg.line, ",")
 
