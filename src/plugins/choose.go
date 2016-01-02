@@ -1,14 +1,15 @@
 //Choose randomly from a set of choices separated by commas.
-package choose
+package plugins
 
 import (
         "math/rand"
         "strings"
+        "walnut"
 )
 
-func Choose(msg Message) []string {
-
-        tmp := strings.Split(msg.line, ",")
+func Choose(c walnut.Command) string {
+        msg := c.Message
+        tmp := strings.Split(msg.Line, ",")
 
         var choice int
 
@@ -18,5 +19,5 @@ func Choose(msg Message) []string {
                 choice = rand.Intn(len(tmp) - 1)
         }
 
-        return []string{tmp[choice]}
+        return tmp[choice]
 }

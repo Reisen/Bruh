@@ -1,9 +1,10 @@
-package urban
+package plugins
 
 import (
 	"net/http"
 	"io/ioutil"
 	"encoding/json"
+    "walnut"
 )
 
 type document struct {
@@ -27,9 +28,9 @@ type def struct {
 }
 
 
-func Urban(msg Message) []string {
-
-	res, _ := http.Get("http://api.urbandictionary.com/v0/define?term=" + msg.line)
+func Urban(c walnut.Command) string {
+    msg := c.Message
+	res, _ := http.Get("http://api.urbandictionary.com/v0/define?term=" + msg.Line)
 	defer res.Body.Close()
 
 
@@ -38,6 +39,6 @@ func Urban(msg Message) []string {
 
 	var parse  document
 	json.Unmarshal(content, &parse)
-	
-	return []string{msg.line + " - " + parse.List[0].Definition}
+
+	return msg.Line + " - " + parse.List[0].Definition
 }
