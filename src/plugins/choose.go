@@ -2,22 +2,22 @@
 package plugins
 
 import (
-        "math/rand"
-        "strings"
-        "walnut"
+	"math/rand"
+	"strings"
+	"walnut"
 )
 
 func Choose(c walnut.Command) string {
-        msg := c.Message
-        tmp := strings.Split(msg.Line, ",")
+	msg := c.Message
+	tmp := strings.Split(msg.Line, ",")
 
-        var choice int
+	var choice int
 
-        if len(tmp) <= 1 {
-                choice = 0
-        } else {
-                choice = rand.Intn(len(tmp) - 1)
-        }
+	if len(tmp) <= 1 {
+		choice = 0
+	} else {
+		choice = rand.Intn(len(tmp) - 1)
+	}
 
-        return tmp[choice]
+	return tmp[choice]
 }
