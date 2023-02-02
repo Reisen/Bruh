@@ -8,4 +8,4 @@ PyHyphen==2.0.5
 pyzmq==14.6.0
 redis==2.10.3
 redislite==1.0.238
-Werkzeug==0.10.1
+Werkzeug==0.15.5
